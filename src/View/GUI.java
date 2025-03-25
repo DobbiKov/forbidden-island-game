@@ -4,6 +4,8 @@ import Model.Zone;
 import Model.ZoneState;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,27 +17,41 @@ public class GUI {
 
     private static Zone[][] zones;
     private static int zone_size;
-    private static JPanel getZone(int i, int j){
+
+    private static JPanel[][] zonePanels;
+
+    private static JPanel getZone(){
         // Creating instance of JButton
         JPanel button = new JPanel(
         );
         button.setSize(zone_size, zone_size);
-        switch(zones[i][j].getZone_state()){
-            case Normal: {
-                button.setBackground(Color.GREEN);
-                break;
-            }
-            case Flooded: {
-                button.setBackground(new Color(173, 216, 230));
-                break;
-            }
-            case Inaccessible: {
-                button.setBackground(Color.WHITE);
-                return button;
+
+        return button;
+    }
+
+    private static void updateZonePanels() {
+        zones = gameController.getZones(); // get the new state
+        for (int i = 0; i < zones.length; i++) {
+            for (int j = 0; j < zones[i].length; j++) {
+                ZoneState state = zones[i][j].getZone_state();
+                JPanel panel = zonePanels[i][j];
+
+                switch (state) {
+                    case Normal:
+                        panel.setBackground(Color.GREEN);
+                        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        break;
+                    case Flooded:
+                        panel.setBackground(new Color(173, 216, 230));
+                        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        break;
+                    case Inaccessible:
+                        panel.setBackground(Color.WHITE);
+                        panel.setBorder(null);
+                        break;
+                }
             }
         }
-        button.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        return button;
     }
 
 
@@ -45,20 +61,35 @@ public class GUI {
         zones = gameController.getZones();
         // Creating instance of JFrame
         JPanel boardPanel = new JPanel();
+        JPanel buttonPanel = new JPanel();
         JFrame window = new JFrame();
 
         zone_size = 50;
 
+        zonePanels = new JPanel[zones.length][zones.length];
 
+        JButton fin_de_tour = new JButton("Fin de Tour");
+        fin_de_tour.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                gameController.finDeTour();
+                updateZonePanels();
+            }
+        });
+        fin_de_tour.setSize(100, 50);
+        fin_de_tour.setVisible(true);
+
+        buttonPanel.add(fin_de_tour);
+        window.add(buttonPanel, BorderLayout.NORTH);
 
         for(int i = 0; i < zones.length; i++){
             for(int j = 0; j < zones[i].length; j++){
-                JPanel button = getZone(i, j);
+                zonePanels[i][j] = getZone();
 
                 // adding button in JFrame
-                boardPanel.add(button);
+                boardPanel.add(zonePanels[i][j]);
             }
         }
+        updateZonePanels();
 
 
         boardPanel.setSize(zones.length * zone_size, zones.length * zone_size);
