@@ -6,17 +6,19 @@ import java.util.function.Predicate;
 public class BoardGame {
     private int size;
     private Zone[][] board;
-    public BoardGame(int size) {
+    private int numPlayers;
+    public BoardGame(int size, int numPlayers) {
+        assert numPlayers > 0 && numPlayers <= 4;
+
         this.size = size;
         this.board = new Zone[size][size];
+        this.numPlayers = numPlayers;
+
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
                 this.board[i][j] = new Zone();
             }
         }
-        this.board[1][1].floodZone();
-        this.board[2][3].floodZone();
-        this.board[2][3].floodZone();
     }
     public Zone[][] getBoard() {
         return board;
@@ -51,5 +53,56 @@ public class BoardGame {
     }
     public void floodAllZones(){
         this.forAllZones(Zone::floodZone);
+    }
+    public boolean verifyConstraints(){
+        int fire_artefacts = 0;
+        int water_artefacts = 0;
+        int earth_artefacts = 0;
+        int air_artefacts = 0;
+        int helicopter = 0;
+        int player_start = 0;
+        for(int i = 0; i < size; i++){
+            for(int j = 0; j < size; j++){
+                switch(this.getZone(i, j).getZone_type()){
+                    case Casual: break;
+                    case Helicopter:{
+                        helicopter++;
+                        break;
+                    }
+                    case PlayerStart: {
+                        player_start++;
+                        break;
+                    }
+                    case ArtefactAssociated:{
+                        Artefact art = this.getZone(i, j).getArtefact();
+                        if(art == null){
+                            return false;
+                        }
+                        switch (art){
+                            case Fire: {
+                                fire_artefacts++;
+                                break;
+                            }
+                            case Water: {
+                                water_artefacts++;
+                                break;
+                            }
+                            case Earth: {
+                                earth_artefacts++;
+                                break;
+                            }
+                            case Air: {
+                                air_artefacts++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(fire_artefacts != 1 || water_artefacts != 1 || helicopter != 1 || air_artefacts != 1 || earth_artefacts != 1){
+            return false;
+        }
+        return true;
     }
 }

@@ -36,4 +36,7 @@ public class GameController {
 
        //suite
     }
+    public boolean verifyConstraints() {
+        return boardGame.verifyConstraints();
+    }
 }

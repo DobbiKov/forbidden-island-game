@@ -7,11 +7,19 @@ public class Zone {
     private ZoneState zone_state;
     private String zone_name;
     private ZoneType zone_type;
+    private Artefact artefact;
     // TODO: players on the zone
     public Zone(){
         this.zone_state = ZoneState.Normal;
         this.zone_name = "";
         this.zone_type = ZoneType.Casual;
+        artefact = null;
+    }
+    public Zone(Artefact artefact){
+        this.zone_state = ZoneState.Normal;
+        this.zone_name = "";
+        this.zone_type = ZoneType.ArtefactAssociated;
+        this.artefact = artefact;
     }
     public void floodZone(){
         switch (zone_state){
@@ -26,6 +34,12 @@ public class Zone {
             }
             default: break;
         }
+    }
+    public ZoneType getZone_type() {
+        return zone_type;
+    }
+    public Artefact getArtefact() {
+        return artefact;
     }
 
     public ZoneState getZone_state() {

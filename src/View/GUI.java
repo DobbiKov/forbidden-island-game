@@ -79,6 +79,18 @@ public class GUI {
         fin_de_tour.setVisible(true);
 
         buttonPanel.add(fin_de_tour);
+
+        JButton verify_constraints = new JButton("Temp verify constraints");
+        verify_constraints.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                boolean res = gameController.verifyConstraints();
+                System.out.println(res);
+            }
+        });
+        verify_constraints.setSize(100, 50);
+        verify_constraints.setVisible(true);
+
+        buttonPanel.add(verify_constraints);
         window.add(buttonPanel, BorderLayout.NORTH);
 
         for(int i = 0; i < zones.length; i++){
