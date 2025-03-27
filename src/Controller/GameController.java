@@ -1,9 +1,11 @@
 package Controller;
 
 import Model.BoardGame;
+import Model.Player;
 import Model.Zone;
 import Model.ZoneState;
 
+import java.util.HashSet;
 import java.util.Random;
 
 public class GameController {
@@ -36,5 +38,12 @@ public class GameController {
        }
 
        //suite
+    }
+    public Player addPlayerToTheGame(String playerName){
+        return boardGame.addPlayer(playerName);
+    }
+
+    public Player[] getPlayers(){
+        return boardGame.getPlayers();
     }
 }

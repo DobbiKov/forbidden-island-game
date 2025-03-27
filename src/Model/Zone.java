@@ -11,11 +11,21 @@ public class Zone {
     protected Player start_for_player;
     protected Artefact associated_artefact;
     protected HashSet<Player> players_on_zone;
+    protected int X;
+    protected int Y;
+
     // TODO: players on the zone
-    public Zone(){
+    public Zone(int x, int y){
         this.zone_state = ZoneState.Normal;
         this.zone_name = "";
         this.zone_type = ZoneType.Casual;
+    }
+
+    public int getX(){
+        return X;
+    }
+    public int getY(){
+        return Y;
     }
 
 
@@ -50,6 +60,9 @@ public class Zone {
         return zone_type;
     }
     public void addPlayerToZone(Player player){
+        if(zone_state.equals(ZoneState.Inaccessible)){
+            throw new ZoneIsInaccessibleException();
+        }
         if(players_on_zone.contains(player)){
             throw new RuntimeException("The player is already on the zone");
         }

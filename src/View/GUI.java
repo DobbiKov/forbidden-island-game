@@ -21,6 +21,8 @@ public class GUI {
 
     private static JPanel[][] zonePanels;
 
+    private static JPanel[] panelPlayers;
+
     private static JPanel getZone(){
         // Creating instance of JButton
         JPanel button = new JPanel(
@@ -28,6 +30,10 @@ public class GUI {
         button.setSize(zone_size, zone_size);
 
         return button;
+    }
+
+    private static void updatePlayerZones(){
+        // TODO
     }
 
     private static void updateZonePanels() {
@@ -80,15 +86,22 @@ public class GUI {
         fin_de_tour.setVisible(true);
 
         JButton add_player = new JButton("Add Player");
+
+
         add_player.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 AddPlayerPopup panel = new AddPlayerPopup();
                 PopupFactory factory = new PopupFactory();
                 Popup po = factory.getPopup(window, panel, window.getX() + (window.getSize().width/2), window.getY() + (window.getSize().height/2));
-                panel.addCancelCallback(new Callback() {
+                panel.addMainCallback(new Callback() {
                     @Override
-                    public void call() {
+                    public void callHide() {
                         po.hide();
+                    }
+
+                    @Override
+                    public void callAddPlayer(String name){
+                        gameController.addPlayerToTheGame(name);
                     }
                 });
                 po.show();
@@ -99,7 +112,6 @@ public class GUI {
 
         buttonPanel.add(fin_de_tour);
         buttonPanel.add(add_player);
-        window.add(buttonPanel, BorderLayout.NORTH);
 
         for(int i = 0; i < zones.length; i++){
             for(int j = 0; j < zones[i].length; j++){
@@ -122,8 +134,11 @@ public class GUI {
         // using no layout managers
 //        boardPanel.setLayout();
 
-        // making the frame visible
+        //window adders
+        window.add(buttonPanel, BorderLayout.NORTH);
         window.add(boardPanel);
+
+        // making the frame visible
         window.pack();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setVisible(true);

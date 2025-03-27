@@ -6,7 +6,7 @@ public enum PlayerRole {
     Diver, // can move through flooded tiles
     Messenger, // can give treasure cards from his hand to any player
     Navigator, // can move other players(up to two tiles per action)
-    Explorer, // can move and shore up dioganally
+    Explorer; // can move and shore up dioganally
 
     @Override
     public String toString() {
@@ -19,5 +19,17 @@ public enum PlayerRole {
             case Explorer: return "Explorer";
         }
         return "";
+    }
+
+    public static PlayerRole getByNum(int num){
+        switch (num){
+            case 0: return Pilot;
+            case 1: return Engineer;
+            case 2: return Diver;
+            case 3: return Messenger;
+            case 4: return Navigator;
+            case 5: return Explorer;
+            default: return null;
+        }
     }
 }

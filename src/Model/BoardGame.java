@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.HashSet;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -8,6 +10,7 @@ public class BoardGame {
     private Zone[][] board;
     private Player[] players;
     private static int player_conut = 0;
+    private HashSet<PlayerRole> used_roles;
 
 
     public BoardGame(int size) {
@@ -16,9 +19,12 @@ public class BoardGame {
         this.board = new Zone[size][size];
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
-                this.board[i][j] = new Zone();
+                this.board[i][j] = new Zone(i, j);
             }
         }
+
+        //roles
+        used_roles = new HashSet<>();
 
         // player init
         this.players = new Player[4];
@@ -31,6 +37,9 @@ public class BoardGame {
     }
     public int getSize() {
         return this.size;
+    }
+    public Player[] getPlayers() {
+        return this.players;
     }
     public void floodZone(int x, int y){
         this.board[x][y].floodZone();
@@ -60,37 +69,52 @@ public class BoardGame {
     public void floodAllZones(){
         this.forAllZones(Zone::floodZone);
     }
+    public PlayerRole getAvailibleRole(){
+        if(this.used_roles.size() >= 6){
+            return null;
+        }
+        Random random = new Random();
+        int n = random.nextInt(6);
+        PlayerRole role = PlayerRole.getByNum(n);
+        while(used_roles.contains(role)){
+            n = random.nextInt(6);
+            role = PlayerRole.getByNum(n);
+        }
+        return role;
+    }
     private Zone chooseZoneForPlayer(Player player){
         int mid = size/2;
         int last = size-1;
         switch (player_conut){
             case 0:{
-                this.board[0][mid] = new PlayerStartZone(player);
+                this.board[0][mid] = new PlayerStartZone(this.board[0][mid].getX(), this.board[0][mid].getY(), player);
                 return this.board[0][mid];
             }
             case 1: {
-                this.board[mid][last] = new PlayerStartZone(player);
+                this.board[mid][last] = new PlayerStartZone(this.board[mid][last].getX(), this.board[mid][last].getY(), player);
                 return this.board[mid][last];
             }
             case 2: {
-                this.board[last][mid] = new PlayerStartZone(player);
+                this.board[last][mid] = new PlayerStartZone(this.board[last][mid].getX(), this.board[last][mid].getY(), player);
                 return this.board[last][mid];
             }
             case 3: {
-                this.board[mid][0] = new PlayerStartZone(player);
+                this.board[mid][0] = new PlayerStartZone(this.board[mid][0].getX(), this.board[mid][0].getY(), player);
                 return this.board[mid][0];
             }
             default: return null;
 
         }
     }
-    public void addPlayer(String name, PlayerRole role){
+    public Player addPlayer(String name){
         if(player_conut > 3){
             throw new RuntimeException("The maximum number of players is reached.");
         }
-        String temp_name = "";
-        PlayerRole temp_role = PlayerRole.temp;
-        Player player = new Player(temp_name, temp_role);
+        PlayerRole role_to_assign = this.getAvailibleRole();
+        if (role_to_assign == null) {
+            throw new RuntimeException("No role assigned.");
+        }
+        Player player = new Player(name, role_to_assign);
 
         this.players[player_conut] = player;
         Zone new_zone = this.chooseZoneForPlayer(player);
@@ -99,5 +123,6 @@ public class BoardGame {
         }
         player.setPlayerToZone(new_zone);
         player_conut++;
+        return player;
     }
 }
