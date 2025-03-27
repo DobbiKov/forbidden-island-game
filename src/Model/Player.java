@@ -7,7 +7,6 @@ public class Player {
     private Zone player_zone;
     private int actions_remaining;
     private PlayerRole player_role;
-    //TODO : players role
     //TODO : hand with cards
 
     public Player(String player_name, PlayerRole player_role) {
