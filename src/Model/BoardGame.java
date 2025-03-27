@@ -1,6 +1,7 @@
 package Model;
 
 import Errors.MaximumNumberOfPlayersReachedException;
+import Errors.NoPlayersException;
 import Errors.NoRoleToAssignError;
 
 import java.util.HashSet;
@@ -14,10 +15,11 @@ public class BoardGame {
     private Player[] players;
     private static int player_conut = 0;
     private HashSet<PlayerRole> used_roles;
-
+    private GameState game_state;
 
     public BoardGame(int size) {
         // zone init
+        this.game_state = GameState.SettingUp;
         this.size = size;
         this.board = new Zone[size][size];
         for(int i = 0; i < size; i++) {
@@ -34,6 +36,15 @@ public class BoardGame {
         for (int i = 0; i < this.players.length; i++) {
             this.players[i] = null;
         }
+    }
+    public void startGame() {
+        if(game_state != GameState.SettingUp) {
+            throw new RuntimeException("Can't start the game because the game isn't in the state of setting up");
+        }
+        if(player_conut == 0){
+            throw new NoPlayersException();
+        }
+        this.game_state = GameState.Playing;
     }
     public Zone[][] getBoard() {
         return board;

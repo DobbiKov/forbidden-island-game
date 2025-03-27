@@ -113,7 +113,6 @@ public class GUI {
             panelPlayers[i] = new JPanel();
         }
 
-        // Creating instance of JFrame
         JPanel boardPanel = new JPanel();
         JPanel buttonPanel = new JPanel();
         window = new JFrame();
@@ -122,17 +121,38 @@ public class GUI {
 
         zonePanels = new JPanel[zones.length][zones.length];
 
-        JButton fin_de_tour = new JButton("Fin de Tour");
-        fin_de_tour.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                gameController.finDeTour();
-                updateZonePanels();
-            }
-        });
-        fin_de_tour.setSize(100, 50);
-        fin_de_tour.setVisible(true);
+
 
         JButton add_player = new JButton("Add Player");
+
+        JButton start_game = new JButton("Start Game");
+        start_game.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               try{
+                   gameController.startGame();
+                   JButton fin_de_tour = new JButton("Fin de Tour");
+                   fin_de_tour.addActionListener(new ActionListener() {
+                       public void actionPerformed(ActionEvent e) {
+                           gameController.finDeTour();
+                           updateZonePanels();
+                       }
+                   });
+                   fin_de_tour.setSize(100, 50);
+                   fin_de_tour.setVisible(true);
+
+                   buttonPanel.remove(add_player);
+                   buttonPanel.remove(start_game);
+                   buttonPanel.add(fin_de_tour);
+                   buttonPanel.setBackground(Color.WHITE);
+                   window.validate();
+               }
+               catch (Exception ex){
+                   // TODO show error mess
+               }
+            }
+        });
 
 
         add_player.addActionListener(new ActionListener() {
@@ -166,9 +186,8 @@ public class GUI {
         });
         add_player.setSize(100, 50);
         add_player.setVisible(true);
-
-        buttonPanel.add(fin_de_tour);
         buttonPanel.add(add_player);
+        buttonPanel.add(start_game);
 
         for(int i = 0; i < zones.length; i++){
             for(int j = 0; j < zones[i].length; j++){

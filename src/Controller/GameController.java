@@ -46,4 +46,7 @@ public class GameController {
     public Player[] getPlayers(){
         return boardGame.getPlayers();
     }
+    public void startGame(){
+        boardGame.startGame();
+    }
 }
