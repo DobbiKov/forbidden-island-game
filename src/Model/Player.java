@@ -19,12 +19,18 @@ public class Player {
     }
 
     public void setPlayerToZone(Zone zone){
+        if(this.player_zone != null){
+            zone.removePlayerFromZone(this);
+        }
         this.player_zone = zone;
+        zone.addPlayerToZone(this);
     }
 
     public int getPlayer_id() {return player_id;}
 
     public Zone getPlayer_zone() {return player_zone;}
+
+    public String getPlayer_name() {return player_name;}
 
     public void move_Player(Zone player_zone) {
         //TODO : check with his role
@@ -39,5 +45,14 @@ public class Player {
 
     public int getActions_remaining() {return actions_remaining;}
 
+    public java.awt.Color getPlayer_color(){
+        switch(player_id){
+            case 0: return java.awt.Color.BLUE;
+            case 1: return java.awt.Color.RED;
+            case 2: return java.awt.Color.GREEN;
+            case 3: return java.awt.Color.YELLOW;
+            default: return java.awt.Color.BLACK;
+        }
+    }
 
 }

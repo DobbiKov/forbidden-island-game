@@ -1,5 +1,8 @@
 package Model;
 
+import Errors.MaximumNumberOfPlayersReachedException;
+import Errors.NoRoleToAssignError;
+
 import java.util.HashSet;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -108,18 +111,18 @@ public class BoardGame {
     }
     public Player addPlayer(String name){
         if(player_conut > 3){
-            throw new RuntimeException("The maximum number of players is reached.");
+            throw new MaximumNumberOfPlayersReachedException();
         }
         PlayerRole role_to_assign = this.getAvailibleRole();
         if (role_to_assign == null) {
-            throw new RuntimeException("No role assigned.");
+            throw new NoRoleToAssignError();
         }
         Player player = new Player(name, role_to_assign);
 
         this.players[player_conut] = player;
         Zone new_zone = this.chooseZoneForPlayer(player);
         if(new_zone == null){
-            throw new RuntimeException("The maximum number of players is reached.");
+            throw new MaximumNumberOfPlayersReachedException();
         }
         player.setPlayerToZone(new_zone);
         player_conut++;

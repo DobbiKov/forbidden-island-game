@@ -1,13 +1,17 @@
 package View;
 import Controller.GameController;
+import Errors.MaximumNumberOfPlayersReachedException;
 import Helper.Callback;
+import Model.Player;
 import Model.Zone;
 import Model.ZoneState;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.ImageObserver;
 import java.io.*;
+import java.text.AttributedCharacterIterator;
 import javax.swing.*;
 import javax.swing.border.Border;
 
@@ -22,6 +26,11 @@ public class GUI {
     private static JPanel[][] zonePanels;
 
     private static JPanel[] panelPlayers;
+    private static int player_panel_size = 0;
+
+    private static JPanel rightPanel;
+    private static JPanel leftPanel;
+    private static JFrame window;
 
     private static JPanel getZone(){
         // Creating instance of JButton
@@ -42,6 +51,7 @@ public class GUI {
             for (int j = 0; j < zones[i].length; j++) {
                 ZoneState state = zones[i][j].getZone_state();
                 JPanel panel = zonePanels[i][j];
+                panel.removeAll();
 
                 switch (state) {
                     case Normal:
@@ -57,8 +67,36 @@ public class GUI {
                         panel.setBorder(null);
                         break;
                 }
+                if(zones[i][j] != null) {
+                    for (Player player : zones[i][j].getPlayers_on_zone()) {
+                        java.awt.Color color = player.getPlayer_color();
+                        JPanel circle = new Circle(color);
+                        circle.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        panel.add(circle);
+                    }
+                }
             }
         }
+        window.validate();
+    }
+    public static void updatePlayerPanels(){
+        window.remove(rightPanel);
+        rightPanel = new JPanel();
+        rightPanel.setLayout(new GridLayout(2, 1));
+        rightPanel.add(panelPlayers[0]);
+        rightPanel.add(panelPlayers[1]);
+        rightPanel.setVisible(true);
+        window.add(rightPanel, BorderLayout.EAST);
+
+        window.remove(leftPanel);
+        leftPanel = new JPanel();
+        leftPanel.setLayout(new GridLayout(2, 1));
+        leftPanel.add(panelPlayers[2]);
+        leftPanel.add(panelPlayers[3]);
+        leftPanel.setVisible(true);
+        window.add(leftPanel, BorderLayout.WEST);
+
+        window.validate();
     }
 
 
@@ -66,10 +104,19 @@ public class GUI {
     {
         gameController = new GameController();
         zones = gameController.getZones();
+
+        // init player panels
+        rightPanel = new JPanel();
+        leftPanel = new JPanel();
+        panelPlayers = new JPanel[4];
+        for(int i = 0; i < panelPlayers.length; i++){
+            panelPlayers[i] = new JPanel();
+        }
+
         // Creating instance of JFrame
         JPanel boardPanel = new JPanel();
         JPanel buttonPanel = new JPanel();
-        JFrame window = new JFrame();
+        window = new JFrame();
 
         zone_size = 50;
 
@@ -101,7 +148,17 @@ public class GUI {
 
                     @Override
                     public void callAddPlayer(String name){
-                        gameController.addPlayerToTheGame(name);
+                        try {
+                            Player new_player = gameController.addPlayerToTheGame(name);
+                            panelPlayers[player_panel_size++] = new PlayerPanel(new_player);
+                            updatePlayerPanels();
+                            updateZonePanels();
+                        }
+                        catch (MaximumNumberOfPlayersReachedException e){
+                            System.out.println("Maximum number of players reached");
+                            // TODO message that maximun players is reached
+                        }
+
                     }
                 });
                 po.show();
@@ -134,9 +191,23 @@ public class GUI {
         // using no layout managers
 //        boardPanel.setLayout();
 
+        //player pane panels
+        rightPanel.setLayout(new GridLayout(2, 1));
+        rightPanel.add(panelPlayers[0]);
+        rightPanel.add(panelPlayers[1]);
+        rightPanel.setVisible(true);
+
+        leftPanel.setLayout(new GridLayout(2, 1));
+        leftPanel.add(panelPlayers[2]);
+        leftPanel.add(panelPlayers[3]);
+        leftPanel.setVisible(true);
+
         //window adders
+
         window.add(buttonPanel, BorderLayout.NORTH);
         window.add(boardPanel);
+        window.add(rightPanel, BorderLayout.EAST);
+        window.add(leftPanel, BorderLayout.WEST);
 
         // making the frame visible
         window.pack();

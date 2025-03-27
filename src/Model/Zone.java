@@ -1,7 +1,8 @@
 package Model;
 
 
-import java.util.ArrayList;
+import Errors.ZoneIsInaccessibleException;
+
 import java.util.HashSet;
 
 public class Zone {
@@ -19,6 +20,7 @@ public class Zone {
         this.zone_state = ZoneState.Normal;
         this.zone_name = "";
         this.zone_type = ZoneType.Casual;
+        this.players_on_zone = new HashSet<>();
     }
 
     public int getX(){
