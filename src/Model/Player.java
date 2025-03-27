@@ -20,7 +20,7 @@ public class Player {
 
     public void setPlayerToZone(Zone zone){
         if(this.player_zone != null){
-            zone.removePlayerFromZone(this);
+            this.player_zone.removePlayerFromZone(this);
         }
         this.player_zone = zone;
         zone.addPlayerToZone(this);
