@@ -78,7 +78,20 @@ public class GUI {
         fin_de_tour.setSize(100, 50);
         fin_de_tour.setVisible(true);
 
+        JButton add_player = new JButton("Add Player");
+        add_player.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JPanel panel = new AddPlayerPopup();
+                PopupFactory factory = new PopupFactory();
+                Popup po = factory.getPopup(window, panel, 100, 100);
+                po.show();
+            }
+        });
+        add_player.setSize(100, 50);
+        add_player.setVisible(true);
+
         buttonPanel.add(fin_de_tour);
+        buttonPanel.add(add_player);
         window.add(buttonPanel, BorderLayout.NORTH);
 
         for(int i = 0; i < zones.length; i++){

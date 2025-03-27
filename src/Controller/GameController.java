@@ -9,11 +9,12 @@ import java.util.Random;
 public class GameController {
     private BoardGame boardGame;
     public GameController() {
-        this.boardGame = new BoardGame(5);
+        this.boardGame = new BoardGame(8);
     }
     public Zone[][] getZones() {
         return this.boardGame.getBoard();
     }
+
     public void finDeTour(){
        //inondation de trois zones
        int zone_flooded = 0;
