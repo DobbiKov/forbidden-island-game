@@ -1,5 +1,6 @@
 package View;
 import Controller.GameController;
+import Helper.Callback;
 import Model.Zone;
 import Model.ZoneState;
 
@@ -81,9 +82,15 @@ public class GUI {
         JButton add_player = new JButton("Add Player");
         add_player.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JPanel panel = new AddPlayerPopup();
+                AddPlayerPopup panel = new AddPlayerPopup();
                 PopupFactory factory = new PopupFactory();
-                Popup po = factory.getPopup(window, panel, 100, 100);
+                Popup po = factory.getPopup(window, panel, window.getX() + (window.getSize().width/2), window.getY() + (window.getSize().height/2));
+                panel.addCancelCallback(new Callback() {
+                    @Override
+                    public void call() {
+                        po.hide();
+                    }
+                });
                 po.show();
             }
         });
