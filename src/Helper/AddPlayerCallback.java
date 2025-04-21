@@ -1,6 +1,6 @@
 package Helper;
 
-public interface Callback {
+public interface AddPlayerCallback {
     void callHide();
     void callAddPlayer(String name);
 }

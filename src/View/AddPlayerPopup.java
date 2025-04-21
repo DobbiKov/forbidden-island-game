@@ -4,12 +4,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-import Helper.Callback;
+import Helper.AddPlayerCallback;
 
 public class AddPlayerPopup extends JPanel implements ActionListener {
     JTextField nameField;
 
-    Callback mainCallback;
+    AddPlayerCallback mainAddPlayerCallback;
 
     public AddPlayerPopup() {
         super();
@@ -23,8 +23,8 @@ public class AddPlayerPopup extends JPanel implements ActionListener {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(mainCallback != null)
-                    mainCallback.callHide();
+                if(mainAddPlayerCallback != null)
+                    mainAddPlayerCallback.callHide();
             }
         });
         JButton addButton = new JButton("Add");
@@ -35,8 +35,8 @@ public class AddPlayerPopup extends JPanel implements ActionListener {
                 if(nameField.getText().equals("")){
                     return;
                 }
-                mainCallback.callAddPlayer(nameField.getText());
-                mainCallback.callHide();
+                mainAddPlayerCallback.callAddPlayer(nameField.getText());
+                mainAddPlayerCallback.callHide();
             }
         });
 
@@ -52,8 +52,8 @@ public class AddPlayerPopup extends JPanel implements ActionListener {
         this.setLayout(new GridLayout(3, 1));
 
     }
-    public void addMainCallback(Callback c){
-        this.mainCallback = c;
+    public void addMainCallback(AddPlayerCallback c){
+        this.mainAddPlayerCallback = c;
     }
 
     @Override

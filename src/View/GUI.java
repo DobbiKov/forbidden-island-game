@@ -1,7 +1,7 @@
 package View;
 import Controller.GameController;
 import Errors.MaximumNumberOfPlayersReachedException;
-import Helper.Callback;
+import Helper.AddPlayerCallback;
 import Model.Player;
 import Model.Zone;
 import Model.ZoneState;
@@ -9,11 +9,7 @@ import Model.ZoneState;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.ImageObserver;
-import java.io.*;
-import java.text.AttributedCharacterIterator;
 import javax.swing.*;
-import javax.swing.border.Border;
 
 public class GUI {
     private static GameController gameController;
@@ -160,7 +156,7 @@ public class GUI {
                 AddPlayerPopup panel = new AddPlayerPopup();
                 PopupFactory factory = new PopupFactory();
                 Popup po = factory.getPopup(window, panel, window.getX() + (window.getSize().width/2), window.getY() + (window.getSize().height/2));
-                panel.addMainCallback(new Callback() {
+                panel.addMainCallback(new AddPlayerCallback() {
                     @Override
                     public void callHide() {
                         po.hide();
@@ -176,7 +172,8 @@ public class GUI {
                         }
                         catch (MaximumNumberOfPlayersReachedException e){
                             System.out.println("Maximum number of players reached");
-                            // TODO message that maximun players is reached
+                            ErrorPopup.CreateErrorPopup(window, "max reached", "Maximum number of players reached");
+
                         }
 
                     }
