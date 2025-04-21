@@ -30,7 +30,7 @@ public class ErrorPopup extends JPanel{
             }
         });
 
-        mainTextArea = new JTextArea(titleText);
+        mainTextArea = new JTextArea(mainText);
 
         this.add(titleTextLabel);
         this.add(mainTextArea);

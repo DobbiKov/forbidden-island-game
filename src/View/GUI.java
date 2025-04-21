@@ -1,8 +1,11 @@
 package View;
 import Controller.GameController;
+import Errors.InvalidNumberOfPlayersException;
 import Errors.MaximumNumberOfPlayersReachedException;
+import Errors.NoPlayersException;
 import Helper.AddPlayerCallback;
 import Model.Player;
+import Model.PlayerAction;
 import Model.Zone;
 import Model.ZoneState;
 
@@ -21,7 +24,7 @@ public class GUI {
 
     private static JPanel[][] zonePanels;
 
-    private static JPanel[] panelPlayers;
+    private static PlayerPanel[] panelPlayers;
     private static int player_panel_size = 0;
 
     private static JPanel rightPanel;
@@ -76,6 +79,32 @@ public class GUI {
         window.validate();
     }
     public static void updatePlayerPanels(){
+        for(PlayerPanel panel : panelPlayers){
+            if(panel.getPlayer() == null){
+                continue;
+            }
+            System.out.println(panel.toString());
+            System.out.println(panel.getPlayer().toString());
+            if(gameController.getPlayerForTheTurn() == null) break;
+            if(gameController.getPlayerForTheTurn().getPlayer_id() == panel.getPlayer().getPlayer_id()
+            ){
+
+                System.out.println("Setting actions for:" + panel.getPlayer().getPlayer_role() + " " + panel.getPlayer().getPlayer_color().toString());
+//                System.out.println(
+//                        gameController.getPossibleActionsForPlayer(panel.getPlayer())
+//                );
+                System.out.println(gameController.getPlayerForTheTurn().getPlayer_role().toString() + "etot huy");
+                System.out.println("hut");
+                panel.setActions(
+                        gameController.getPossibleActionsForPlayer(panel.getPlayer())
+                );
+                System.out.println("hut set");
+                for(PlayerAction action : gameController.getPossibleActionsForPlayer(panel.getPlayer())){
+                    System.out.println(action.toString());
+                }
+            }
+        }
+
         window.remove(rightPanel);
         rightPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(2, 1));
@@ -104,9 +133,9 @@ public class GUI {
         // init player panels
         rightPanel = new JPanel();
         leftPanel = new JPanel();
-        panelPlayers = new JPanel[4];
+        panelPlayers = new PlayerPanel[4];
         for(int i = 0; i < panelPlayers.length; i++){
-            panelPlayers[i] = new JPanel();
+            panelPlayers[i] = new PlayerPanel();
         }
 
         JPanel boardPanel = new JPanel();
@@ -142,7 +171,14 @@ public class GUI {
                    buttonPanel.remove(start_game);
                    buttonPanel.add(fin_de_tour);
                    buttonPanel.setBackground(Color.WHITE);
+                   updatePlayerPanels();
                    window.validate();
+               }
+               catch (NoPlayersException ex){
+                   ErrorPopup.CreateErrorPopup(window, "No Players", "The game can't be started without players!");
+               }
+               catch (InvalidNumberOfPlayersException ex){
+                   ErrorPopup.CreateErrorPopup(window, "Invalid number of players", ex.getMessage());
                }
                catch (Exception ex){
                    // TODO show error mess

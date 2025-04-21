@@ -1,5 +1,6 @@
 package Model;
 
+import Errors.InvalidNumberOfPlayersException;
 import Errors.MaximumNumberOfPlayersReachedException;
 import Errors.NoPlayersException;
 import Errors.NoRoleToAssignError;
@@ -16,6 +17,7 @@ public class BoardGame {
     private static int player_conut = 0;
     private HashSet<PlayerRole> used_roles;
     private GameState game_state;
+    private int player_turn_id; // idx in the array of players or -1
 
     public BoardGame(int size) {
         // zone init
@@ -36,6 +38,9 @@ public class BoardGame {
         for (int i = 0; i < this.players.length; i++) {
             this.players[i] = null;
         }
+
+        // turn
+        player_turn_id = -1;
     }
     public void startGame() {
         if(game_state != GameState.SettingUp) {
@@ -43,6 +48,13 @@ public class BoardGame {
         }
         if(player_conut == 0){
             throw new NoPlayersException();
+        }
+        if(player_conut < 2 || player_conut > 4){
+            String message = "The number of players is less then 2";
+            if(player_conut > 4){
+                message = "The number of players is greater than 4";
+            }
+            throw new InvalidNumberOfPlayersException(message);
         }
         this.game_state = GameState.Playing;
     }
@@ -138,5 +150,24 @@ public class BoardGame {
         player.setPlayerToZone(new_zone);
         player_conut++;
         return player;
+    }
+
+    public int getPlayerTurnId(){
+        return player_turn_id;
+    }
+    public Player getPlayerForTheTurn(){
+        if (this.getPlayerTurnId() == -1){
+            return null;
+        }
+        return this.players[this.getPlayerTurnId()];
+    }
+    public void nextPlayerTurn(){
+        player_turn_id++;
+        if(player_turn_id >= this.players.length){
+            this.player_turn_id = -1;
+        }
+    }
+    public boolean isGameSettingUp(){
+        return this.game_state == GameState.SettingUp;
     }
 }
