@@ -26,6 +26,10 @@ public class Player {
         zone.addPlayerToZone(this);
     }
 
+    public PlayerRole getPlayer_role() {
+        return player_role;
+    }
+
     public int getPlayer_id() {return player_id;}
 
     public Zone getPlayer_zone() {return player_zone;}

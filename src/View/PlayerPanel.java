@@ -21,11 +21,11 @@ public class PlayerPanel extends JPanel {
         Color playerColor = player.getPlayer_color();
         playerNamePanel = new JPanel();
         playerNamePanel.setBackground(playerColor);
-        playerName = new JTextArea("Player" + player.getPlayer_name());
+        playerName = new JTextArea("Player" + player.getPlayer_name() + " " + " role: ");
         playerNamePanel.add(playerName);
         playerName.setEditable(false);
 
-        playerRole = new JTextArea("TODO"); //TODO
+        playerRole = new JTextArea(player.getPlayer_role().toString()); //TODO
         this.add(playerNamePanel);
         this.add(playerRole);
     }
