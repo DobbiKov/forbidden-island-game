@@ -7,7 +7,7 @@ public class Player {
     private Zone player_zone;
     private int actions_remaining;
     private PlayerRole player_role;
-    //TODO : hand with cards
+    private Hand hand;
 
     public Player(String player_name, PlayerRole player_role) {
         if(player_count >= 4){ throw new RuntimeException("You cant have more than 4 players");}
@@ -16,6 +16,7 @@ public class Player {
         this.player_name = player_name;
         this.actions_remaining = 3;
         this.player_role = player_role;
+        this.hand = new Hand();
     }
 
     public void setPlayerToZone(Zone zone){
@@ -59,5 +60,19 @@ public class Player {
             default: return java.awt.Color.BLACK;
         }
     }
+
+    public Hand getHand(){
+        return hand;
+    }
+
+    public void takeCard(Card card){
+        hand.add(card);
+    }
+
+    public void discardCard(Card card, Deck deck){
+        hand.remove(card);
+        deck.discard(card);
+    }
+
 
 }
