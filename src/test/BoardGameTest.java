@@ -13,7 +13,7 @@ class BoardGameTest {
 
     @BeforeEach
     void setUp() {
-        game = new BoardGame(5);
+        game = new BoardGame();
     }
     @BeforeEach
     void resetStaticPlayerCount() throws ReflectiveOperationException { // resets final number of players each time
