@@ -1,9 +1,6 @@
 package Model;
 
-import Errors.InvalidNumberOfPlayersException;
-import Errors.MaximumNumberOfPlayersReachedException;
-import Errors.NoPlayersException;
-import Errors.NoRoleToAssignError;
+import Errors.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -61,6 +58,7 @@ public class BoardGame {
             throw new InvalidNumberOfPlayersException(message);
         }
         this.game_state = GameState.Playing;
+        this.moveTurnToNextPlayer();
     }
     public Zone[][] getBoard() {
         return board;
@@ -77,6 +75,7 @@ public class BoardGame {
     public Zone getZone(int x, int y){
         return this.board[x][y];
     }
+
     public int getNumOfActiveZones(){
         int count = 0;
         for(int i = 0; i < size; i++){
@@ -171,6 +170,10 @@ public class BoardGame {
         if(player_turn_id >= this.players.length){
             this.player_turn_id = -1;
         }
+    }
+    public Player moveTurnToNextPlayer(){
+        this.nextPlayerTurn();
+        return this.getPlayerForTheTurn();
     }
     public boolean isGameSettingUp(){
         return this.game_state == GameState.SettingUp;
@@ -273,8 +276,50 @@ public class BoardGame {
     }
 
     public void movePlayerToZone(Player player, Zone zone){
+        if(!this.isPlayerChoosingZoneToMove()){
+            throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to move");
+        }
+        if(!this.getZonesForPlayerToMove(player).contains(zone)){
+            throw new InvalidZoneToMove("The zone you choose is not in the zone");
+        }
+
         player.getPlayer_zone().removePlayerFromZone(player);
         player.move_Player(zone);
         zone.addPlayerToZone(player);
+        this.setGame_state(GameState.Playing);
+
+    }
+
+    private boolean isPlayerChoosingZoneToMove() {
+        return this.game_state == GameState.PlayerChooseWhereToMove;
+    }
+
+    public void setPlayerChooseZoneToMoveTo(){
+        // TODO: verify that it's possible
+        this.game_state = GameState.PlayerChooseWhereToMove;
+    }
+
+    public void finDeTour()
+    {
+        //inondation de trois zones
+        int zone_flooded = 0;
+        int must_be_flooded = 3;
+        if(this.getNumOfActiveZones() < must_be_flooded){
+            this.floodAllZones();
+        }
+        else {
+            while (zone_flooded < must_be_flooded) {
+                Random rand = new Random();
+                int x = rand.nextInt(this.getSize());
+                int y = rand.nextInt(this.getSize());
+                if (this.getZone(x, y).getZone_state() == ZoneState.Inaccessible) {
+                    continue;
+                }
+                this.floodZone(x, y);
+                zone_flooded++;
+            }
+        }
+
+        //suite
     }
 }

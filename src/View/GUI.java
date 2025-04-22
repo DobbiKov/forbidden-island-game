@@ -33,6 +33,11 @@ public class GUI {
     private static JPanel rightPanel;
     private static JPanel leftPanel;
     private static JFrame window;
+    private static JPanel boardPanel;
+    private static JPanel buttonPanel;
+    private static JButton add_player;
+
+    private static JButton start_game;
 
     private static JPanel getZone(){
         // Creating instance of JButton
@@ -45,6 +50,15 @@ public class GUI {
 
     private static void updatePlayerZones(){
         // TODO
+    }
+
+    public static void showErrorMess(String title, String message){
+        ErrorPopup.CreateErrorPopup(window, title, message);
+    }
+    public static void addPlayerPanel(Player new_player){
+        panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
+        updatePlayerPanels();
+        updateZonePanels();
     }
 
     public static void updateZonePanels() {
@@ -135,6 +149,25 @@ public class GUI {
         window.validate();
     }
 
+    public static void startGameHandleView(){
+        JButton fin_de_tour = new JButton("Fin de Tour");
+        fin_de_tour.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                gameController.finDeTour();
+                updateZonePanels();
+            }
+        });
+        fin_de_tour.setSize(100, 50);
+        fin_de_tour.setVisible(true);
+
+        buttonPanel.remove(add_player);
+        buttonPanel.remove(start_game);
+        buttonPanel.add(fin_de_tour);
+        buttonPanel.setBackground(Color.WHITE);
+        updatePlayerPanels();
+        window.validate();
+        window.repaint();
+    }
 
     public static void main(String[] args)
     {
@@ -149,8 +182,8 @@ public class GUI {
             panelPlayers[i] = new PlayerPanel();
         }
 
-        JPanel boardPanel = new JPanel();
-        JPanel buttonPanel = new JPanel();
+        boardPanel = new JPanel();
+        buttonPanel = new JPanel();
         window = new JFrame();
 
         zone_size = 50;
@@ -159,41 +192,14 @@ public class GUI {
 
 
 
-        JButton add_player = new JButton("Add Player");
+        add_player = new JButton("Add Player");
 
-        JButton start_game = new JButton("Start Game");
+        start_game = new JButton("Start Game");
         start_game.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-               try{
                    gameController.startGame();
-                   JButton fin_de_tour = new JButton("Fin de Tour");
-                   fin_de_tour.addActionListener(new ActionListener() {
-                       public void actionPerformed(ActionEvent e) {
-                           gameController.finDeTour();
-                           updateZonePanels();
-                       }
-                   });
-                   fin_de_tour.setSize(100, 50);
-                   fin_de_tour.setVisible(true);
-
-                   buttonPanel.remove(add_player);
-                   buttonPanel.remove(start_game);
-                   buttonPanel.add(fin_de_tour);
-                   buttonPanel.setBackground(Color.WHITE);
-                   updatePlayerPanels();
-                   window.validate();
-               }
-               catch (NoPlayersException ex){
-                   ErrorPopup.CreateErrorPopup(window, "No Players", "The game can't be started without players!");
-               }
-               catch (InvalidNumberOfPlayersException ex){
-                   ErrorPopup.CreateErrorPopup(window, "Invalid number of players", ex.getMessage());
-               }
-               catch (Exception ex){
-                   // TODO show error mess
-               }
             }
         });
 
@@ -211,18 +217,7 @@ public class GUI {
 
                     @Override
                     public void callAddPlayer(String name){
-                        try {
-                            Player new_player = gameController.addPlayerToTheGame(name);
-                            panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
-                            updatePlayerPanels();
-                            updateZonePanels();
-                        }
-                        catch (MaximumNumberOfPlayersReachedException e){
-                            System.out.println("Maximum number of players reached");
-                            ErrorPopup.CreateErrorPopup(window, "max reached", "Maximum number of players reached");
-
-                        }
-
+                        gameController.addPlayerToTheGame(name);
                     }
                 });
                 po.show();
