@@ -120,6 +120,7 @@ public class GUI {
             if(panel.getPlayer() == null){
                 continue;
             }
+            panel.update();
             if(gameController.getPlayerForTheTurn() == null) break;
             if(gameController.getPlayerForTheTurn().getPlayer_id() == panel.getPlayer().getPlayer_id()
             ){

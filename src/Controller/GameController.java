@@ -4,6 +4,7 @@ import Errors.*;
 import Model.*;
 import View.ErrorPopup;
 import View.GUI;
+import View.PlayerPanel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,7 +20,14 @@ public class GameController {
     }
 
     public void finDeTour(){
-        this.boardGame.finDeTour();
+        try {
+            this.boardGame.finDeTour();
+            GUI.updatePlayerPanels();
+            GUI.updateZonePanels();
+        }
+        catch (NotAllPlayersFinishedTheirTurns ex){
+            GUI.showErrorMess("Impossible to finish", "All the players have to finish their turns!");
+        }
     }
     public void addPlayerToTheGame(String playerName){
         try {
@@ -48,9 +56,6 @@ public class GameController {
         }
     }
 
-    public Player makeNextTurnPlayer(){
-        return this.boardGame.moveTurnToNextPlayer();
-    }
     public Player getPlayerForTheTurn(){
         return this.boardGame.getPlayerForTheTurn();
     }
@@ -67,6 +72,8 @@ public class GameController {
 
     public void setPlayerChooseZoneToMoveTo(){
         this.boardGame.setPlayerChooseZoneToMoveTo();
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
     }
     public boolean isPlayerChoosingZoneToMove(){
         return this.boardGame.isPlayerChoosingToMove();
@@ -74,6 +81,18 @@ public class GameController {
 
     public void movePlayerToTheZone(Player player, Zone zone){
         this.boardGame.movePlayerToZone(player, zone);
+        GUI.updateZonePanels();
+        GUI.updatePlayerPanels();
+    }
+
+    public int getCurrentPlayerActionsNumber(){
+        return this.boardGame.getCurrent_player_actions_num();
+    }
+
+    public void playerFinishTurn(PlayerPanel playerPanel){
+        this.boardGame.playerFinishTurn();
+        playerPanel.removeActions();
+        GUI.updatePlayerPanels();
     }
 
 }

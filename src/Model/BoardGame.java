@@ -13,7 +13,7 @@ public class BoardGame {
     private int size;
     private Zone[][] board;
     private Player[] players;
-    private static int player_conut = 0;
+    private int player_count = 0;
     private HashSet<PlayerRole> used_roles;
     private GameState game_state;
     private int player_turn_id; // idx in the array of players or -1
@@ -47,12 +47,12 @@ public class BoardGame {
         if(game_state != GameState.SettingUp) {
             throw new RuntimeException("Can't start the game because the game isn't in the state of setting up");
         }
-        if(player_conut == 0){
+        if(player_count == 0){
             throw new NoPlayersException();
         }
-        if(player_conut < 2 || player_conut > 4){
+        if(player_count < 2 || player_count > 4){
             String message = "The number of players is less then 2";
-            if(player_conut > 4){
+            if(player_count > 4){
                 message = "The number of players is greater than 4";
             }
             throw new InvalidNumberOfPlayersException(message);
@@ -114,7 +114,7 @@ public class BoardGame {
     private Zone chooseZoneForPlayer(Player player){
         int mid = size/2;
         int last = size-1;
-        switch (player_conut){
+        switch (player_count){
             case 0:{
                 this.board[0][mid] = new PlayerStartZone(this.board[0][mid].getX(), this.board[0][mid].getY(), player);
                 return this.board[0][mid];
@@ -136,7 +136,7 @@ public class BoardGame {
         }
     }
     public Player addPlayer(String name){
-        if(player_conut > 3){
+        if(player_count > 3){
             throw new MaximumNumberOfPlayersReachedException();
         }
         PlayerRole role_to_assign = this.getAvailibleRole();
@@ -146,13 +146,13 @@ public class BoardGame {
         Player player = new Player(name, role_to_assign);
         this.used_roles.add(role_to_assign);
 
-        this.players[player_conut] = player;
+        this.players[player_count] = player;
         Zone new_zone = this.chooseZoneForPlayer(player);
         if(new_zone == null){
             throw new MaximumNumberOfPlayersReachedException();
         }
         player.setPlayerToZone(new_zone);
-        player_conut++;
+        player_count++;
         return player;
     }
 
@@ -165,9 +165,10 @@ public class BoardGame {
         }
         return this.players[this.getPlayerTurnId()];
     }
+    /// Gives the turn to the next player
     public void nextPlayerTurn(){
         player_turn_id++;
-        if(player_turn_id >= this.players.length){
+        if(player_turn_id >= this.player_count){
             this.player_turn_id = -1;
         }
     }
@@ -216,6 +217,7 @@ public class BoardGame {
         if(player_on_same_card || player.getPlayer_role() == PlayerRole.Messenger){
             possibleActions.add(PlayerAction.GiveTreasureCard);
         }
+        possibleActions.add(PlayerAction.FinishTurn);
         return possibleActions;
     }
 
@@ -266,16 +268,24 @@ public class BoardGame {
             return this.getZonesForDiver(player.getPlayer_zone());
         }
         if(player.getPlayer_role() == PlayerRole.Explorer){
-            return this.getAdjacentZones(player.getPlayer_zone(), true, null);
+            return this.getAdjacentZones(player.getPlayer_zone(), true, Zone::isDry);
         }
-        return this.getAdjacentZones(player.getPlayer_zone(), false, null);
+        return this.getAdjacentZones(player.getPlayer_zone(), false, Zone::isDry);
     }
 
     public void setGame_state(GameState game_state){
         this.game_state = game_state;
     }
 
+    private boolean isEnoughActions(){
+        return this.current_player_actions_num > 0;
+    }
+    /// THe player clicked move and chose the zone
     public void movePlayerToZone(Player player, Zone zone){
+        if(!this.isEnoughActions()){
+            throw new NoActionsLeft();
+        }
+
         if(!this.isPlayerChoosingZoneToMove()){
             throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to move");
         }
@@ -287,7 +297,7 @@ public class BoardGame {
         player.move_Player(zone);
         zone.addPlayerToZone(player);
         this.setGame_state(GameState.Playing);
-
+        this.current_player_actions_num--;
     }
 
     private boolean isPlayerChoosingZoneToMove() {
@@ -299,8 +309,15 @@ public class BoardGame {
         this.game_state = GameState.PlayerChooseWhereToMove;
     }
 
+    public int getCurrent_player_actions_num() {
+        return this.current_player_actions_num;
+    }
+
     public void finDeTour()
     {
+        if(this.getPlayerForTheTurn() != null){
+            throw new NotAllPlayersFinishedTheirTurns();
+        }
         //inondation de trois zones
         int zone_flooded = 0;
         int must_be_flooded = 3;
@@ -320,6 +337,15 @@ public class BoardGame {
             }
         }
 
-        //suite
+        this.nextPlayerTurn();
+    }
+
+    public void playerFinishTurn() {
+        Player p = this.getPlayerForTheTurn();
+        this.nextPlayerTurn();
+        this.setDefaultActionsNum();
+    }
+    private void setDefaultActionsNum(){
+        this.current_player_actions_num = 3;
     }
 }

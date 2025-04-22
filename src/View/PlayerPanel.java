@@ -14,6 +14,7 @@ public class PlayerPanel extends JPanel {
     private JPanel playerNamePanel;
     private JTextArea playerName;
     private JTextArea playerRole;
+    private JTextArea playerActionsNumText;
     JPanel actionButtonsPanel;
     private GameController gameController;
 
@@ -28,19 +29,28 @@ public class PlayerPanel extends JPanel {
 
         Color playerColor = player.getPlayer_color();
         playerNamePanel = new JPanel();
-        playerNamePanel.setBackground(playerColor);
         playerName = new JTextArea("Player: " + player.getPlayer_name() + " " + " role: ");
         playerNamePanel.add(playerName);
         playerName.setEditable(false);
 
+        playerActionsNumText = new JTextArea("");
+        playerActionsNumText.setEditable(false);
+        playerNamePanel.add(playerActionsNumText);
+
         playerRole = new JTextArea(player.getPlayer_role().toString());
         playerRole.setEditable(false);
+        playerNamePanel.add(playerRole);
+
+        playerNamePanel.setLayout(new GridLayout(2, 1));
+        playerName.setBackground(playerColor);
+
         this.add(playerNamePanel);
-        this.add(playerRole);
+
 
         actionButtonsPanel = new JPanel();
         actionButtonsPanel.setLayout(new GridLayout(3, 3));
         this.add(actionButtonsPanel);
+        this.setLayout(new GridLayout(2, 1));
     }
 
     public void setActions(ArrayList<PlayerAction> actions){
@@ -57,7 +67,11 @@ public class PlayerPanel extends JPanel {
             case Move:
                 button.addActionListener(e -> {
                     this.gameController.setPlayerChooseZoneToMoveTo();
-                    GUI.updateZonePanels();
+                });
+                break;
+            case FinishTurn:
+                button.addActionListener(e -> {
+                    this.gameController.playerFinishTurn(this);
                 });
                 break;
             default: break;
@@ -70,7 +84,15 @@ public class PlayerPanel extends JPanel {
     }
 
     public void update(){
-        playerName.setText("Player: " + player.getPlayer_name());
+//        playerName.setText("Player: " + player.getPlayer_name());
+
+        if(gameController.getPlayerForTheTurn() == this.player){
+            playerActionsNumText.setText("Actions left: " + gameController.getCurrentPlayerActionsNumber());
+        }else{
+            playerActionsNumText.setText("");
+        }
+        playerNamePanel.validate();
+        playerNamePanel.repaint();
     }
     public Player getPlayer(){
         return player;
