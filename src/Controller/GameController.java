@@ -83,6 +83,11 @@ public class GameController {
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
+    public void setNavigatorChoosePlayerToMove(){
+        this.boardGame.setNavigatorChoosePlayerToMove();
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
+    }
 
     //end set player choose
     //------------
@@ -100,6 +105,12 @@ public class GameController {
     }
     public boolean isPlayerChoosingZoneToFlyTo(){
         return this.boardGame.isPilotChoosingZoneToFly();
+    }
+    public boolean isNavgiatorChoosingAPlayerToMove(){
+        return this.boardGame.isNavgiatorChoosingAPlayerToMove();
+    }
+    public boolean isNavgiatorChoosingAZoneToMovePlayerTo(){
+        return this.boardGame.isNavgiatorChoosingAZoneToMovePlayerTo();
     }
     //end is player choosing
     //------------

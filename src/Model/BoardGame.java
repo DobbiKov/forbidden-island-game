@@ -227,6 +227,92 @@ public class BoardGame {
         return possibleActions;
     }
 
+
+
+    public void setGame_state(GameState game_state){
+        this.game_state = game_state;
+    }
+
+    private boolean isEnoughActions(){
+        return this.current_player_actions_num > 0;
+    }
+    /// THe player clicked move and chose the zone
+    public void movePlayerToZone(Zone zone){
+        Player player = this.getPlayerForTheTurn();
+        if(!this.isEnoughActions()){
+            throw new NoActionsLeft();
+        }
+
+        if(!this.isPlayerChoosingZoneToMove()){
+            throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to move");
+        }
+        if(!this.getZonesForPlayerToMove(player).contains(zone)){
+            throw new InvalidZoneToMove("The zone you choose is not in the zone");
+        }
+
+        player.getPlayer_zone().removePlayerFromZone(player);
+        player.move_Player(zone);
+        zone.addPlayerToZone(player);
+        this.setGame_state(GameState.Playing);
+        this.useOneAction();
+    }
+
+    private void useOneAction() {
+        this.current_player_actions_num--;
+    }
+
+
+
+    public int getCurrent_player_actions_num() {
+        return this.current_player_actions_num;
+    }
+
+    public void finDeTour()
+    {
+        //inondation de trois zones
+        int zone_flooded = 0;
+        int must_be_flooded = 3;
+        if(this.getNumOfActiveZones() < must_be_flooded){
+            this.floodAllZones();
+        }
+        else {
+            while (zone_flooded < must_be_flooded) {
+                Random rand = new Random();
+                int x = rand.nextInt(this.getSize());
+                int y = rand.nextInt(this.getSize());
+                if (this.getZone(x, y).getZone_state() == ZoneState.Inaccessible) {
+                    continue;
+                }
+                this.floodZone(x, y);
+                zone_flooded++;
+            }
+        }
+
+        this.playerFinishTurn();
+    }
+
+    private void playerFinishTurn() {
+        Player p = this.getPlayerForTheTurn();
+        this.nextPlayerTurn();
+        this.setDefaultActionsNum();
+    }
+    private void setDefaultActionsNum(){
+        this.current_player_actions_num = 3;
+    }
+
+    //------------
+    //get zones
+
+    public ArrayList<Zone> getZonesPossibleForChoosing() {
+        if(this.isPlayerChoosingZoneToMove()){
+            return this.getZonesForPlayerToMove(this.getPlayerForTheTurn());
+        }else if(this.isPlayerChoosingZoneToShoreUp()){
+           return this.getZonesToForPlayerShoreUp(this.getPlayerForTheTurn());
+        }else if(this.isPilotChoosingZoneToFly()){
+            return this.getZonesForPlayerToFlyTo(this.getPlayerForTheTurn());
+        }
+        return new ArrayList<>();
+    }
     private ArrayList<Zone> getAdjacentZones(Zone zone, boolean accept_diagonals, Predicate<Zone> filter){
         ArrayList<Zone> adjacentZones = new ArrayList<>();
         for(int i : new int[]{-1, 0, 1}){
@@ -268,7 +354,6 @@ public class BoardGame {
 
         return new ArrayList<>(res_zones);
     }
-
     public ArrayList<Zone> getZonesForPlayerToMove(Player player) {
         if(player.getPlayer_role() == PlayerRole.Diver){
             return this.getZonesForDiver(player.getPlayer_zone());
@@ -277,93 +362,6 @@ public class BoardGame {
             return this.getAdjacentZones(player.getPlayer_zone(), true, Zone::isDry);
         }
         return this.getAdjacentZones(player.getPlayer_zone(), false, Zone::isDry);
-    }
-
-    public void setGame_state(GameState game_state){
-        this.game_state = game_state;
-    }
-
-    private boolean isEnoughActions(){
-        return this.current_player_actions_num > 0;
-    }
-    /// THe player clicked move and chose the zone
-    public void movePlayerToZone(Zone zone){
-        Player player = this.getPlayerForTheTurn();
-        if(!this.isEnoughActions()){
-            throw new NoActionsLeft();
-        }
-
-        if(!this.isPlayerChoosingZoneToMove()){
-            throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to move");
-        }
-        if(!this.getZonesForPlayerToMove(player).contains(zone)){
-            throw new InvalidZoneToMove("The zone you choose is not in the zone");
-        }
-
-        player.getPlayer_zone().removePlayerFromZone(player);
-        player.move_Player(zone);
-        zone.addPlayerToZone(player);
-        this.setGame_state(GameState.Playing);
-        this.useOneAction();
-    }
-
-    private void useOneAction() {
-        this.current_player_actions_num--;
-    }
-
-    private boolean isPlayerChoosingZoneToMove() {
-        return this.game_state == GameState.PlayerChooseWhereToMove;
-    }
-
-    public void setPlayerChooseZoneToMoveTo(){
-        // TODO: verify that it's possible
-        this.game_state = GameState.PlayerChooseWhereToMove;
-    }
-
-    public int getCurrent_player_actions_num() {
-        return this.current_player_actions_num;
-    }
-
-    public void finDeTour()
-    {
-        //inondation de trois zones
-        int zone_flooded = 0;
-        int must_be_flooded = 3;
-        if(this.getNumOfActiveZones() < must_be_flooded){
-            this.floodAllZones();
-        }
-        else {
-            while (zone_flooded < must_be_flooded) {
-                Random rand = new Random();
-                int x = rand.nextInt(this.getSize());
-                int y = rand.nextInt(this.getSize());
-                if (this.getZone(x, y).getZone_state() == ZoneState.Inaccessible) {
-                    continue;
-                }
-                this.floodZone(x, y);
-                zone_flooded++;
-            }
-        }
-
-        this.playerFinishTurn();
-    }
-
-    private void playerFinishTurn() {
-        Player p = this.getPlayerForTheTurn();
-        this.nextPlayerTurn();
-        this.setDefaultActionsNum();
-    }
-    private void setDefaultActionsNum(){
-        this.current_player_actions_num = 3;
-    }
-
-    public ArrayList<Zone> getZonesPossibleForChoosing() {
-        if(this.isPlayerChoosingZoneToMove()){
-            return this.getZonesForPlayerToMove(this.getPlayerForTheTurn());
-        }else if(this.isPlayerChoosingZoneToShoreUp()){
-           return this.getZonesToForPlayerShoreUp(this.getPlayerForTheTurn());
-        }
-        return new ArrayList<>();
     }
 
     private ArrayList<Zone> getZonesToForPlayerShoreUp(Player player) {
@@ -375,14 +373,22 @@ public class BoardGame {
         }
         return res;
     }
-
-    public boolean isPlayerChoosingZoneToShoreUp() {
-        return this.game_state == GameState.PlayerChooseWhereToShoreUp;
+    private ArrayList<Zone> getZonesForPlayerToFlyTo(Player player) {
+        ArrayList<Zone> res = new ArrayList<>();
+        for(int i = 0; i < this.board.length; i++){
+            for(int j = 0; j < this.board[i].length; j++){
+                Zone curr = this.board[i][j];
+                if(curr.isDry() && curr != player.getPlayer_zone()){
+                    res.add(curr);
+                }
+            }
+        }
+        return res;
     }
+    //end get zones
+    //------------
 
-    public void setPlayerChooseZoneToShoreUp() {
-        this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
-    }
+
 
     public void playerShoreUpZone(Zone zone) {
         Player player = this.getPlayerForTheTurn();
@@ -399,6 +405,66 @@ public class BoardGame {
 
         zone.shoreUp();
         this.setGame_state(GameState.Playing);
-        this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
+        if(player.getPlayer_role() == PlayerRole.Engineer){
+            if(shore_ups_left == 0)
+            {
+                this.useOneAction();
+                shore_ups_left = 1;
+            }else{
+                shore_ups_left=0;
+            }
+        }
+        else {
+            this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
+        }
     }
+
+    //----------------
+    //is player choosing
+    public boolean isPlayerChoosingSomething() {
+        return
+                   this.isPlayerChoosingZoneToShoreUp()
+                || this.isPlayerChoosingZoneToMove()
+                || this.isPilotChoosingZoneToFly()
+                || this.isNavgiatorChoosingAPlayerToMove()
+                || this.isNavgiatorChoosingAZoneToMovePlayerTo();
+    }
+    public boolean isPlayerChoosingZoneToMove() {
+        return this.game_state == GameState.PlayerChooseWhereToMove;
+    }
+    public boolean isPilotChoosingZoneToFly() {
+        return this.game_state == GameState.PilotChooseWhereToFly;
+    }
+    public boolean isPlayerChoosingZoneToShoreUp() {
+        return this.game_state == GameState.PlayerChooseWhereToShoreUp;
+    }
+    public boolean isNavgiatorChoosingAPlayerToMove(){
+        return this.game_state == GameState.NavigatorChooseAPlayerToMove;
+    }
+    public boolean isNavgiatorChoosingAZoneToMovePlayerTo(){
+        return this.game_state == GameState.NavigatorChooseAZoneToMovePlayerTo;
+    }
+    //----------------
+
+    //-------------
+    //set player choose
+    public void setPilotChooseWhereToFlyTo() {
+        this.setGame_state(GameState.PilotChooseWhereToFly);
+    }
+    public void setNavigatorChoosePlayerToMove() {
+        this.setGame_state(GameState.NavigatorChooseAPlayerToMove);
+    }
+    private void setNavigatorChooseZoneToMoveThePlayerTo() {
+        this.setGame_state(GameState.NavigatorChooseAZoneToMovePlayerTo);
+    }
+    public void setPlayerChooseZoneToMoveTo(){
+        // TODO: verify that it's possible
+        this.game_state = GameState.PlayerChooseWhereToMove;
+    }
+
+    public void setPlayerChooseZoneToShoreUp() {
+        this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
+    }
+    //end
+    //---------------
 }
