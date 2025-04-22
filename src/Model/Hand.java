@@ -13,7 +13,12 @@ public class Hand {
     }
 
     public void remove(Card card) {
-        cards.remove(card);
+        boolean removed = cards.remove(card);
+        if (!removed) {
+            throw new IllegalArgumentException(
+                    "Cannot remove card " + card + " because it is not in the hand."
+            );
+        }
     }
 
     public int getSize(){

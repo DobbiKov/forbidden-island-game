@@ -145,4 +145,8 @@ public class Zone {
     public void makeInaccessible(){
         this.zone_state = ZoneState.Inaccessible;
     }
+
+    public static void resetUsedZoneCards() {  // for unit tests
+        used_cards.clear();
+    }
 }

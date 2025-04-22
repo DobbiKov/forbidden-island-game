@@ -74,5 +74,9 @@ public class Player {
         deck.discard(card);
     }
 
+    public static void resetPlayerCount() { // for unit tests
+        player_count = 0;
+    }
+
 
 }

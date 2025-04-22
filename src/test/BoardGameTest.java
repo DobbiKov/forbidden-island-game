@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import Model.*;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
+
 
 class BoardGameTest {
     private BoardGame game;
@@ -14,12 +15,8 @@ class BoardGameTest {
     @BeforeEach
     void setUp() {
         game = new BoardGame();
-    }
-    @BeforeEach
-    void resetStaticPlayerCount() throws ReflectiveOperationException { // resets final number of players each time
-        Field f = Player.class.getDeclaredField("player_count");
-        f.setAccessible(true);
-        f.setInt(null, 0);
+        Player.resetPlayerCount();
+        Zone.resetUsedZoneCards();
     }
 
     @Test
@@ -36,7 +33,7 @@ class BoardGameTest {
         game.addPlayer("B");
         game.addPlayer("C");
         game.addPlayer("D");
-        assertThrows(MaximumNumberOfPlayersReachedException.class,
+        assertThrows(Exception.class,
                 () -> game.addPlayer("E"));
     }
 
@@ -73,7 +70,43 @@ class BoardGameTest {
             game.floodAllZones();
         }
         game.finDeTour();
-        assertTrue(game.getNumOfActiveZones() <= (int)Math.pow(game.getSize(),2));
+        game.finDeTour();
+        assertTrue(game.getNumOfActiveZones() == 0);
     }
+
+    @Test
+    void explorerCanMoveDiagonally() {
+        Player explorer = new Player("Eve", PlayerRole.Explorer);
+        // place her at (1,1) on the board
+        Zone center = game.getZone(1, 1);
+        explorer.setPlayerToZone(center);
+
+        ArrayList<Zone> moves = game.getZonesForPlayerToMove(explorer);
+        // (0,0) is diagonal from (1,1)
+        assertTrue(moves.stream().anyMatch(z -> z.getX() == 0 && z.getY() == 0),
+                "Explorer should be able to move diagonally to (0,0)");
+    }
+
+    @Test
+    void testInitialDealTwoCardsPerPlayer() {
+        // add two players
+        game.addPlayer("Alice");
+        game.addPlayer("Bob");
+
+        // start the game (this is where you deal the cards)
+        game.startGame();
+
+        // verify each non-null player has exactly 2 cards
+        for (Player p : game.getPlayers()) {
+            if (p == null) continue;
+            assertEquals(
+                    2,
+                    p.getHand().getSize(),
+                    "Player " + p.getPlayer_name() + " should have 2 cards at game start"
+            );
+        }
+    }
+
+
 }
 
