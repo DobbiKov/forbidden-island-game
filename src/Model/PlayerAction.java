@@ -5,8 +5,7 @@ public enum PlayerAction {
     Drain,
     GiveTreasureCard,
     FlyToACard,
-    MovePlayer,
-    FinishTurn;
+    MovePlayer;
 
     @Override
     public String toString() {
@@ -16,7 +15,6 @@ public enum PlayerAction {
             case GiveTreasureCard: return "give treasure card";
             case FlyToACard: return "fly to card";
             case MovePlayer: return "move player";
-            case FinishTurn: return "finish turn";
         }
         return "";
     }

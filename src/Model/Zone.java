@@ -63,6 +63,12 @@ public class Zone {
     public boolean isDry() {
         return this.zone_state == ZoneState.Normal;
     }
+    public void shoreUp(){
+        if(this.zone_state == ZoneState.Inaccessible){
+            throw new ZoneIsInaccessibleException();
+        }
+        this.zone_state = ZoneState.Normal;
+    }
 
     public String toString() {
         String output = "";

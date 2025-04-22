@@ -51,7 +51,13 @@ public class GUI {
     private static void updatePlayerZones(){
         // TODO
     }
-
+    public static void removeActionsForPlayerPanel(){
+        for(PlayerPanel p : panelPlayers){
+            if(p.getPlayer() == gameController.getPlayerForTheTurn()){
+                p.removeActions();
+            }
+        }
+    }
     public static void showErrorMess(String title, String message){
         ErrorPopup.CreateErrorPopup(window, title, message);
     }
@@ -64,8 +70,8 @@ public class GUI {
     public static void updateZonePanels() {
         zones = gameController.getZones(); // get the new state
         HashSet<Zone> zoneSet = new HashSet<>();
-        if(gameController.isPlayerChoosingZoneToMove()){
-            zoneSet = new HashSet<>(gameController.getZonesForPlayerToMove(gameController.getPlayerForTheTurn()));
+        if(gameController.isPlayerChoosingZoneToMove() || gameController.isPlayerChoosingZoneToShoreUp()){
+            zoneSet = new HashSet<>(gameController.getZonesPossibleForChoosing());
         }
         for (int i = 0; i < zones.length; i++) {
             for (int j = 0; j < zones[i].length; j++) {
@@ -104,7 +110,12 @@ public class GUI {
                     panel.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
-                            gameController.movePlayerToTheZone(gameController.getPlayerForTheTurn(), zones[finalI][finalJ]);
+                            if(gameController.isPlayerChoosingZoneToShoreUp()){
+                                gameController.playerShoreUpZone(zones[finalI][finalJ]);
+                            }
+                            else if(gameController.isPlayerChoosingZoneToMove()) {
+                                gameController.movePlayerToTheZone(zones[finalI][finalJ]);
+                            }
                             updatePlayerPanels();
                             updateZonePanels();
                             window.repaint();

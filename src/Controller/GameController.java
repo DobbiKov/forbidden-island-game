@@ -20,14 +20,10 @@ public class GameController {
     }
 
     public void finDeTour(){
-        try {
+            GUI.removeActionsForPlayerPanel();
             this.boardGame.finDeTour();
             GUI.updatePlayerPanels();
             GUI.updateZonePanels();
-        }
-        catch (NotAllPlayersFinishedTheirTurns ex){
-            GUI.showErrorMess("Impossible to finish", "All the players have to finish their turns!");
-        }
     }
     public void addPlayerToTheGame(String playerName){
         try {
@@ -66,8 +62,8 @@ public class GameController {
         return this.boardGame.getPossiblePlayerActions(player);
     }
 
-    public ArrayList<Zone> getZonesForPlayerToMove(Player player){
-        return this.boardGame.getZonesForPlayerToMove(player);
+    public ArrayList<Zone> getZonesPossibleForChoosing(){
+       return this.boardGame.getZonesPossibleForChoosing();
     }
 
     public void setPlayerChooseZoneToMoveTo(){
@@ -75,24 +71,40 @@ public class GameController {
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
+    public void setPlayerChooseZoneToShoreUp(){
+        this.boardGame.setPlayerChooseZoneToShoreUp();
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
+    }
     public boolean isPlayerChoosingZoneToMove(){
         return this.boardGame.isPlayerChoosingToMove();
     }
+    public boolean isPlayerChoosingZoneToShoreUp(){
+        return this.boardGame.isPlayerChoosingZoneToShoreUp();
+    }
 
-    public void movePlayerToTheZone(Player player, Zone zone){
-        this.boardGame.movePlayerToZone(player, zone);
-        GUI.updateZonePanels();
-        GUI.updatePlayerPanels();
+    public void movePlayerToTheZone(Zone zone){
+        try {
+            this.boardGame.movePlayerToZone(zone);
+            GUI.updateZonePanels();
+            GUI.updatePlayerPanels();
+        }catch (NoActionsLeft ex){
+            GUI.showErrorMess("No actions left", "You used all your actions!");
+        }
     }
 
     public int getCurrentPlayerActionsNumber(){
         return this.boardGame.getCurrent_player_actions_num();
     }
 
-    public void playerFinishTurn(PlayerPanel playerPanel){
-        this.boardGame.playerFinishTurn();
-        playerPanel.removeActions();
-        GUI.updatePlayerPanels();
-    }
 
+    public void playerShoreUpZone(Zone zone) {
+        try {
+            this.boardGame.playerShoreUpZone(zone);
+            GUI.updateZonePanels();
+            GUI.updatePlayerPanels();
+        }catch (NoActionsLeft ex){
+            GUI.showErrorMess("No actions left", "You used all your actions!");
+        }
+    }
 }

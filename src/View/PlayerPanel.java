@@ -69,9 +69,9 @@ public class PlayerPanel extends JPanel {
                     this.gameController.setPlayerChooseZoneToMoveTo();
                 });
                 break;
-            case FinishTurn:
+            case Drain:
                 button.addActionListener(e -> {
-                    this.gameController.playerFinishTurn(this);
+                    this.gameController.setPlayerChooseZoneToShoreUp();
                 });
                 break;
             default: break;

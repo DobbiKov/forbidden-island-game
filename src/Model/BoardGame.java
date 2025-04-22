@@ -169,7 +169,7 @@ public class BoardGame {
     public void nextPlayerTurn(){
         player_turn_id++;
         if(player_turn_id >= this.player_count){
-            this.player_turn_id = -1;
+            this.player_turn_id = 0;
         }
     }
     public Player moveTurnToNextPlayer(){
@@ -217,7 +217,6 @@ public class BoardGame {
         if(player_on_same_card || player.getPlayer_role() == PlayerRole.Messenger){
             possibleActions.add(PlayerAction.GiveTreasureCard);
         }
-        possibleActions.add(PlayerAction.FinishTurn);
         return possibleActions;
     }
 
@@ -281,7 +280,8 @@ public class BoardGame {
         return this.current_player_actions_num > 0;
     }
     /// THe player clicked move and chose the zone
-    public void movePlayerToZone(Player player, Zone zone){
+    public void movePlayerToZone(Zone zone){
+        Player player = this.getPlayerForTheTurn();
         if(!this.isEnoughActions()){
             throw new NoActionsLeft();
         }
@@ -297,6 +297,10 @@ public class BoardGame {
         player.move_Player(zone);
         zone.addPlayerToZone(player);
         this.setGame_state(GameState.Playing);
+        this.useOneAction();
+    }
+
+    private void useOneAction() {
         this.current_player_actions_num--;
     }
 
@@ -315,9 +319,6 @@ public class BoardGame {
 
     public void finDeTour()
     {
-        if(this.getPlayerForTheTurn() != null){
-            throw new NotAllPlayersFinishedTheirTurns();
-        }
         //inondation de trois zones
         int zone_flooded = 0;
         int must_be_flooded = 3;
@@ -337,15 +338,53 @@ public class BoardGame {
             }
         }
 
-        this.nextPlayerTurn();
+        this.playerFinishTurn();
     }
 
-    public void playerFinishTurn() {
+    private void playerFinishTurn() {
         Player p = this.getPlayerForTheTurn();
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
     }
     private void setDefaultActionsNum(){
         this.current_player_actions_num = 3;
+    }
+
+    public ArrayList<Zone> getZonesPossibleForChoosing() {
+        if(this.isPlayerChoosingZoneToMove()){
+            return this.getZonesForPlayerToMove(this.getPlayerForTheTurn());
+        }else if(this.isPlayerChoosingZoneToShoreUp()){
+           return this.getZonesToForPlayerShoreUp(this.getPlayerForTheTurn());
+        }
+        return new ArrayList<>();
+    }
+
+    private ArrayList<Zone> getZonesToForPlayerShoreUp(Player player) {
+        return this.getAdjacentZones(player.getPlayer_zone(), true, z -> z.getZone_state() == ZoneState.Flooded);
+    }
+
+    public boolean isPlayerChoosingZoneToShoreUp() {
+        return this.game_state == GameState.PlayerChooseWhereToShoreUp;
+    }
+
+    public void setPlayerChooseZoneToShoreUp() {
+        this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
+    }
+
+    public void playerShoreUpZone(Zone zone) {
+        Player player = this.getPlayerForTheTurn();
+        if(!this.isEnoughActions()){
+            throw new NoActionsLeft();
+        }
+
+        if(!this.isPlayerChoosingZoneToShoreUp()){
+            throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to shore up");
+        }
+        if(!this.getZonesToForPlayerShoreUp(player).contains(zone)){
+            throw new InvalidZoneToMove("The zone you choose is not in the zone");
+        }
+
+        zone.shoreUp();
+        this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
     }
 }
