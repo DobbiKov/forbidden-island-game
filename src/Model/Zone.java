@@ -21,6 +21,16 @@ public class Zone {
         this.zone_name = "";
         this.zone_type = ZoneType.Casual;
         this.players_on_zone = new HashSet<>();
+        this.X = x;
+        this.Y = y;
+    }
+
+    public boolean isAdjecantTo(Zone other){
+        return !(Math.abs(this.getX() - other.getX()) > 1 || Math.abs(this.getY() - other.getY()) > 1);
+    }
+    public boolean isDiagonalTo(Zone other){
+        if(!isAdjecantTo(other)){ return false;}
+        return Math.abs(this.getX() - other.getX()) != 0 && Math.abs(this.getY() - other.getY()) != 0;
     }
 
     public int getX(){
@@ -48,6 +58,10 @@ public class Zone {
 
     public ZoneState getZone_state() {
         return zone_state;
+    }
+
+    public boolean isDry() {
+        return this.zone_state == ZoneState.Normal;
     }
 
     public String toString() {

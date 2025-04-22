@@ -5,7 +5,9 @@ import Errors.MaximumNumberOfPlayersReachedException;
 import Errors.NoPlayersException;
 import Errors.NoRoleToAssignError;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -18,6 +20,7 @@ public class BoardGame {
     private HashSet<PlayerRole> used_roles;
     private GameState game_state;
     private int player_turn_id; // idx in the array of players or -1
+    private int current_player_actions_num;
 
     public BoardGame(int size) {
         // zone init
@@ -41,6 +44,7 @@ public class BoardGame {
 
         // turn
         player_turn_id = -1;
+        current_player_actions_num = 3;
     }
     public void startGame() {
         if(game_state != GameState.SettingUp) {
@@ -141,6 +145,7 @@ public class BoardGame {
             throw new NoRoleToAssignError();
         }
         Player player = new Player(name, role_to_assign);
+        this.used_roles.add(role_to_assign);
 
         this.players[player_conut] = player;
         Zone new_zone = this.chooseZoneForPlayer(player);
@@ -169,5 +174,107 @@ public class BoardGame {
     }
     public boolean isGameSettingUp(){
         return this.game_state == GameState.SettingUp;
+    }
+    public boolean isPlayerChoosingToMove(){
+        return this.game_state == GameState.PlayerChooseWhereToMove;
+    }
+
+    public boolean isGamePlaying(){
+        return !this.isGameSettingUp();
+    }
+
+    public ArrayList<PlayerAction> getPossiblePlayerActions(Player player){
+        ArrayList<PlayerAction> possibleActions = new ArrayList<>();
+        if(player == null || this.isGameSettingUp()){
+            return possibleActions;
+        }
+
+        possibleActions.add(PlayerAction.Move);
+        possibleActions.add(PlayerAction.Drain);
+        switch(player.getPlayer_role()){
+            case Pilot:
+                possibleActions.add(PlayerAction.FlyToACard);
+                break;
+            case Navigator:
+                possibleActions.add(PlayerAction.MovePlayer);
+                break;
+
+            default: break;
+        }
+        boolean player_on_same_card = false;
+        for(Player p : getPlayers()){
+            if(p == player || p == null){
+                continue;
+            }
+            if(p.getPlayer_zone() == player.getPlayer_zone()){
+                player_on_same_card = true;
+            }
+        }
+        if(player_on_same_card || player.getPlayer_role() == PlayerRole.Messenger){
+            possibleActions.add(PlayerAction.GiveTreasureCard);
+        }
+        return possibleActions;
+    }
+
+    private ArrayList<Zone> getAdjacentZones(Zone zone, boolean accept_diagonals, Predicate<Zone> filter){
+        ArrayList<Zone> adjacentZones = new ArrayList<>();
+        for(int i : new int[]{-1, 0, 1}){
+            for(int j : new int[]{-1, 0, 1}) {
+                if(i == 0 && j == 0){continue;}
+                if(i != 0 && j != 0 && !accept_diagonals){continue;}
+                int new_x = zone.getX() + i;
+                int new_y = zone.getY() + j;
+                if(new_x < 0 || new_y < 0 || new_x >= this.board.length || new_y >= this.board[0].length){continue;}
+                Zone zone_to_add = this.getZone(new_x, new_y);
+                if(filter == null || filter.test(zone_to_add)){
+                    adjacentZones.add(zone_to_add);
+                }
+            }
+        }
+        return adjacentZones;
+    }
+
+    private ArrayList<Zone> getZonesForDiver(Zone zone){
+        HashSet<Zone> res_zones = new HashSet<>(this.getAdjacentZones(zone, false, Zone::isDry));
+        LinkedList<Zone> floodedQueue = new LinkedList<>(this.getAdjacentZones(zone, true, z -> !z.isDry()));
+        HashSet<Zone> exploredFlooded = new HashSet<>();
+
+        while(!floodedQueue.isEmpty()){
+            Zone floodedZone = floodedQueue.poll();
+            exploredFlooded.add(floodedZone);
+            ArrayList<Zone> dryZones = this.getAdjacentZones(floodedZone, true, z -> {
+                if(res_zones.contains(z)){ return false;}
+                return z.isDry();
+            });
+            res_zones.addAll(dryZones);
+
+            ArrayList<Zone> floodedZones = this.getAdjacentZones(floodedZone, true, z -> {
+                if(exploredFlooded.contains(z)){ return false;}
+                return !z.isDry();
+            });
+            floodedQueue.addAll(floodedZones);
+        }
+
+        return new ArrayList<>(res_zones);
+    }
+
+    public ArrayList<Zone> getZonesForPlayerToMove(Player player) {
+        if(player.getPlayer_role() == PlayerRole.Diver){
+            return this.getZonesForDiver(player.getPlayer_zone());
+        }
+        if(player.getPlayer_role() == PlayerRole.Explorer){
+            return this.getAdjacentZones(player.getPlayer_zone(), true, null);
+        }
+        return this.getAdjacentZones(player.getPlayer_zone(), false, null);
+    }
+
+    public void setGame_state(GameState game_state){
+        this.game_state = game_state;
+    }
+
+    public void movePlayerToZone(Player player, Zone zone){
+        player.getPlayer_zone().removePlayerFromZone(player);
+        player.move_Player(zone);
+        zone.addPlayerToZone(player);
     }
 }

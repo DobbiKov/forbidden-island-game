@@ -12,6 +12,9 @@ import Model.ZoneState;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashSet;
 import javax.swing.*;
 
 public class GUI {
@@ -44,12 +47,18 @@ public class GUI {
         // TODO
     }
 
-    private static void updateZonePanels() {
+    public static void updateZonePanels() {
         zones = gameController.getZones(); // get the new state
+        HashSet<Zone> zoneSet = new HashSet<>();
+        if(gameController.isPlayerChoosingZoneToMove()){
+            zoneSet = new HashSet<>(gameController.getZonesForPlayerToMove(gameController.getPlayerForTheTurn()));
+        }
         for (int i = 0; i < zones.length; i++) {
             for (int j = 0; j < zones[i].length; j++) {
                 ZoneState state = zones[i][j].getZone_state();
                 JPanel panel = zonePanels[i][j];
+                if(panel.getMouseListeners().length > 0)
+                    panel.removeMouseListener(panel.getMouseListeners()[0]);
                 panel.removeAll();
 
                 switch (state) {
@@ -74,34 +83,36 @@ public class GUI {
                         panel.add(circle);
                     }
                 }
+                if(zoneSet.contains(zones[i][j])){
+                    panel.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 5));
+                    int finalI = i;
+                    int finalJ = j;
+                    panel.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            gameController.movePlayerToTheZone(gameController.getPlayerForTheTurn(), zones[finalI][finalJ]);
+                            updatePlayerPanels();
+                            updateZonePanels();
+                            window.repaint();
+                        }
+                    });
+                }
+                panel.validate();
             }
         }
-        window.validate();
     }
     public static void updatePlayerPanels(){
         for(PlayerPanel panel : panelPlayers){
             if(panel.getPlayer() == null){
                 continue;
             }
-            System.out.println(panel.toString());
-            System.out.println(panel.getPlayer().toString());
             if(gameController.getPlayerForTheTurn() == null) break;
             if(gameController.getPlayerForTheTurn().getPlayer_id() == panel.getPlayer().getPlayer_id()
             ){
 
-                System.out.println("Setting actions for:" + panel.getPlayer().getPlayer_role() + " " + panel.getPlayer().getPlayer_color().toString());
-//                System.out.println(
-//                        gameController.getPossibleActionsForPlayer(panel.getPlayer())
-//                );
-                System.out.println(gameController.getPlayerForTheTurn().getPlayer_role().toString() + "etot huy");
-                System.out.println("hut");
                 panel.setActions(
-                        gameController.getPossibleActionsForPlayer(panel.getPlayer())
+                    gameController.getPossibleActionsForPlayer(panel.getPlayer())
                 );
-                System.out.println("hut set");
-                for(PlayerAction action : gameController.getPossibleActionsForPlayer(panel.getPlayer())){
-                    System.out.println(action.toString());
-                }
             }
         }
 
@@ -202,7 +213,7 @@ public class GUI {
                     public void callAddPlayer(String name){
                         try {
                             Player new_player = gameController.addPlayerToTheGame(name);
-                            panelPlayers[player_panel_size++] = new PlayerPanel(new_player);
+                            panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
                             updatePlayerPanels();
                             updateZonePanels();
                         }

@@ -41,6 +41,7 @@ public class Player {
         if(this.actions_remaining > 0){
             this.actions_remaining--;
         }
+        this.player_zone = player_zone;
     }
 
     public void reset_actions(){
