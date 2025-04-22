@@ -39,10 +39,8 @@ public class GUI {
 
     private static JButton start_game;
 
-    private static JPanel getZone(){
-        // Creating instance of JButton
-        JPanel button = new JPanel(
-        );
+    private static JPanel getZone(Zone z){
+        JPanel button = new FilteredImagePanel(z);
         button.setSize(zone_size, zone_size);
 
         return button;
@@ -83,12 +81,10 @@ public class GUI {
 
                 switch (state) {
                     case Normal:
-                        panel.setBackground(Color.GREEN);
-                        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        ((FilteredImagePanel)panel).setBlueFilterVisible(false);
                         break;
                     case Flooded:
-                        panel.setBackground(new Color(173, 216, 230));
-                        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        ((FilteredImagePanel)panel).setBlueFilterVisible(true);
                         break;
                     case Inaccessible:
                         panel.setBackground(Color.WHITE);
@@ -242,7 +238,7 @@ public class GUI {
 
         for(int i = 0; i < zones.length; i++){
             for(int j = 0; j < zones[i].length; j++){
-                zonePanels[i][j] = getZone();
+                zonePanels[i][j] = getZone(zones[i][j]);
 
                 // adding button in JFrame
                 boardPanel.add(zonePanels[i][j]);

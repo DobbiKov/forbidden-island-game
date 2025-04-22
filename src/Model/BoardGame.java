@@ -26,7 +26,10 @@ public class BoardGame {
         this.board = new Zone[size][size];
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
-                this.board[i][j] = new Zone(i, j);
+                if(i == 2 && j == 2){
+                }
+                boolean is_accessible = !(i == 2 && j == 2);
+                this.board[i][j] = new Zone(i, j, is_accessible);
             }
         }
         this.board[2][2].makeInaccessible();
@@ -117,19 +120,19 @@ public class BoardGame {
         int last = size-1;
         switch (player_count){
             case 0:{
-                this.board[0][mid] = new PlayerStartZone(this.board[0][mid].getX(), this.board[0][mid].getY(), player);
+                this.board[0][mid] = new PlayerStartZone(this.board[0][mid], player);
                 return this.board[0][mid];
             }
             case 1: {
-                this.board[mid][last] = new PlayerStartZone(this.board[mid][last].getX(), this.board[mid][last].getY(), player);
+                this.board[mid][last] = new PlayerStartZone(this.board[mid][last], player);
                 return this.board[mid][last];
             }
             case 2: {
-                this.board[last][mid] = new PlayerStartZone(this.board[last][mid].getX(), this.board[last][mid].getY(), player);
+                this.board[last][mid] = new PlayerStartZone(this.board[last][mid], player);
                 return this.board[last][mid];
             }
             case 3: {
-                this.board[mid][0] = new PlayerStartZone(this.board[mid][0].getX(), this.board[mid][0].getY(), player);
+                this.board[mid][0] = new PlayerStartZone(this.board[mid][0], player);
                 return this.board[mid][0];
             }
             default: return null;

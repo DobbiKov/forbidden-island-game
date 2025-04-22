@@ -4,7 +4,7 @@ package Model;
 
 public class ArtefactZone extends Zone {
     public ArtefactZone(int x, int y, Artefact artefact) {
-        super(x, y);
+        super(x, y, true);
 
         this.associated_artefact = artefact;
         this.zone_state = ZoneState.Normal;
