@@ -63,6 +63,9 @@ public class Zone {
     public boolean isDry() {
         return this.zone_state == ZoneState.Normal;
     }
+    public boolean isFlooded(){
+        return this.zone_state == ZoneState.Flooded;
+    }
     public void shoreUp(){
         if(this.zone_state == ZoneState.Inaccessible){
             throw new ZoneIsInaccessibleException();

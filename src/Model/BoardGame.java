@@ -360,7 +360,13 @@ public class BoardGame {
     }
 
     private ArrayList<Zone> getZonesToForPlayerShoreUp(Player player) {
-        return this.getAdjacentZones(player.getPlayer_zone(), true, z -> z.getZone_state() == ZoneState.Flooded);
+        ArrayList<Zone> res = this.getAdjacentZones(player.getPlayer_zone(), true, Zone::isFlooded);
+
+        Zone curr = player.getPlayer_zone(); // adding current if it's also flooded
+        if(curr.isFlooded()){
+            res.add(curr);
+        }
+        return res;
     }
 
     public boolean isPlayerChoosingZoneToShoreUp() {
@@ -385,6 +391,7 @@ public class BoardGame {
         }
 
         zone.shoreUp();
+        this.setGame_state(GameState.Playing);
         this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
     }
 }
