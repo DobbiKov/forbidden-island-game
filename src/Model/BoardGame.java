@@ -19,16 +19,17 @@ public class BoardGame {
     private int player_turn_id; // idx in the array of players or -1
     private int current_player_actions_num;
 
-    public BoardGame(int size) {
+    public BoardGame() {
         // zone init
         this.game_state = GameState.SettingUp;
-        this.size = size;
+        this.size = 5;
         this.board = new Zone[size][size];
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
                 this.board[i][j] = new Zone(i, j);
             }
         }
+        this.board[2][2].makeInaccessible();
 
         //roles
         used_roles = new HashSet<>();

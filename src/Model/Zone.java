@@ -15,7 +15,6 @@ public class Zone {
     protected int X;
     protected int Y;
 
-    // TODO: players on the zone
     public Zone(int x, int y){
         this.zone_state = ZoneState.Normal;
         this.zone_name = "";
@@ -101,5 +100,8 @@ public class Zone {
             throw new RuntimeException("Player is not on the zone");
         }
         this.players_on_zone.remove(player);
+    }
+    public void makeInaccessible(){
+        this.zone_state = ZoneState.Inaccessible;
     }
 }

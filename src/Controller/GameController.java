@@ -13,7 +13,7 @@ import java.util.Random;
 public class GameController {
     private BoardGame boardGame;
     public GameController() {
-        this.boardGame = new BoardGame(8);
+        this.boardGame = new BoardGame();
     }
     public Zone[][] getZones() {
         return this.boardGame.getBoard();

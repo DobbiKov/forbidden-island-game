@@ -53,7 +53,7 @@ public class Deck {
         if (drawCards.isEmpty()) {
             reshuffleDiscardIntoDraw();
         }
-        return drawCards.removeLast();
+        return drawCards.remove(drawCards.size() - 1);
     }
 
     private void reshuffleDiscardIntoDraw() {
