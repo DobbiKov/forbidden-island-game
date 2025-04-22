@@ -66,6 +66,8 @@ public class GameController {
        return this.boardGame.getZonesPossibleForChoosing();
     }
 
+    //------------
+    //set player choose
     public void setPlayerChooseZoneToMoveTo(){
         this.boardGame.setPlayerChooseZoneToMoveTo();
         GUI.updatePlayerPanels();
@@ -76,12 +78,31 @@ public class GameController {
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
+    public void setPilotChooseWhereToFlyTo(){
+        this.boardGame.setPilotChooseWhereToFlyTo();
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
+    }
+
+    //end set player choose
+    //------------
+
+    //------------
+    //is player choosing
+    public boolean isPlayerChoosingSomething(){
+        return this.boardGame.isPlayerChoosingSomething();
+    }
     public boolean isPlayerChoosingZoneToMove(){
         return this.boardGame.isPlayerChoosingToMove();
     }
     public boolean isPlayerChoosingZoneToShoreUp(){
         return this.boardGame.isPlayerChoosingZoneToShoreUp();
     }
+    public boolean isPlayerChoosingZoneToFlyTo(){
+        return this.boardGame.isPilotChoosingZoneToFly();
+    }
+    //end is player choosing
+    //------------
 
     public void movePlayerToTheZone(Zone zone){
         try {
@@ -90,6 +111,15 @@ public class GameController {
             GUI.updatePlayerPanels();
         }catch (NoActionsLeft ex){
             GUI.showErrorMess("No actions left", "You used all your actions!");
+        }
+    }
+    public void flyPilotToTheZone(Zone zone){
+        try{
+            this.boardGame.flyPilotToZone(zone);
+        }catch (NoActionsLeft ex){
+            GUI.showErrorMess("No actions left", "You used all your actions!");
+        }catch (InvalidActionForRole ex){
+            GUI.showErrorMess("Invalid action", "Only a pilot can fly");
         }
     }
 

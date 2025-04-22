@@ -74,6 +74,11 @@ public class PlayerPanel extends JPanel {
                     this.gameController.setPlayerChooseZoneToShoreUp();
                 });
                 break;
+            case FlyToACard:
+                button.addActionListener(e -> {
+                    this.gameController.setPilotChooseWhereToFlyTo();
+                });
+                break;
             default: break;
         }
         return button;

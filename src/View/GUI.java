@@ -68,7 +68,7 @@ public class GUI {
     public static void updateZonePanels() {
         zones = gameController.getZones(); // get the new state
         HashSet<Zone> zoneSet = new HashSet<>();
-        if(gameController.isPlayerChoosingZoneToMove() || gameController.isPlayerChoosingZoneToShoreUp()){
+        if(gameController.isPlayerChoosingSomething()){
             zoneSet = new HashSet<>(gameController.getZonesPossibleForChoosing());
         }
         for (int i = 0; i < zones.length; i++) {
@@ -82,9 +82,11 @@ public class GUI {
                 switch (state) {
                     case Normal:
                         ((FilteredImagePanel)panel).setBlueFilterVisible(false);
+                        panel.setBorder(null);
                         break;
                     case Flooded:
                         ((FilteredImagePanel)panel).setBlueFilterVisible(true);
+                        panel.setBorder(null);
                         break;
                     case Inaccessible:
                         panel.setBackground(Color.WHITE);
@@ -111,6 +113,8 @@ public class GUI {
                             }
                             else if(gameController.isPlayerChoosingZoneToMove()) {
                                 gameController.movePlayerToTheZone(zones[finalI][finalJ]);
+                            }else if(gameController.isPlayerChoosingZoneToFlyTo()){
+                                gameController.flyPilotToTheZone(zones[finalI][finalJ]);
                             }
                             updatePlayerPanels();
                             updateZonePanels();

@@ -18,6 +18,7 @@ public class BoardGame {
     private GameState game_state;
     private int player_turn_id; // idx in the array of players or -1
     private int current_player_actions_num;
+    private int shore_ups_left = 0; // for engineer to count 2 shore ups per action
 
     public BoardGame() {
         // zone init
@@ -144,6 +145,7 @@ public class BoardGame {
             throw new MaximumNumberOfPlayersReachedException();
         }
         PlayerRole role_to_assign = this.getAvailibleRole();
+//        PlayerRole role_to_assign = PlayerRole.Pilot;
         if (role_to_assign == null) {
             throw new NoRoleToAssignError();
         }
@@ -304,12 +306,39 @@ public class BoardGame {
         this.useOneAction();
     }
 
+    /// THe player clicked move and chose the zone
+    public void flyPilotToZone(Zone zone){
+        Player player = this.getPlayerForTheTurn();
+        if(!this.isEnoughActions()){
+            throw new NoActionsLeft();
+        }
+
+        if(!this.isPilotChoosingZoneToFly()){
+            throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to move");
+        }
+        if(player.getPlayer_role() != PlayerRole.Pilot){
+            throw new InvalidActionForRole("This player is not a pilot");
+        }
+        if(!this.getZonesForPlayerToFlyTo(player).contains(zone)){
+            throw new InvalidZoneToMove("The zone you choose is not in the zone");
+        }
+
+        player.getPlayer_zone().removePlayerFromZone(player);
+        player.move_Player(zone);
+        zone.addPlayerToZone(player);
+        this.setGame_state(GameState.Playing);
+        this.useOneAction();
+    }
+
     private void useOneAction() {
         this.current_player_actions_num--;
     }
 
-    private boolean isPlayerChoosingZoneToMove() {
+    public boolean isPlayerChoosingZoneToMove() {
         return this.game_state == GameState.PlayerChooseWhereToMove;
+    }
+    public boolean isPilotChoosingZoneToFly() {
+        return this.game_state == GameState.PilotChooseWhereToFly;
     }
 
     public void setPlayerChooseZoneToMoveTo(){
@@ -359,6 +388,8 @@ public class BoardGame {
             return this.getZonesForPlayerToMove(this.getPlayerForTheTurn());
         }else if(this.isPlayerChoosingZoneToShoreUp()){
            return this.getZonesToForPlayerShoreUp(this.getPlayerForTheTurn());
+        }else if(this.isPilotChoosingZoneToFly()){
+            return this.getZonesForPlayerToFlyTo(this.getPlayerForTheTurn());
         }
         return new ArrayList<>();
     }
@@ -369,6 +400,18 @@ public class BoardGame {
         Zone curr = player.getPlayer_zone(); // adding current if it's also flooded
         if(curr.isFlooded()){
             res.add(curr);
+        }
+        return res;
+    }
+    private ArrayList<Zone> getZonesForPlayerToFlyTo(Player player) {
+        ArrayList<Zone> res = new ArrayList<>();
+        for(int i = 0; i < this.board.length; i++){
+            for(int j = 0; j < this.board[i].length; j++){
+                Zone curr = this.board[i][j];
+                if(curr.isDry() && curr != player.getPlayer_zone()){
+                    res.add(curr);
+                }
+            }
         }
         return res;
     }
@@ -396,6 +439,28 @@ public class BoardGame {
 
         zone.shoreUp();
         this.setGame_state(GameState.Playing);
-        this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
+        if(player.getPlayer_role() == PlayerRole.Engineer){
+            if(shore_ups_left == 0)
+            {
+                this.useOneAction();
+                shore_ups_left = 1;
+            }else{
+                shore_ups_left=0;
+            }
+        }
+        else {
+            this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
+        }
+    }
+
+    public void setPilotChooseWhereToFlyTo() {
+        this.setGame_state(GameState.PilotChooseWhereToFly);
+    }
+
+    public boolean isPlayerChoosingSomething() {
+        return
+                   this.isPlayerChoosingZoneToShoreUp()
+                || this.isPlayerChoosingZoneToMove()
+                || this.isPilotChoosingZoneToFly();
     }
 }
