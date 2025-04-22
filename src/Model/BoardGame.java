@@ -256,6 +256,30 @@ public class BoardGame {
         this.setGame_state(GameState.Playing);
         this.useOneAction();
     }
+    /// THe player clicked move and chose the zone
+    public void flyPilotToZone(Zone zone){
+        Player player = this.getPlayerForTheTurn();
+        if(!this.isEnoughActions()){
+            throw new NoActionsLeft();
+        }
+
+        if(!this.isPilotChoosingZoneToFly()){
+            throw new InvalidMoveForCurrentGameState("The player is not currently choosing a zone to move");
+        }
+        if(player.getPlayer_role() != PlayerRole.Pilot){
+            throw new InvalidActionForRole("This player is not a pilot");
+        }
+        if(!this.getZonesForPlayerToFlyTo(player).contains(zone)){
+            throw new InvalidZoneToMove("The zone you choose is not in the zone");
+        }
+
+        player.getPlayer_zone().removePlayerFromZone(player);
+        player.move_Player(zone);
+        zone.addPlayerToZone(player);
+        this.setGame_state(GameState.Playing);
+        this.useOneAction();
+    }
+
 
     private void useOneAction() {
         this.current_player_actions_num--;
