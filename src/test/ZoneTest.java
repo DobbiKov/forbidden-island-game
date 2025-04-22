@@ -11,7 +11,7 @@ class ZoneTest {
 
     @BeforeEach
     void setUp() {
-        z = new Zone(2, 3);
+        z = new Zone(2, 3, true);
     }
 
     @Test

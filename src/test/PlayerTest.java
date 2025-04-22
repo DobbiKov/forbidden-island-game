@@ -21,7 +21,7 @@ class PlayerTest {
 
     @Test
     void testMoveConsumesAction() {
-        Zone z1 = new Zone(0,0), z2 = new Zone(0,1);
+        Zone z1 = new Zone(0,0, true), z2 = new Zone(0,1, true);
         p.setPlayerToZone(z1);
         p.move_Player(z2);
         assertEquals(2, p.getActions_remaining());
