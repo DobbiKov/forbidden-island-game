@@ -19,7 +19,11 @@ public class GameController {
 
     public void finDeTour(){
             GUI.removeActionsForPlayerPanel();
+        try {
             this.boardGame.finDeTour();
+        } catch (TooManyCardsInTheHand ex) {
+            GUI.showErrorMess("Too Many Cards", ex.getMessage());
+        }
             GUI.updatePlayerPanels();
             GUI.updateZonePanels();
     }

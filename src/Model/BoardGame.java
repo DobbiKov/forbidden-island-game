@@ -23,6 +23,7 @@ public class BoardGame {
     private Player chosen_player_by_navigator = null;
     private ZoneFactory zone_factory;
     private PlayerFactory player_factory;
+    private boolean treasureDrawnThisTurn = false;
 
     public BoardGame() {
         // zone init
@@ -299,8 +300,22 @@ public class BoardGame {
         return this.current_player_actions_num;
     }
 
-    public void finDeTour()
-    {
+    public void finDeTour() {
+        Player p = this.getPlayerForTheTurn();
+        if(!this.treasureDrawnThisTurn){
+            p.takeCard(treasureDeck.draw());
+            p.takeCard(treasureDeck.draw());
+            this.treasureDrawnThisTurn = true;
+            if(p.getHand().isOverflow()){
+                this.game_state = GameState.Discarding;
+                throw new TooManyCardsInTheHand();
+            }
+        }else{
+            if (p.getHand().isOverflow()) {
+                this.game_state = GameState.Discarding;
+                throw new TooManyCardsInTheHand();
+            }
+        }
         for (int i = 0; i < 3; i++) {
             ZoneCard card;
             try {
@@ -314,10 +329,14 @@ public class BoardGame {
             }
             floodDeck.discard(card);
         }
-        playerFinishTurn();
+        //playerFinishTurn();
+        this.treasureDrawnThisTurn = false;
+        this.nextPlayerTurn();
+        this.setDefaultActionsNum();
+        this.setGame_state(GameState.Playing);
     }
 
-    private void playerFinishTurn() {
+    /*private void playerFinishTurn() {
         Player p = this.getPlayerForTheTurn();
         p.takeCard(treasureDeck.draw());
         p.takeCard(treasureDeck.draw());
@@ -328,7 +347,7 @@ public class BoardGame {
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
         this.setGame_state(GameState.Playing);
-    }
+    }*/
     private void setDefaultActionsNum(){
         this.current_player_actions_num = 3;
     }
