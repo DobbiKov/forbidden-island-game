@@ -147,8 +147,7 @@ public class BoardGame {
         if(player_count > 3){
             throw new MaximumNumberOfPlayersReachedException();
         }
-//        PlayerRole role_to_assign = this.getAvailibleRole();
-        PlayerRole role_to_assign = PlayerRole.Navigator;
+        PlayerRole role_to_assign = this.getAvailibleRole();
         if (role_to_assign == null) {
             throw new NoRoleToAssignError();
         }

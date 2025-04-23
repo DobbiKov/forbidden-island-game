@@ -31,6 +31,7 @@ public class ErrorPopup extends JPanel{
         });
 
         mainTextArea = new JTextArea(mainText);
+        mainTextArea.setEditable(false);
 
         this.add(titleTextLabel);
         this.add(mainTextArea);
