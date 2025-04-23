@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class PlayerPanel extends JPanel {
     private Player player;
     private JPanel playerNamePanel;
+    private JPanel playerProfilePanel;
     private JTextArea playerName;
     private JTextArea playerRole;
     private JTextArea playerActionsNumText;
@@ -29,28 +30,48 @@ public class PlayerPanel extends JPanel {
         this.player = player;
         this.gameController = gController;
 
+        this.playerProfilePanel = new JPanel();
+        playerProfilePanel.setLayout(new GridLayout(1, 2));
+
+        //------
+        ImageIcon originalIcon = new ImageIcon("roles_images/" + player.getPlayer_role().toImgString() + ".png");
+        Image originalImage = originalIcon.getImage();
+
+        Image resizedImage = originalImage.getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+        ImageIcon resizedIcon = new ImageIcon(resizedImage);
+        JLabel player_img = new JLabel(resizedIcon);
+        //------
+
         Color playerColor = player.getPlayerColor().getColor();
         playerNamePanel = new JPanel();
-        playerName = new JTextArea("Player: " + player.getPlayer_name() + " " + " role: ");
-        playerNamePanel.add(playerName);
+        playerName = new JTextArea(player.getPlayer_name());
         playerName.setEditable(false);
+
 
         playerActionsNumText = new JTextArea("");
         playerActionsNumText.setEditable(false);
-        playerNamePanel.add(playerActionsNumText);
+
 
         playerRole = new JTextArea(player.getPlayer_role().toString());
         playerRole.setEditable(false);
-        playerNamePanel.add(playerRole);
 
-        playerNamePanel.setLayout(new GridLayout(2, 1));
+        playerNamePanel.add(playerName);
+        playerNamePanel.add(playerRole);
+        playerNamePanel.add(playerActionsNumText);
+
+        playerNamePanel.setLayout(new GridLayout(3, 1));
         playerName.setBackground(playerColor);
 
-        this.add(playerNamePanel);
+        playerProfilePanel.add(player_img);
+        playerProfilePanel.add(playerNamePanel);
+
+
 
 
         actionButtonsPanel = new JPanel();
         actionButtonsPanel.setLayout(new GridLayout(3, 3));
+
+        this.add(playerProfilePanel);
         this.add(actionButtonsPanel);
         this.setLayout(new GridLayout(2, 1));
     }

@@ -21,6 +21,18 @@ public enum PlayerRole {
         return "";
     }
 
+    public String toImgString(){
+        switch (this) {
+            case Pilot: return "pilot";
+            case Engineer: return "engineer";
+            case Diver: return "diver";
+            case Messenger: return "messenger";
+            case Navigator: return "navigator";
+            case Explorer: return "explorer";
+        }
+        return "";
+    }
+
     public static PlayerRole getByNum(int num){
         switch (num){
             case 0: return Pilot;
