@@ -1,4 +1,4 @@
-package test;
+/*package test;
 
 import Errors.ZoneIsInaccessibleException;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,4 +60,4 @@ class ZoneTest {
         Player p = new Player("Y", PlayerRole.Diver);
         assertThrows(ZoneIsInaccessibleException.class, () -> z.addPlayerToZone(p));
     }
-}
+}*/

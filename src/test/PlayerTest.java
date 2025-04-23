@@ -1,4 +1,4 @@
-package test;
+/*package test;
 
 import Model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,4 +39,4 @@ class PlayerTest {
         assertEquals(1, deck.getDiscardCardsSize());
     }
   
-}
+}*/

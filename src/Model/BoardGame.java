@@ -18,13 +18,15 @@ public class BoardGame {
     private GameState game_state;
     private int player_turn_id; // idx in the array of players or -1
     private int current_player_actions_num;
-    private final Deck deck;
+    private final TreasureDeck treasureDeck;
+    private final FloodDeck floodDeck;
     private int shore_ups_left = 0; // for engineer to count 2 shore ups per action
     private Player chosen_player_by_navigator = null;
 
     public BoardGame() {
         // zone init
-        this.deck = new Deck();
+        this.treasureDeck = new TreasureDeck();
+        this.floodDeck = new FloodDeck();
         this.game_state = GameState.SettingUp;
         this.size = 5;
         this.board = new Zone[size][size];
@@ -66,6 +68,11 @@ public class BoardGame {
             throw new InvalidNumberOfPlayersException(message);
         }
         this.game_state = GameState.Playing;
+        for(int i = 0; i< player_count; i++){
+            Player p = players[i];
+            p.takeCard(treasureDeck.draw());
+            p.takeCard(treasureDeck.draw());
+        }
         this.moveTurnToNextPlayer();
     }
     public Zone[][] getBoard() {
@@ -328,6 +335,8 @@ public class BoardGame {
 
     private void playerFinishTurn() {
         Player p = this.getPlayerForTheTurn();
+        p.takeCard(treasureDeck.draw());
+        p.takeCard(treasureDeck.draw());
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
     }
@@ -542,5 +551,9 @@ public class BoardGame {
         player.getPlayer_zone().removePlayerFromZone(player);
         player.move_Player(zone);
         zone.addPlayerToZone(player);
+    }
+
+    public TreasureDeck getTreasureDeck() {
+        return this.treasureDeck;
     }
 }

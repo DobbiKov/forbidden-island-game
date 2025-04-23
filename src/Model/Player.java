@@ -69,9 +69,9 @@ public class Player {
         hand.add(card);
     }
 
-    public void discardCard(Card card, Deck deck){
+    public void discardCard(Card card, TreasureDeck treasureDeck){
         hand.remove(card);
-        deck.discard(card);
+        treasureDeck.discard(card);
     }
 
     public static void resetPlayerCount() { // for unit tests

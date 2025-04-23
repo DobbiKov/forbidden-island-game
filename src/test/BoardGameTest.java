@@ -89,14 +89,10 @@ class BoardGameTest {
 
     @Test
     void testInitialDealTwoCardsPerPlayer() {
-        // add two players
         game.addPlayer("Alice");
         game.addPlayer("Bob");
 
-        // start the game (this is where you deal the cards)
         game.startGame();
-
-        // verify each non-null player has exactly 2 cards
         for (Player p : game.getPlayers()) {
             if (p == null) continue;
             assertEquals(
@@ -105,6 +101,30 @@ class BoardGameTest {
                     "Player " + p.getPlayer_name() + " should have 2 cards at game start"
             );
         }
+    }
+
+    @Test
+    void testDrawTwoCardsAtEndOfTurn() {
+        game.addPlayer("Yehor");
+        game.addPlayer("Zalupa");
+        game.startGame();
+
+        Player first = game.getPlayerForTheTurn();
+        assertEquals(2, first.getHand().getSize(),
+                "Should have been dealt 2 cards at game start");
+
+        game.finDeTour();
+
+        assertEquals(4, first.getHand().getSize(),
+                "After ending turn, player should draw two more cards");
+
+        Player second = game.getPlayerForTheTurn();
+        assertEquals(2, second.getHand().getSize(),
+                "Second player starts with only the 2 initial cards until their turn ends");
+        game.finDeTour();
+        assertEquals(4, second.getHand().getSize());
+        game.finDeTour();
+        assertEquals(6, first.getHand().getSize());
     }
 
 
