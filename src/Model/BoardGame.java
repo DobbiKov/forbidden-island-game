@@ -6,7 +6,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -26,6 +26,7 @@ public class BoardGame {
     private PlayerFactory player_factory;
     private boolean treasureDrawnThisTurn = false;
     private Player player_choosing_card_to_use = null;
+    private final EnumSet<Artefact> claimedArtefacts = EnumSet.noneOf(Artefact.class);
 
     public BoardGame() {
         // zone init
@@ -227,6 +228,14 @@ public class BoardGame {
         if (game_state == GameState.Discarding && player == getPlayerForTheTurn()) {
             possibleActions.add(PlayerAction.DiscardCard);
         }
+        if(player.getPlayer_zone() instanceof ArtefactZone){
+            ArtefactZone artefact_zone = (ArtefactZone) player.getPlayer_zone();
+            Artefact artefact = artefact_zone.getArtefact();
+            CardType needed = cardTypeFor(artefact);
+            if (!claimedArtefacts.contains(artefact) && hasAtLeast(needed)) {
+                possibleActions.add(PlayerAction.TakeArtefact);
+            }
+        }
         return possibleActions;
     }
 
@@ -333,25 +342,12 @@ public class BoardGame {
             }
             floodDeck.discard(card);
         }
-        //playerFinishTurn();
         this.treasureDrawnThisTurn = false;
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
         this.setGame_state(GameState.Playing);
     }
 
-    /*private void playerFinishTurn() {
-        Player p = this.getPlayerForTheTurn();
-        p.takeCard(treasureDeck.draw());
-        p.takeCard(treasureDeck.draw());
-        if(p.getHand().isOverflow()){
-            this.game_state = GameState.Discarding;
-            return;
-        }
-        this.nextPlayerTurn();
-        this.setDefaultActionsNum();
-        this.setGame_state(GameState.Playing);
-    }*/
     private void setDefaultActionsNum(){
         this.current_player_actions_num = 3;
     }
@@ -683,4 +679,58 @@ public class BoardGame {
         zone.shoreUp();
     }
 
+
+    public EnumSet<Artefact> getClaimedArtefacts() {
+        return EnumSet.copyOf(claimedArtefacts);
+    }
+
+    public void takeArtefact() {
+        Player p = getPlayerForTheTurn();
+        Zone current_zone = p.getPlayer_zone();
+        if(!(current_zone instanceof ArtefactZone)){
+            throw new InvalidStateOfTheGameException("You must stand on the zone with artefact");
+        }
+        ArtefactZone artefactZone = (ArtefactZone) current_zone;
+        Artefact artefact = artefactZone.getArtefact();
+        if(claimedArtefacts.contains(artefact)){
+            throw new InvalidStateOfTheGameException("You must stand on the matching artefact zone");
+        }
+        CardType needed = cardTypeFor(artefact);
+        if (!hasAtLeast(needed)) {
+            throw new IllegalStateException("Not enough " + needed + " cards");
+        }
+        int discards = 0;
+        List<Card> handCards = new ArrayList<>(p.getHand().getCards());
+        for (Card c : handCards) {
+            if (c.getType() == needed && discards < 4) {
+                p.discardCard(c, treasureDeck);
+                discards++;
+            }
+        }
+        claimedArtefacts.add(artefact);
+        p.addArtefact(artefact);
+
+    }
+
+    private boolean hasAtLeast(CardType cardType) {
+        Player p = getPlayerForTheTurn();
+        int cpt = 0;
+        for(Card card : p.getHand().getCards()) {
+            if(card.getType() == cardType) {
+                cpt++;
+                if(cpt >= 4){return true;}
+            }
+        }
+        return false;
+    }
+
+    private CardType cardTypeFor(Artefact art) {
+        switch (art) {
+            case Fire:  return CardType.FIRE_CARD;
+            case Water: return CardType.WATER_CARD;
+            case Wind:  return CardType.AIR_CARD;
+            case Earth: return CardType.EARTH_CARD;
+            default:    throw new IllegalArgumentException();
+        }
+    }
 }
