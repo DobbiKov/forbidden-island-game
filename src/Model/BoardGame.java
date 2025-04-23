@@ -95,6 +95,17 @@ public class BoardGame {
     public Zone getZone(int x, int y){
         return this.board[x][y];
     }
+    public Zone getZoneByCard(ZoneCard zone_card){
+        for(int x = 0; x < size; x++){
+            for(int y = 0; y < size; y++){
+                Zone zone = this.board[x][y];
+                if(zone.getZoneCard() == zone_card){
+                    return zone;
+                }
+            }
+        }
+        throw new IllegalStateException("No zone found for flood card " + zone_card);
+    }
 
     public int getNumOfActiveZones(){
         int count = 0;
@@ -289,26 +300,20 @@ public class BoardGame {
 
     public void finDeTour()
     {
-        //inondation de trois zones
-        int zone_flooded = 0;
-        int must_be_flooded = 3;
-        if(this.getNumOfActiveZones() < must_be_flooded){
-            this.floodAllZones();
-        }
-        else {
-            while (zone_flooded < must_be_flooded) {
-                Random rand = new Random();
-                int x = rand.nextInt(this.getSize());
-                int y = rand.nextInt(this.getSize());
-                if (this.getZone(x, y).getZone_state() == ZoneState.Inaccessible) {
-                    continue;
-                }
-                this.floodZone(x, y);
-                zone_flooded++;
+        for (int i = 0; i < 3; i++) {
+            ZoneCard card;
+            try {
+                card = floodDeck.draw();
+            } catch (IllegalStateException e) {
+                break;
             }
+            Zone z = getZoneByCard(card);
+            if (z != null) {
+                z.floodZone();
+            }
+            floodDeck.discard(card);
         }
-
-        this.playerFinishTurn();
+        playerFinishTurn();
     }
 
     private void playerFinishTurn() {
@@ -533,5 +538,8 @@ public class BoardGame {
 
     public TreasureDeck getTreasureDeck() {
         return this.treasureDeck;
+    }
+    public FloodDeck getFloodDeck() {
+        return this.floodDeck;
     }
 }
