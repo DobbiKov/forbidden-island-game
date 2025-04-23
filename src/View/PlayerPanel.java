@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class PlayerPanel extends JPanel {
     private final GameController gc;
     private final Player player;
-    private final JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+    private final JPanel buttonBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2));
     private final JLabel actionBadge = new JLabel();
 
     public PlayerPanel() {
@@ -63,6 +63,7 @@ public class PlayerPanel extends JPanel {
         for (PlayerAction a : gc.getPossiblePlayerActionsForCurrentTurn(player)) {
             buttonBar.add(buildActionButton(a));
         }
+        buttonBar.setMaximumSize(new Dimension(50, Integer.MAX_VALUE));
         revalidate();
         repaint();
     }
