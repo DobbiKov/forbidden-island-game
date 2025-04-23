@@ -1,6 +1,8 @@
 package Model;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
     private static int player_count = 0;
@@ -11,6 +13,7 @@ public class Player {
     private PlayerRole player_role;
     private Hand hand;
     private PlayerColor player_color;
+    private List<Artefact> artefacts;
 
     public Player(String player_name, PlayerRole player_role) {
         this.player_id = player_count++;
@@ -20,6 +23,7 @@ public class Player {
         this.player_role = player_role;
         this.player_color = player_role.getColor();
         this.hand = new Hand();
+        this.artefacts = new ArrayList<>();
     }
     public PlayerColor getPlayerColor() {
         return this.player_color;
@@ -72,6 +76,16 @@ public class Player {
 
     public static void resetPlayerCount() { // for unit tests
         player_count = 0;
+    }
+
+    public List<Artefact> getArtefacts() {
+        return artefacts;
+    }
+    public void addArtefact(Artefact artefact){
+        if(artefacts.contains(artefact)){
+            throw new IllegalStateException("You already have that artefact, it is not possible");
+        }
+        artefacts.add(artefact);
     }
 
 
