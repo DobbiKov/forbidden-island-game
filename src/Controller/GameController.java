@@ -170,4 +170,10 @@ public class GameController {
             GUI.showErrorMess("No actions left", "You used all your actions!");
         }
     }
+
+    public void discardCardFromCurrentPlayer(Card c) {
+        boardGame.getPlayerForTheTurn().discardCard(c, boardGame.getTreasureDeck());
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
+    }
 }

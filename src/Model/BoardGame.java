@@ -221,6 +221,7 @@ public class BoardGame {
         if(player_on_same_card || player.getPlayer_role() == PlayerRole.Messenger){
             possibleActions.add(PlayerAction.GiveTreasureCard);
         }
+        possibleActions.add(PlayerAction.DiscardCard);
         return possibleActions;
     }
 

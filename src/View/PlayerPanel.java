@@ -3,6 +3,7 @@ package View;
 import Controller.GameController;
 import Model.BoardGame;
 import Model.Player;
+import Model.Card;
 import Model.PlayerAction;
 
 import javax.swing.*;
@@ -115,6 +116,7 @@ public class PlayerPanel extends JPanel {
             case Drain         : b.addActionListener(e -> gc.setPlayerChooseZoneToShoreUp()); break;
             case FlyToACard    : b.addActionListener(e -> gc.setPilotChooseWhereToFlyTo()); break;
             case MovePlayer    : b.addActionListener(e -> gc.setNavigatorChoosePlayerToMove()); break;
+            case DiscardCard   : b.addActionListener(e -> openDiscardDialog()); break;
         }
         return b;
     }
@@ -124,5 +126,25 @@ public class PlayerPanel extends JPanel {
     }
     public void removeActions(){
         this.actionBadge.removeAll();
+    }
+
+    private void openDiscardDialog() {
+        JDialog dlg = new JDialog(
+                SwingUtilities.getWindowAncestor(this),
+                "Choose a card to discard",
+                Dialog.ModalityType.APPLICATION_MODAL
+        );
+        dlg.setLayout(new FlowLayout());
+        for (Card c : player.getHand().getCards()) {
+            JButton btn = new JButton("Discard " + c.getType());
+            btn.addActionListener(e -> {
+                gc.discardCardFromCurrentPlayer(c);
+                dlg.dispose();
+            });
+            dlg.add(btn);
+        }
+        dlg.pack();
+        dlg.setLocationRelativeTo(this);
+        dlg.setVisible(true);
     }
 }
