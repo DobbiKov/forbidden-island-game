@@ -151,9 +151,7 @@ public class GUI {
             if(gameController.getPlayerForTheTurn().getPlayer_id() == panel.getPlayer().getPlayer_id()
             ){
 
-                panel.setActions(
-                    gameController.getPossibleActionsForPlayer(panel.getPlayer())
-                );
+                panel.update();
             }
         }
 

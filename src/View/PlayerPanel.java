@@ -6,143 +6,123 @@ import Model.Player;
 import Model.PlayerAction;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 public class PlayerPanel extends JPanel {
-    private Player player;
-    private JPanel playerNamePanel;
-    private JPanel playerProfilePanel;
-    private JTextArea playerName;
-    private JTextArea playerRole;
-    private JTextArea playerActionsNumText;
-    JPanel actionButtonsPanel;
-    private GameController gameController;
+    private final GameController gc;
+    private final Player player;
+    private final JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 2));
+    private final JLabel actionBadge = new JLabel();
 
-    PlayerPanel() {
-        super();
+    public PlayerPanel() {
+        this.gc = null;
         this.player = null;
     }
-    PlayerPanel(GameController gController, Player player) {
-        super();
-        this.player = player;
-        this.gameController = gController;
+    public PlayerPanel(GameController gc, Player p) {
+        this.gc = gc;
+        this.player = p;
 
-        this.playerProfilePanel = new JPanel();
-        playerProfilePanel.setLayout(new GridLayout(1, 2));
+        setLayout(new BorderLayout(0, 8));
+        setOpaque(false);                            // let header paint its own bg
 
-        //------
-        ImageIcon originalIcon = new ImageIcon("roles_images/" + player.getPlayer_role().toImgString() + ".png");
-        Image originalImage = originalIcon.getImage();
+        add(createHeader(), BorderLayout.NORTH);
+        add(buttonBar,        BorderLayout.CENTER);
 
-        Image resizedImage = originalImage.getScaledInstance(70, 70, Image.SCALE_SMOOTH);
-        ImageIcon resizedIcon = new ImageIcon(resizedImage);
-        JLabel player_img = new JLabel(resizedIcon);
-        //------
-
-        Color playerColor = player.getPlayerColor().getColor();
-        playerNamePanel = new JPanel();
-        playerName = new JTextArea(player.getPlayer_name());
-        playerName.setEditable(false);
-
-
-        playerActionsNumText = new JTextArea("");
-        playerActionsNumText.setEditable(false);
-
-
-        playerRole = new JTextArea(player.getPlayer_role().toString());
-        playerRole.setEditable(false);
-
-        playerNamePanel.add(playerName);
-        playerNamePanel.add(playerRole);
-        playerNamePanel.add(playerActionsNumText);
-
-        playerNamePanel.setLayout(new GridLayout(3, 1));
-        playerName.setBackground(playerColor);
-
-        playerProfilePanel.add(player_img);
-        playerProfilePanel.add(playerNamePanel);
-
-
-
-
-        actionButtonsPanel = new JPanel();
-        actionButtonsPanel.setLayout(new GridLayout(3, 3));
-
-        this.add(playerProfilePanel);
-        this.add(actionButtonsPanel);
-        this.setLayout(new GridLayout(2, 1));
+        update();                                    // initial fill
     }
 
-    public void setActions(ArrayList<PlayerAction> actions){
-        actionButtonsPanel.removeAll();
-        for(PlayerAction action : actions){
-            JButton button = this.getActionButton(action);
-           this.actionButtonsPanel.add(button);
+    /* ---------- public API ---------- */
+
+    public void makeChoosable(Runnable onClick) {
+        setBorder(new LineBorder(new Color(255,140,0), 3, true));
+        addMouseListener(new MouseAdapter() { public void mouseClicked(MouseEvent e){ onClick.run(); }});
+    }
+    public void makeUnchoosable() {
+        setBorder(null);
+        for(MouseListener l : getMouseListeners()) removeMouseListener(l);
+    }
+
+    public void update() {
+        // badge
+        if (gc.getPlayerForTheTurn() == player) {
+            actionBadge.setText(" " + gc.getCurrentPlayerActionsNumber() + " ");
+            actionBadge.setVisible(true);
+        } else {
+            actionBadge.setVisible(false);
         }
-    }
-    public JButton getActionButton(PlayerAction action){
-        JButton button = new JButton();
-        button.setText(action.toString());
-        switch(action){
-            case Move:
-                button.addActionListener(e -> {
-                    this.gameController.setPlayerChooseZoneToMoveTo();
-                });
-                break;
-            case Drain:
-                button.addActionListener(e -> {
-                    this.gameController.setPlayerChooseZoneToShoreUp();
-                });
-                break;
-            case FlyToACard:
-                button.addActionListener(e -> {
-                    this.gameController.setPilotChooseWhereToFlyTo();
-                });
-                break;
-            case MovePlayer:
-                button.addActionListener(e -> {
-                    this.gameController.setNavigatorChoosePlayerToMove();
-                });
-            default: break;
+
+        // action buttons
+        buttonBar.removeAll();
+        for (PlayerAction a : gc.getPossibleActionsForPlayer(player)) {
+            buttonBar.add(buildActionButton(a));
         }
-        return button;
+        revalidate();
+        repaint();
     }
 
-    public void removeActions(){
-        this.actionButtonsPanel.removeAll();
-    }
+    /* ---------- private helpers ---------- */
 
-    public void update(){
-//        playerName.setText("Player: " + player.getPlayer_name());
-
-        if(gameController.getPlayerForTheTurn() == this.player){
-            playerActionsNumText.setText("Actions left: " + gameController.getCurrentPlayerActionsNumber());
-        }else{
-            playerActionsNumText.setText("");
-        }
-        playerNamePanel.validate();
-        playerNamePanel.repaint();
-    }
-    public void makeChoosable(Runnable action){
-        this.removeActions();
-        this.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 10));
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                action.run();
+    private JComponent createHeader() {
+        JPanel header = new JPanel(new BorderLayout(6, 0)) {
+            @Override protected void paintComponent(Graphics g) {        // pastel bg
+                g.setColor(player.getPlayerColor().getColor());
+                g.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
             }
-        });
+        };
+        header.setBorder(new EmptyBorder(6, 8, 6, 8));
+
+        // avatar 70×70
+        var avatar = new JLabel(new ImageIcon(
+                new ImageIcon("roles_images/" + player.getPlayer_role().toImgString() + ".png")
+                        .getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH)));
+
+        // name + role
+        var name   = new JLabel(player.getPlayer_name());
+        name.setFont(name.getFont().deriveFont(Font.BOLD, 15f));
+        var role   = new JLabel(player.getPlayer_role().toString());
+        role.setFont(role.getFont().deriveFont(Font.PLAIN, 13f));
+
+        var labels = Box.createVerticalBox();
+        labels.add(name);
+        labels.add(role);
+
+        // badge
+        actionBadge.setOpaque(true);
+        actionBadge.setBackground(new Color(30,30,30,200));
+        actionBadge.setForeground(Color.WHITE);
+        actionBadge.setFont(actionBadge.getFont().deriveFont(Font.BOLD));
+        actionBadge.setBorder(new EmptyBorder(2,6,2,6));
+        actionBadge.setVisible(false);    // hidden until first update()
+
+        header.add(avatar, BorderLayout.WEST);
+        header.add(labels, BorderLayout.CENTER);
+        header.add(actionBadge, BorderLayout.EAST);
+
+        return header;
     }
-    public void makeUnchoosable(){
-        this.setBorder(null);
-        if(this.getMouseListeners().length > 0) {
-            this.removeMouseListener(this.getMouseListeners()[0]);
+
+    private JButton buildActionButton(PlayerAction action) {
+        JButton b = new JButton(action.toString());
+        b.setFocusable(false);
+        switch (action) {
+            case Move          : b.addActionListener(e -> gc.setPlayerChooseZoneToMoveTo()); break;
+            case Drain         : b.addActionListener(e -> gc.setPlayerChooseZoneToShoreUp()); break;
+            case FlyToACard    : b.addActionListener(e -> gc.setPilotChooseWhereToFlyTo()); break;
+            case MovePlayer    : b.addActionListener(e -> gc.setNavigatorChoosePlayerToMove()); break;
         }
+        return b;
     }
-    public Player getPlayer(){
+
+    public Player getPlayer() {
         return player;
+    }
+    public void removeActions(){
+        this.actionBadge.removeAll();
     }
 }

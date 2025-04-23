@@ -11,4 +11,7 @@ public class ArtefactZone extends Zone {
         this.zone_name = "";
         this.zone_type = ZoneType.ArtefactAssociated;
     }
+    public Artefact getArtefact() {
+        return associated_artefact;
+    }
 }
