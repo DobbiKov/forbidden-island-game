@@ -17,36 +17,20 @@ public class Zone {
     protected int X;
     protected int Y;
     protected ZoneCard zone_card;
-    protected static HashSet<ZoneCard> used_cards = new HashSet<>();
 
-    protected static ZoneCard getAvaliableCard() {
-        if(used_cards.size() >= 24){
-            throw new AllTheCardsAreUsedException();
-        }
-        Random rand = new Random();
-        int x = rand.nextInt(24);
-        ZoneCard zc = ZoneCard.fromInt(x);
-        while(used_cards.contains(zc)) {
-            x = rand.nextInt(24);
-            zc = ZoneCard.fromInt(x);
-        }
-        return zc;
-    }
-    public Zone(int x, int y, boolean accessible){
+    public Zone(int x, int y, boolean accessible, ZoneCard zone_card) {
         this.zone_state = ZoneState.Normal;
         this.zone_name = "";
         this.zone_type = ZoneType.Casual;
         this.players_on_zone = new HashSet<>();
         this.X = x;
         this.Y = y;
+        this.zone_card = zone_card;
 
-        if(accessible) {
-            ZoneCard zc = getAvaliableCard();
-            used_cards.add(zc);
-            this.zone_card = zc;
-        }else{
+        if(!accessible){
             this.zone_state = ZoneState.Inaccessible;
         }
+
     }
     public Zone(Zone zone_from){
         this.zone_state = zone_from.zone_state;
@@ -144,9 +128,5 @@ public class Zone {
     }
     public void makeInaccessible(){
         this.zone_state = ZoneState.Inaccessible;
-    }
-
-    public static void resetUsedZoneCards() {  // for unit tests
-        used_cards.clear();
     }
 }

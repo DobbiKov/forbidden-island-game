@@ -29,7 +29,7 @@ public class PlayerPanel extends JPanel {
         this.player = player;
         this.gameController = gController;
 
-        Color playerColor = player.getPlayer_color();
+        Color playerColor = player.getPlayerColor().getColor();
         playerNamePanel = new JPanel();
         playerName = new JTextArea("Player: " + player.getPlayer_name() + " " + " role: ");
         playerNamePanel.add(playerName);

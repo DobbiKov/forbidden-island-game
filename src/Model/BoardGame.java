@@ -14,7 +14,6 @@ public class BoardGame {
     private Zone[][] board;
     private Player[] players;
     private int player_count = 0;
-    private HashSet<PlayerRole> used_roles;
     private GameState game_state;
     private int player_turn_id; // idx in the array of players or -1
     private int current_player_actions_num;
@@ -22,9 +21,13 @@ public class BoardGame {
     private final FloodDeck floodDeck;
     private int shore_ups_left = 0; // for engineer to count 2 shore ups per action
     private Player chosen_player_by_navigator = null;
+    private ZoneFactory zone_factory;
+    private PlayerFactory player_factory;
 
     public BoardGame() {
         // zone init
+        this.zone_factory = new ZoneFactory();
+        this.player_factory = new PlayerFactory();
         this.treasureDeck = new TreasureDeck();
         this.floodDeck = new FloodDeck();
         this.game_state = GameState.SettingUp;
@@ -32,16 +35,17 @@ public class BoardGame {
         this.board = new Zone[size][size];
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
-                if(i == 2 && j == 2){
-                }
                 boolean is_accessible = !(i == 2 && j == 2);
-                this.board[i][j] = new Zone(i, j, is_accessible);
+                if(!is_accessible) {
+                    this.board[i][j] = zone_factory.createInaccessibleZone(i, j);
+                }
+                else {
+                    this.board[i][j] = zone_factory.createRandomZone(i, j);
+                }
             }
         }
         this.board[2][2].makeInaccessible();
 
-        //roles
-        used_roles = new HashSet<>();
 
         // player init
         this.players = new Player[4];
@@ -113,61 +117,29 @@ public class BoardGame {
     public void floodAllZones(){
         this.forAllZones(Zone::floodZone);
     }
-    public PlayerRole getAvailibleRole(){
-        if(this.used_roles.size() >= 6){
-            return null;
-        }
-        Random random = new Random();
-        int n = random.nextInt(6);
-        PlayerRole role = PlayerRole.getByNum(n);
-        while(used_roles.contains(role)){
-            n = random.nextInt(6);
-            role = PlayerRole.getByNum(n);
-        }
-        return role;
-    }
     private Zone chooseZoneForPlayer(Player player){
-        int mid = size/2;
-        int last = size-1;
-        switch (player_count){
-            case 0:{
-                this.board[0][mid] = new PlayerStartZone(this.board[0][mid], player);
-                return this.board[0][mid];
+        for(int i = 0; i < this.board.length; i++){
+            for(int j = 0; j < this.board[i].length; j++){
+                Zone zone = this.board[i][j];
+                if(zone.getZone_type() != ZoneType.PlayerStart){continue;}
+                if(((PlayerStartZone)zone).getCard_player_color() != player.getPlayerColor())  {continue;}
+                return zone;
             }
-            case 1: {
-                this.board[mid][last] = new PlayerStartZone(this.board[mid][last], player);
-                return this.board[mid][last];
-            }
-            case 2: {
-                this.board[last][mid] = new PlayerStartZone(this.board[last][mid], player);
-                return this.board[last][mid];
-            }
-            case 3: {
-                this.board[mid][0] = new PlayerStartZone(this.board[mid][0], player);
-                return this.board[mid][0];
-            }
-            default: return null;
-
         }
+        return null;
     }
     public Player addPlayer(String name){
         if(player_count > 3){
             throw new MaximumNumberOfPlayersReachedException();
         }
-        PlayerRole role_to_assign = this.getAvailibleRole();
-        if (role_to_assign == null) {
-            throw new NoRoleToAssignError();
-        }
-        Player player = new Player(name, role_to_assign);
-        this.used_roles.add(role_to_assign);
-
-        this.players[player_count] = player;
+        Player player = this.player_factory.createPlayer(name);
         Zone new_zone = this.chooseZoneForPlayer(player);
         if(new_zone == null){
             throw new MaximumNumberOfPlayersReachedException();
         }
         player.setPlayerToZone(new_zone);
-        player_count++;
+        ((PlayerStartZone)new_zone).associatePlayer(player);
+        this.players[player_count++] = player;
         return player;
     }
 

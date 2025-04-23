@@ -32,4 +32,15 @@ public enum PlayerRole {
             default: return null;
         }
     }
+    public PlayerColor getColor(){
+        switch (this){
+            case Pilot: return PlayerColor.Blue;
+            case Navigator: return PlayerColor.Gold;
+            case Explorer: return PlayerColor.Copper;
+            case Engineer: return PlayerColor.Bronze;
+            case Diver: return PlayerColor.Iron;
+            case Messenger: return PlayerColor.Silver;
+            default: return null;
+        }
+    }
 }

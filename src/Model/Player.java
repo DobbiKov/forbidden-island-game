@@ -1,5 +1,7 @@
 package Model;
 
+import java.awt.*;
+
 public class Player {
     private static int player_count = 0;
     private final int player_id;
@@ -8,6 +10,7 @@ public class Player {
     private int actions_remaining;
     private PlayerRole player_role;
     private Hand hand;
+    private PlayerColor player_color;
 
     public Player(String player_name, PlayerRole player_role) {
         if(player_count >= 4){ throw new RuntimeException("You cant have more than 4 players");}
@@ -16,7 +19,11 @@ public class Player {
         this.player_name = player_name;
         this.actions_remaining = 3;
         this.player_role = player_role;
+        this.player_color = player_role.getColor();
         this.hand = new Hand();
+    }
+    public PlayerColor getPlayerColor() {
+        return this.player_color;
     }
 
     public void setPlayerToZone(Zone zone){
@@ -50,16 +57,6 @@ public class Player {
     }
 
     public int getActions_remaining() {return actions_remaining;}
-
-    public java.awt.Color getPlayer_color(){
-        switch(player_id){
-            case 0: return java.awt.Color.BLUE;
-            case 1: return java.awt.Color.RED;
-            case 2: return java.awt.Color.GREEN;
-            case 3: return java.awt.Color.YELLOW;
-            default: return java.awt.Color.BLACK;
-        }
-    }
 
     public Hand getHand(){
         return hand;
