@@ -21,7 +21,7 @@ class Circle extends JPanel {
 
         // Set the color and draw a circle (oval with equal width and height)
         g2d.setColor(this.color);
-        int diameter = 100;
+        int diameter = 200;
         int x = (getWidth() - diameter) / 2;
         int y = (getHeight() - diameter) / 2;
         g2d.fillOval(x, y, diameter, diameter);

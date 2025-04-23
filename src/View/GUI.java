@@ -4,6 +4,7 @@ import Errors.InvalidNumberOfPlayersException;
 import Errors.MaximumNumberOfPlayersReachedException;
 import Errors.NoPlayersException;
 import Helper.AddPlayerCallback;
+import Helper.ChoosablePlayerCallback;
 import Model.Player;
 import Model.PlayerAction;
 import Model.Zone;
@@ -46,8 +47,19 @@ public class GUI {
         return button;
     }
 
-    private static void updatePlayerZones(){
-        // TODO
+    public static void makePlayersChoosable(HashSet<Player> players, ChoosablePlayerCallback callback){
+        for(PlayerPanel panel : panelPlayers){
+            if(players.contains(panel.getPlayer())){
+                panel.makeChoosable(() -> {
+                    callback.choose(panel.getPlayer());
+                });
+            }
+        }
+    }
+    public static void makePlayersUnChoosable(){
+        for(PlayerPanel panel : panelPlayers){
+            panel.makeUnchoosable();
+        }
     }
     public static void removeActionsForPlayerPanel(){
         for(PlayerPanel p : panelPlayers){
@@ -115,6 +127,8 @@ public class GUI {
                                 gameController.movePlayerToTheZone(zones[finalI][finalJ]);
                             }else if(gameController.isPlayerChoosingZoneToFlyTo()){
                                 gameController.flyPilotToTheZone(zones[finalI][finalJ]);
+                            }else if(gameController.isNavgiatorChoosingAZoneToMovePlayerTo()){
+                                gameController.movePlayerToTheZoneByNavigator(zones[finalI][finalJ]);
                             }
                             updatePlayerPanels();
                             updateZonePanels();

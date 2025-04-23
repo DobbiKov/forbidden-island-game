@@ -20,6 +20,7 @@ public class BoardGame {
     private int current_player_actions_num;
     private final Deck deck;
     private int shore_ups_left = 0; // for engineer to count 2 shore ups per action
+    private Player chosen_player_by_navigator = null;
 
     public BoardGame() {
         // zone init
@@ -146,7 +147,8 @@ public class BoardGame {
         if(player_count > 3){
             throw new MaximumNumberOfPlayersReachedException();
         }
-        PlayerRole role_to_assign = this.getAvailibleRole();
+//        PlayerRole role_to_assign = this.getAvailibleRole();
+        PlayerRole role_to_assign = PlayerRole.Navigator;
         if (role_to_assign == null) {
             throw new NoRoleToAssignError();
         }
@@ -279,9 +281,19 @@ public class BoardGame {
         this.setGame_state(GameState.Playing);
         this.useOneAction();
     }
+    public void choosePlayerByNavigator(Player player){
+        if(!this.isNavgiatorChoosingAPlayerToMove()){
+            throw new InvalidActionForTheCurrentState("The navigator is not currently choosing a player to move");
+        }
+        this.chosen_player_by_navigator = player;
+        this.setNavigatorChooseZoneToMoveThePlayerTo();
+    }
 
 
     private void useOneAction() {
+        if(this.current_player_actions_num <= 0){
+            throw new NoActionsLeft();
+        }
         this.current_player_actions_num--;
     }
 
@@ -324,6 +336,21 @@ public class BoardGame {
         this.current_player_actions_num = 3;
     }
 
+    public HashSet<Player> getPlayersToChoose(){
+        if(this.isPlayerChoosingZoneToMove()){
+            throw new InvalidActionForRole("This player is not a navgiator");
+        }
+        Player current_player = this.getPlayerForTheTurn();
+        HashSet<Player> res = new HashSet<>();
+        for(Player p : this.getPlayers()){
+            if(p == current_player || p == null){
+                continue;
+            }
+            res.add(p);
+        }
+        return res;
+    }
+
     //------------
     //get zones
 
@@ -334,6 +361,8 @@ public class BoardGame {
            return this.getZonesToForPlayerShoreUp(this.getPlayerForTheTurn());
         }else if(this.isPilotChoosingZoneToFly()){
             return this.getZonesForPlayerToFlyTo(this.getPlayerForTheTurn());
+        }else if(this.isNavgiatorChoosingAZoneToMovePlayerTo()){
+            return this.getZonesForNavigatorToMovePlayerTo();
         }
         return new ArrayList<>();
     }
@@ -409,6 +438,13 @@ public class BoardGame {
         }
         return res;
     }
+    private ArrayList<Zone> getZonesForNavigatorToMovePlayerTo(){
+        Player player_to_move = this.chosen_player_by_navigator;
+        if(player_to_move == null){
+            throw new InvalidStateOfTheGameException("The player to move is null!");
+        }
+        return this.getAdjacentZones(player_to_move.getPlayer_zone(), true, Zone::isDry);
+    }
     //end get zones
     //------------
 
@@ -439,8 +475,19 @@ public class BoardGame {
             }
         }
         else {
-            this.useOneAction(); // TODO: if it's a specific role that can shoreup two tiles
+            this.useOneAction();
         }
+    }
+    public void movePlayerToZoneByNavigator(Zone zone) {
+        Player player_to_move = this.chosen_player_by_navigator;
+        if(player_to_move == null){
+            throw new InvalidStateOfTheGameException("The player to move is null!");
+        }
+
+        placePlayerToZone(player_to_move, zone);
+        this.chosen_player_by_navigator = null;
+        this.useOneAction();
+        this.setGame_state(GameState.Playing);
     }
 
     //----------------
@@ -489,6 +536,12 @@ public class BoardGame {
     public void setPlayerChooseZoneToShoreUp() {
         this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
     }
+
     //end
     //---------------
+    private void placePlayerToZone(Player player, Zone zone) {
+        player.getPlayer_zone().removePlayerFromZone(player);
+        player.move_Player(zone);
+        zone.addPlayerToZone(player);
+    }
 }

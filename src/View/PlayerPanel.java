@@ -7,6 +7,8 @@ import Model.PlayerAction;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class PlayerPanel extends JPanel {
@@ -79,6 +81,10 @@ public class PlayerPanel extends JPanel {
                     this.gameController.setPilotChooseWhereToFlyTo();
                 });
                 break;
+            case MovePlayer:
+                button.addActionListener(e -> {
+                    this.gameController.setNavigatorChoosePlayerToMove();
+                });
             default: break;
         }
         return button;
@@ -98,6 +104,22 @@ public class PlayerPanel extends JPanel {
         }
         playerNamePanel.validate();
         playerNamePanel.repaint();
+    }
+    public void makeChoosable(Runnable action){
+        this.removeActions();
+        this.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 10));
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                action.run();
+            }
+        });
+    }
+    public void makeUnchoosable(){
+        this.setBorder(null);
+        if(this.getMouseListeners().length > 0) {
+            this.removeMouseListener(this.getMouseListeners()[0]);
+        }
     }
     public Player getPlayer(){
         return player;

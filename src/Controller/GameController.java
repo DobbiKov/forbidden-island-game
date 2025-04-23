@@ -36,9 +36,6 @@ public class GameController {
         }
     }
 
-    public Player[] getPlayers(){
-        return boardGame.getPlayers();
-    }
     public void startGame(){
         try {
             boardGame.startGame();
@@ -52,19 +49,24 @@ public class GameController {
         }
     }
 
-    public Player getPlayerForTheTurn(){
-        return this.boardGame.getPlayerForTheTurn();
-    }
 
     // play actions:
 
+    //---------------
+    //general getters
     public ArrayList<PlayerAction> getPossibleActionsForPlayer(Player player){
         return this.boardGame.getPossiblePlayerActions(player);
+    }
+
+    public Player getPlayerForTheTurn(){
+        return this.boardGame.getPlayerForTheTurn();
     }
 
     public ArrayList<Zone> getZonesPossibleForChoosing(){
        return this.boardGame.getZonesPossibleForChoosing();
     }
+    //end general getters
+    //---------------
 
     //------------
     //set player choose
@@ -85,9 +87,12 @@ public class GameController {
     }
     public void setNavigatorChoosePlayerToMove(){
         this.boardGame.setNavigatorChoosePlayerToMove();
+        HashSet<Player> players = this.boardGame.getPlayersToChoose();
+        GUI.makePlayersChoosable(players, this::choosePlayerByNavigator);
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
+
 
     //end set player choose
     //------------
@@ -142,6 +147,22 @@ public class GameController {
     public void playerShoreUpZone(Zone zone) {
         try {
             this.boardGame.playerShoreUpZone(zone);
+            GUI.updateZonePanels();
+            GUI.updatePlayerPanels();
+        }catch (NoActionsLeft ex){
+            GUI.showErrorMess("No actions left", "You used all your actions!");
+        }
+    }
+    private void choosePlayerByNavigator(Player chosen_player) {
+        this.boardGame.choosePlayerByNavigator(chosen_player);
+        GUI.makePlayersUnChoosable();
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
+    }
+
+    public void movePlayerToTheZoneByNavigator(Zone zone) {
+        try {
+            this.boardGame.movePlayerToZoneByNavigator(zone);
             GUI.updateZonePanels();
             GUI.updatePlayerPanels();
         }catch (NoActionsLeft ex){
