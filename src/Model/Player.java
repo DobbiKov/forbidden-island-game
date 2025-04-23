@@ -13,7 +13,6 @@ public class Player {
     private PlayerColor player_color;
 
     public Player(String player_name, PlayerRole player_role) {
-        if(player_count >= 4){ throw new RuntimeException("You cant have more than 4 players");}
         this.player_id = player_count++;
         this.player_zone = null;
         this.player_name = player_name;

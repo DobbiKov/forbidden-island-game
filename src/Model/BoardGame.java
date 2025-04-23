@@ -13,7 +13,7 @@ public class BoardGame {
     private int size;
     private Zone[][] board;
     private Player[] players;
-    private int player_count = 0;
+    private int player_count;
     private GameState game_state;
     private int player_turn_id; // idx in the array of players or -1
     private int current_player_actions_num;
@@ -26,6 +26,7 @@ public class BoardGame {
 
     public BoardGame() {
         // zone init
+        this.player_count = 0;
         this.zone_factory = new ZoneFactory();
         this.player_factory = new PlayerFactory();
         this.treasureDeck = new TreasureDeck();
@@ -121,7 +122,7 @@ public class BoardGame {
         for(int i = 0; i < this.board.length; i++){
             for(int j = 0; j < this.board[i].length; j++){
                 Zone zone = this.board[i][j];
-                if(zone.getZone_type() != ZoneType.PlayerStart){continue;}
+                if(zone.getZone_type() != ZoneType.PlayerStart && zone.getZone_type() != ZoneType.Helicopter){continue;}
                 if(((PlayerStartZone)zone).getCard_player_color() != player.getPlayerColor())  {continue;}
                 return zone;
             }

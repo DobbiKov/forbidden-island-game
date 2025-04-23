@@ -43,6 +43,12 @@ public class PawnPanel extends JPanel {
         g2.fill(body);
         g2.fill(base);
 
+        g2.setPaint(Color.BLACK);            // or any “border” colour
+        g2.setStroke(new BasicStroke(3f));   // thickness in user-space (scaled)
+        g2.draw(head);
+        g2.draw(neck);
+        g2.draw(body);
+        g2.draw(base);
         g2.dispose();
     }
 }
