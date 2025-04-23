@@ -320,8 +320,13 @@ public class BoardGame {
         Player p = this.getPlayerForTheTurn();
         p.takeCard(treasureDeck.draw());
         p.takeCard(treasureDeck.draw());
+        if(p.getHand().isOverflow()){
+            this.game_state = GameState.Discarding;
+            return;
+        }
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
+        this.setGame_state(GameState.Playing);
     }
     private void setDefaultActionsNum(){
         this.current_player_actions_num = 3;
@@ -541,5 +546,19 @@ public class BoardGame {
     }
     public FloodDeck getFloodDeck() {
         return this.floodDeck;
+    }
+
+    public void discardTreasureCard(Card card) {
+        if (game_state != GameState.Discarding) {
+            throw new IllegalStateException("Not currently discarding");
+        }
+        Player p = getPlayerForTheTurn();
+        p.discardCard(card, treasureDeck);
+
+        if (!p.getHand().isOverflow()) {
+            nextPlayerTurn();
+            setDefaultActionsNum();
+            this.game_state = GameState.Playing;
+        }
     }
 }
