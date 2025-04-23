@@ -46,12 +46,11 @@ class FilteredImagePanel extends JPanel {
 
             // draw the overlay in the bottom‐right corner
             if (overlayImage != null) {
-                System.out.println("trying to draw ");
-                int imgW = overlayImage.getWidth(null);
-                int imgH = overlayImage.getHeight(null);
-
-                int x = getWidth()  - 10;
-                int y = getHeight() - 10;
+//                int imgW = overlayImage.getWidth(null);
+//                int imgH = overlayImage.getHeight(null);
+//
+//                int x = getWidth()  - 10;
+//                int y = getHeight() - 10;
                 g.drawImage(overlayImage,
                         getWidth() - 50, getHeight() - 50,
                         50, 50,
