@@ -2,9 +2,7 @@ package Controller;
 
 import Errors.*;
 import Model.*;
-import View.ErrorPopup;
 import View.GUI;
-import View.PlayerPanel;
 
 import java.util.ArrayList;
 import java.util.HashSet;

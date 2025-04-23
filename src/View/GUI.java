@@ -70,7 +70,8 @@ public class GUI {
         }
     }
     public static void showErrorMess(String title, String message){
-        ErrorPopup.CreateErrorPopup(window, title, message);
+        ErrorDialog dlg = new ErrorDialog(window, title, message);
+        dlg.setVisible(true);
     }
     public static void addPlayerPanel(Player new_player){
         panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
@@ -233,21 +234,15 @@ public class GUI {
 
         add_player.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddPlayerPopup panel = new AddPlayerPopup();
-                PopupFactory factory = new PopupFactory();
-                Popup po = factory.getPopup(window, panel, window.getX() + (window.getSize().width/2), window.getY() + (window.getSize().height/2));
-                panel.addMainCallback(new AddPlayerCallback() {
-                    @Override
-                    public void callHide() {
-                        po.hide();
-                    }
-
-                    @Override
-                    public void callAddPlayer(String name){
+                AddPlayerDialog dlg = new AddPlayerDialog(window, new AddPlayerCallback() {
+                    @Override public void callAddPlayer(String name) {
                         gameController.addPlayerToTheGame(name);
                     }
+                    @Override public void callHide() {
+                        // nothing special—dialog will dispose itself
+                    }
                 });
-                po.show();
+                dlg.setVisible(true);
             }
         });
         add_player.setSize(100, 50);
