@@ -25,6 +25,7 @@ public class GUI {
 
     private static Zone[][] zones;
     private static int zone_size;
+    private static int artefactSize = zone_size;
 
     private static JPanel[][] zonePanels;
 
@@ -212,6 +213,7 @@ public class GUI {
         window = new JFrame();
 
         zone_size = 50;
+        artefactSize = (int)(zone_size*(1.5));
 
         zonePanels = new JPanel[zones.length][zones.length];
 
@@ -269,10 +271,6 @@ public class GUI {
         boardPanel.setVisible(true);
         window.setSize(w_width, w_height);
 
-//        boardPanel.setPreferredSize(new Dimension((int)(w_width * 0.8), (int)(w_height * 0.8)));
-
-        // using no layout managers
-//        boardPanel.setLayout();
 
         //player pane panels
         rightPanel.setLayout(new GridLayout(2, 1));
@@ -288,13 +286,66 @@ public class GUI {
         //window adders
 
         window.add(buttonPanel, BorderLayout.NORTH);
-        window.add(boardPanel);
         window.add(rightPanel, BorderLayout.EAST);
         window.add(leftPanel, BorderLayout.WEST);
+
+        // top row
+        JPanel topCorners = new JPanel();
+        topCorners.setOpaque(false);
+        topCorners.setLayout(new BoxLayout(topCorners, BoxLayout.X_AXIS));
+        topCorners.setPreferredSize(new Dimension(0, artefactSize));
+
+        JLabel topLeft  = new JLabel(scaledIcon("artefacts_images/earth_stone.png", artefactSize, artefactSize));
+        JLabel topRight = new JLabel(scaledIcon("artefacts_images/statue_of_wind.png", artefactSize, artefactSize));
+
+        topCorners.add(topLeft);
+        topCorners.add(Box.createHorizontalGlue());
+        topCorners.add(topRight);
+
+// bottom row
+        JPanel bottomCorners = new JPanel();
+        bottomCorners.setOpaque(false);
+        bottomCorners.setLayout(new BoxLayout(bottomCorners, BoxLayout.X_AXIS));
+        bottomCorners.setPreferredSize(new Dimension(0, artefactSize));
+
+        JLabel botLeft  = new JLabel(scaledIcon("artefacts_images/crystal_of_fire.png", artefactSize, artefactSize));
+        JLabel botRight = new JLabel(scaledIcon("artefacts_images/oceans_chalice.png", artefactSize, artefactSize));
+
+        bottomCorners.add(botLeft);
+        bottomCorners.add(Box.createHorizontalGlue());
+        bottomCorners.add(botRight);
+
+        //board wrapper
+        //-----------
+        JPanel boardPanelWrapper = new JPanel(new BorderLayout());
+        boardPanelWrapper.add(Box.createHorizontalStrut(artefactSize), BorderLayout.WEST);
+        boardPanelWrapper.add(boardPanel,  BorderLayout.CENTER);
+        boardPanelWrapper.add(Box.createHorizontalStrut(artefactSize), BorderLayout.EAST);
+        //-----------
+
+        JPanel gameArea = new JPanel(new BorderLayout());
+        gameArea.add(topCorners, BorderLayout.NORTH);
+        gameArea.add(boardPanelWrapper,  BorderLayout.CENTER);
+        gameArea.add(bottomCorners,  BorderLayout.SOUTH);
+
+        // 3. Finally stitch everything into the frame:
+        window.getContentPane().removeAll();
+        window.getContentPane().setLayout(new BorderLayout());
+        window.getContentPane().add(buttonPanel,    BorderLayout.NORTH);
+        window.getContentPane().add(gameArea,      BorderLayout.CENTER);
+        window.getContentPane().add(rightPanel, BorderLayout.EAST);
+        window.getContentPane().add(leftPanel, BorderLayout.WEST);
+
 
         // making the frame visible
         window.pack();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setVisible(true);
+    }
+    private static Icon scaledIcon(String path, int w, int h) {
+        ImageIcon raw = new ImageIcon(path);
+        Image img = raw.getImage()
+                .getScaledInstance(w, h, Image.SCALE_SMOOTH);
+        return new ImageIcon(img);
     }
 }

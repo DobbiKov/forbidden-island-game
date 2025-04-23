@@ -59,7 +59,7 @@ public class PlayerPanel extends JPanel {
 
         // action buttons
         buttonBar.removeAll();
-        for (PlayerAction a : gc.getPossibleActionsForPlayer(player)) {
+        for (PlayerAction a : gc.getPossiblePlayerActionsForCurrentTurn(player)) {
             buttonBar.add(buildActionButton(a));
         }
         revalidate();

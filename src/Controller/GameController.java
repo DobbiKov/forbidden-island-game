@@ -54,8 +54,11 @@ public class GameController {
 
     //---------------
     //general getters
-    public ArrayList<PlayerAction> getPossibleActionsForPlayer(Player player){
-        return this.boardGame.getPossiblePlayerActions(player);
+//    public ArrayList<PlayerAction> getPossibleActionsForPlayer(Player player){
+//        return this.boardGame.getPossiblePlayerActions(player);
+//    }
+    public ArrayList<PlayerAction> getPossiblePlayerActionsForCurrentTurn(Player player){
+        return this.boardGame.getPossiblePlayerActionsForCurrentTurn(player);
     }
 
     public Player getPlayerForTheTurn(){

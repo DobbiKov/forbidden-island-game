@@ -29,6 +29,9 @@ class FilteredImagePanel extends JPanel {
             if(z.getZone_type() == ZoneType.ArtefactAssociated){
                 Artefact art = ((ArtefactZone)z).getArtefact();
                 overlayImage = new ImageIcon("artefacts_images/" + art.toImgString() + ".png").getImage();
+            }else if(z.getZone_type() == ZoneType.Helicopter){
+
+                overlayImage = new ImageIcon("artefacts_images/" + "helicopter_no_background" + ".png").getImage();
             }
         }
 

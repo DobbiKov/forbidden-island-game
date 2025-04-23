@@ -175,6 +175,11 @@ public class BoardGame {
         return !this.isGameSettingUp();
     }
 
+    public ArrayList<PlayerAction> getPossiblePlayerActionsForCurrentTurn(Player player){
+        if(player == this.getPlayerForTheTurn())
+            return getPossiblePlayerActions(player);
+        return new ArrayList<>();
+    }
     public ArrayList<PlayerAction> getPossiblePlayerActions(Player player){
         ArrayList<PlayerAction> possibleActions = new ArrayList<>();
         if(player == null || this.isGameSettingUp()){
