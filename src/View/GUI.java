@@ -108,8 +108,9 @@ public class GUI {
                 if(zones[i][j] != null) {
                     for (Player player : zones[i][j].getPlayers_on_zone()) {
                         java.awt.Color color = player.getPlayer_color();
-                        JPanel circle = new Circle(color);
-                        circle.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        JPanel circle = new PawnPanel(color);
+                        circle.setPreferredSize(new Dimension(50, 100));
+//                        circle.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                         panel.add(circle);
                     }
                 }
