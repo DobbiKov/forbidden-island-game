@@ -132,6 +132,10 @@ public class GUI {
                                 gameController.flyPilotToTheZone(zones[finalI][finalJ]);
                             }else if(gameController.isNavgiatorChoosingAZoneToMovePlayerTo()){
                                 gameController.movePlayerToTheZoneByNavigator(zones[finalI][finalJ]);
+                            }else if(gameController.isPlayerChoosingZoneToFlyWithCard()){
+                                gameController.flyPlayerToZoneWithCard(zones[finalI][finalJ]);
+                            } else if(gameController.isPlayerChoosingZoneToShoreUpWithCard()){
+                                gameController.shoreUpZoneWithCard(zones[finalI][finalJ]);
                             }
                             updatePlayerPanels();
                             updateZonePanels();

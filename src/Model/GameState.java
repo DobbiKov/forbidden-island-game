@@ -9,5 +9,9 @@ public enum GameState {
 
     NavigatorChooseAPlayerToMove,
     NavigatorChooseAZoneToMovePlayerTo,
+
+    //using cards
     Discarding,
+    PlayerChooseAZoneToShoreUpWithCard,
+    PlayerChooseAZoneToFlyWithCard,
 }

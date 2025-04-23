@@ -16,6 +16,18 @@ public enum CardType {
         }
     }
 
+    public String getImgString(){
+        switch (this){
+            case EARTH_CARD: return "earth_stone_artefact";
+            case AIR_CARD: return "statue_of_the_wind_artefact";
+            case FIRE_CARD: return "fire_artefact";
+            case WATER_CARD: return "oceans_chalice_artefact";
+            case SANDBAGS: return "sand_bags";
+            case HELICOPTER_LIFT: return "helicopter";
+            default: return "";
+        }
+    }
+
     public boolean isAction(){
         return this == HELICOPTER_LIFT || this == SANDBAGS;
     }

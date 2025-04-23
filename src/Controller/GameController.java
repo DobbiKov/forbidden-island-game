@@ -4,6 +4,7 @@ import Errors.*;
 import Model.*;
 import View.GUI;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
@@ -122,9 +123,17 @@ public class GameController {
     public boolean isNavgiatorChoosingAZoneToMovePlayerTo(){
         return this.boardGame.isNavgiatorChoosingAZoneToMovePlayerTo();
     }
+    public boolean isPlayerChoosingZoneToShoreUpWithCard() {
+        return this.boardGame.isPlayerChoosingZoneToShoreUpWithCard();
+    }
+    public boolean isPlayerChoosingZoneToFlyWithCard() {
+        return this.boardGame.isPlayerChoosingZoneToFlyWithCard();
+    }
     //end is player choosing
     //------------
 
+    //------------
+    //actions
     public void movePlayerToTheZone(Zone zone){
         try {
             this.boardGame.movePlayerToZone(zone);
@@ -143,12 +152,6 @@ public class GameController {
             GUI.showErrorMess("Invalid action", "Only a pilot can fly");
         }
     }
-
-    public int getCurrentPlayerActionsNumber(){
-        return this.boardGame.getCurrent_player_actions_num();
-    }
-
-
     public void playerShoreUpZone(Zone zone) {
         try {
             this.boardGame.playerShoreUpZone(zone);
@@ -174,10 +177,38 @@ public class GameController {
             GUI.showErrorMess("No actions left", "You used all your actions!");
         }
     }
+    //------------
+
+    public int getCurrentPlayerActionsNumber(){
+        return this.boardGame.getCurrent_player_actions_num();
+    }
+    public ArrayList<Card> getCurrentPlayerCards(Player player){
+        return this.boardGame.getCurrentPlayerCards(player);
+    }
+
+
 
     public void discardCardFromCurrentPlayer(Card c) {
         boardGame.getPlayerForTheTurn().discardCard(c, boardGame.getTreasureDeck());
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
+    }
+
+    public void playerUseActionCard(Player player, Card card) {
+        try {
+            this.boardGame.playerUseActionCard(player, card);
+            GUI.updatePlayerPanels();
+            GUI.updateZonePanels();
+        }catch (InvalidParameterException ex){
+            GUI.showErrorMess("Invalid card", "You don't have such a card!");
+        }
+    }
+
+    public void flyPlayerToZoneWithCard(Zone zone) {
+        this.boardGame.flyPlayerToZoneWithCard(zone);
+    }
+
+    public void shoreUpZoneWithCard(Zone zone) {
+        this.boardGame.shoreUpZoneWithCard(zone);
     }
 }

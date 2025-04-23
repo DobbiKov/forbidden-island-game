@@ -2,6 +2,7 @@ package Model;
 
 import Errors.*;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,6 +25,7 @@ public class BoardGame {
     private ZoneFactory zone_factory;
     private PlayerFactory player_factory;
     private boolean treasureDrawnThisTurn = false;
+    private Player player_choosing_card_to_use = null;
 
     public BoardGame() {
         // zone init
@@ -381,6 +383,10 @@ public class BoardGame {
             return this.getZonesForPlayerToFlyTo(this.getPlayerForTheTurn());
         }else if(this.isNavgiatorChoosingAZoneToMovePlayerTo()){
             return this.getZonesForNavigatorToMovePlayerTo();
+        }else if(this.isPlayerChoosingZoneToFlyWithCard()){
+            return this.getZonesToFlyWithCard();
+        }else if(this.isPlayerChoosingZoneToShoreUpWithCard()){
+            return this.getZonesToShoreUpWithCard();
         }
         return new ArrayList<>();
     }
@@ -449,7 +455,7 @@ public class BoardGame {
         for(int i = 0; i < this.board.length; i++){
             for(int j = 0; j < this.board[i].length; j++){
                 Zone curr = this.board[i][j];
-                if(curr.isDry() && curr != player.getPlayer_zone()){
+                if(curr.isAccessible() && curr != player.getPlayer_zone()){
                     res.add(curr);
                 }
             }
@@ -462,6 +468,30 @@ public class BoardGame {
             throw new InvalidStateOfTheGameException("The player to move is null!");
         }
         return this.getAdjacentZones(player_to_move.getPlayer_zone(), true, Zone::isDry);
+    }
+    private ArrayList<Zone> getZonesToShoreUpWithCard(){
+        ArrayList<Zone> res = new ArrayList<>();
+        for(int i = 0; i < this.board.length; i++){
+            for(int j = 0; j < this.board[i].length; j++){
+                Zone curr = this.board[i][j];
+                if(curr.isFlooded()){
+                    res.add(curr);
+                }
+            }
+        }
+        return res;
+    }
+    private ArrayList<Zone> getZonesToFlyWithCard(){
+        ArrayList<Zone> res = new ArrayList<>();
+        for(int i = 0; i < this.board.length; i++){
+            for(int j = 0; j < this.board[i].length; j++){
+                Zone curr = this.board[i][j];
+                if(curr.isAccessible()){
+                    res.add(curr);
+                }
+            }
+        }
+        return res;
     }
     //end get zones
     //------------
@@ -497,7 +527,7 @@ public class BoardGame {
         }
     }
     public void movePlayerToZoneByNavigator(Zone zone) {
-        Player player_to_move = this.chosen_player_by_navigator;
+        Player player_to_move = this.getPlayerForTheTurn();
         if(player_to_move == null){
             throw new InvalidStateOfTheGameException("The player to move is null!");
         }
@@ -516,7 +546,10 @@ public class BoardGame {
                 || this.isPlayerChoosingZoneToMove()
                 || this.isPilotChoosingZoneToFly()
                 || this.isNavgiatorChoosingAPlayerToMove()
-                || this.isNavgiatorChoosingAZoneToMovePlayerTo();
+                || this.isNavgiatorChoosingAZoneToMovePlayerTo()
+                || this.isPlayerChoosingZoneToShoreUpWithCard()
+                || this.isPlayerChoosingZoneToFlyWithCard()
+                ;
     }
     public boolean isPlayerChoosingZoneToMove() {
         return this.game_state == GameState.PlayerChooseWhereToMove;
@@ -532,6 +565,12 @@ public class BoardGame {
     }
     public boolean isNavgiatorChoosingAZoneToMovePlayerTo(){
         return this.game_state == GameState.NavigatorChooseAZoneToMovePlayerTo;
+    }
+    public boolean isPlayerChoosingZoneToShoreUpWithCard() {
+        return this.game_state == GameState.PlayerChooseAZoneToShoreUpWithCard;
+    }
+    public boolean isPlayerChoosingZoneToFlyWithCard() {
+        return this.game_state == GameState.PlayerChooseAZoneToFlyWithCard;
     }
     //----------------
 
@@ -583,4 +622,65 @@ public class BoardGame {
             this.game_state = GameState.Playing;
         }
     }
+
+    public ArrayList<Card> getCurrentPlayerCards(Player player) {
+        return new ArrayList<>(this.players[player.getPlayer_id()].getHand().getCards());
+    }
+
+    public void playerUseActionCard(Player player, Card card) {
+        if(!player.getHand().getCards().contains(card)){
+            throw new InvalidParameterException("You do not have such a card!");
+        }
+        switch(card.getType()){
+            case HELICOPTER_LIFT:
+                this.setGame_state(GameState.PlayerChooseAZoneToFlyWithCard);
+                this.player_choosing_card_to_use = player;
+                break;
+            case SANDBAGS:
+                this.player_choosing_card_to_use = player;
+                this.setGame_state(GameState.PlayerChooseAZoneToShoreUpWithCard);
+                break;
+        }
+    }
+
+    public void flyPlayerToZoneWithCard(Zone zone) {
+        Player player = this.player_choosing_card_to_use;
+        if(!this.isPlayerChoosingZoneToFlyWithCard()){
+            throw new InvalidStateOfTheGameException("Player is not choosing to fly to a zone!");
+        }
+        this.setGame_state(GameState.Playing);
+        Card card = null;
+        for(Card c : player.getHand().getCards()){
+            if(c.getType() == CardType.HELICOPTER_LIFT){
+                card = c;
+                break;
+            }
+        }
+        if(card == null) {
+            throw new InvalidStateOfTheGameException("The player doesn't have a card to fly!");
+        }
+        player.getHand().remove(card);
+        this.placePlayerToZone(player, zone);
+    }
+
+    public void shoreUpZoneWithCard(Zone zone) {
+        Player player = this.player_choosing_card_to_use;
+        if(!this.isPlayerChoosingZoneToShoreUpWithCard()){
+            throw new InvalidStateOfTheGameException("Player is not choosing to shore up a zone!");
+        }
+        this.setGame_state(GameState.Playing);
+        Card card = null;
+        for(Card c : player.getHand().getCards()){
+            if(c.getType() == CardType.SANDBAGS){
+                card = c;
+                break;
+            }
+        }
+        if(card == null) {
+            throw new InvalidStateOfTheGameException("The player doesn't have a card to shore up!");
+        }
+        player.getHand().remove(card);
+        zone.shoreUp();
+    }
+
 }

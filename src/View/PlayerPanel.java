@@ -19,6 +19,7 @@ public class PlayerPanel extends JPanel {
     private final GameController gc;
     private final Player player;
     private final JPanel buttonBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2));
+    private final JPanel cardsBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2));
     private final JLabel actionBadge = new JLabel();
 
     public PlayerPanel() {
@@ -34,6 +35,7 @@ public class PlayerPanel extends JPanel {
 
         add(createHeader(), BorderLayout.NORTH);
         add(buttonBar,        BorderLayout.CENTER);
+        add(cardsBar,        BorderLayout.SOUTH);
 
         update();                                    // initial fill
     }
@@ -63,10 +65,18 @@ public class PlayerPanel extends JPanel {
         for (PlayerAction a : gc.getPossiblePlayerActionsForCurrentTurn(player)) {
             buttonBar.add(buildActionButton(a));
         }
-        buttonBar.setMaximumSize(new Dimension(50, Integer.MAX_VALUE));
+        buttonBar.setMaximumSize(new Dimension(100, Integer.MAX_VALUE));
+
+        //cards
+        cardsBar.removeAll();
+        for (Card c : gc.getCurrentPlayerCards(player)) {
+            cardsBar.add(buildPlayerCard(c));
+        }
+        cardsBar.setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
         revalidate();
         repaint();
     }
+
 
     /* ---------- private helpers ---------- */
 
@@ -120,6 +130,32 @@ public class PlayerPanel extends JPanel {
             case DiscardCard   : b.addActionListener(e -> openDiscardDialog()); break;
         }
         return b;
+    }
+
+    private Component buildPlayerCard(Card c) {
+        int c_size = 80;
+        int w = c_size;
+        int h = c_size;
+        JPanel imagePanel = new JPanel() {
+            private final Image image = new ImageIcon("player_cards_images/" + c.getType().getImgString() + ".png")
+                    .getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(image, 0, 0, this);
+            }
+        };
+        imagePanel.setPreferredSize(new Dimension(w, h));
+        if(c.isAction()){
+            imagePanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    gc.playerUseActionCard(player, c);
+                }
+            });
+        }
+        return imagePanel;
     }
 
     public Player getPlayer() {
