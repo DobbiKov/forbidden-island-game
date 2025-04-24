@@ -331,6 +331,8 @@ public class BoardGame {
             if (p.getHand().isOverflow()) {
                 this.game_state = GameState.Discarding;
                 throw new TooManyCardsInTheHand();
+            }else{
+                this.game_state = GameState.Playing;
             }
         }
         for (int i = 0; i < 3; i++) {

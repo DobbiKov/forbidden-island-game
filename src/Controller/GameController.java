@@ -262,4 +262,14 @@ public class GameController {
     public boolean isThisPlayerChoosingCardToDiscard(Player player) {
         return this.boardGame.isThisPlayerChoosingCardToDiscard(player);
     }
+
+    public void takeArtefact() {
+        try {
+            boardGame.takeArtefact();
+        } catch (IllegalStateException ex) {
+            GUI.showErrorMess("Cannot Take Artefact", ex.getMessage());
+        }
+        GUI.updatePlayerPanels();
+        GUI.updateZonePanels();
+    }
 }
