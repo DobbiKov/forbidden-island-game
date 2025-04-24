@@ -6,6 +6,8 @@ public enum GameState {
     PlayerChooseWhereToMove, // when a player is choosing a zone to move
     PlayerChooseWhereToShoreUp, // when a player is choosing a zone to shore up
     PilotChooseWhereToFly, // when a pilot is choosing where to fly
+    PlayerChoosingCardToGive,
+    PlayerChoosePlayerToGiveCardTo,
 
     NavigatorChooseAPlayerToMove,
     NavigatorChooseAZoneToMovePlayerTo,

@@ -224,4 +224,25 @@ public class GameController {
     public void shoreUpZoneWithCard(Zone zone) {
         this.boardGame.shoreUpZoneWithCard(zone);
     }
+
+    public void setPlayerGiveTreasureCards() {
+        this.boardGame.setPlayerGiveTreasureCards();
+        GUI.updatePlayerPanels();
+    }
+
+    public boolean isThisPlayerChoosingCardToGive(Player player) {
+        return this.boardGame.isThisPlayerChoosingCardToGive(player);
+    }
+
+    public void playerChooseCardToGive(Player p, Card c) {
+        this.boardGame.playerChooseCardToGive(p, c);
+        GUI.updatePlayerPanels();
+        HashSet<Player> players = this.boardGame.getPlayersToChoose();
+        GUI.makePlayersChoosable(players, this::choosePlayerToGiveCardTo);
+    }
+
+    public void choosePlayerToGiveCardTo(Player player) {
+        this.boardGame.choosePlayerToGiveCardTo(player);
+        GUI.updatePlayerPanels();
+    }
 }

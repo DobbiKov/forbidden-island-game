@@ -28,6 +28,7 @@ public class BoardGame {
     private Player player_choosing_card_to_use = null;
     private final EnumSet<Artefact> claimedArtefacts = EnumSet.noneOf(Artefact.class);
     private ArrayList<Player> players_to_fly_with;
+    private Card card_to_give_by_player;
 
     public BoardGame() {
         // zone init
@@ -38,6 +39,7 @@ public class BoardGame {
         this.floodDeck = new FloodDeck();
         this.game_state = GameState.SettingUp;
         this.size = 5;
+        this.card_to_give_by_player = null;
         this.board = new Zone[size][size];
         this.players_to_fly_with = new ArrayList<>();
         for(int i = 0; i < size; i++) {
@@ -390,15 +392,33 @@ public class BoardGame {
         }
         return res;
     }
+    private HashSet<Player> getPlayersToChooseForGivingCard(){
+       if(!this.isPlayerChoosingPlayerToGiveCardTo()){
+           throw new InvalidStateOfTheGameException("The player is not currently choosing a player to give card");
+       }
+       HashSet<Player> res = new HashSet<>();
+       Player current_player = this.getPlayerForTheTurn();
+       for(Player p : this.getPlayers()){
+           if(p == current_player || p == null){
+               continue;
+           }
+           if(p.getHand().getSize() >= 5) { continue; }
+           if(!current_player.getPlayer_zone().getPlayers_on_zone().contains(p) && current_player.getPlayer_role() != PlayerRole.Messenger){ continue; }
+           res.add(p);
+       }
+       return res;
+    }
 
     public HashSet<Player> getPlayersToChoose(){
-        if(!this.isPlayerChoosingZoneToFlyWithCard() && !this.isNavgiatorChoosingAPlayerToMove()){
-           throw new InvalidStateOfTheGameException("The player is not currently any player!");
+        if(!this.isPlayerChoosingZoneToFlyWithCard() && !this.isNavgiatorChoosingAPlayerToMove() && !this.isPlayerChoosingPlayerToGiveCardTo()){
+           throw new InvalidStateOfTheGameException("The player is not currently choosing any player!");
         }
         if(this.isNavgiatorChoosingAPlayerToMove()){
             return this.getPlayerToChooseForNavigator();
         }else if(this.isPlayerChoosingZoneToFlyWithCard()){
             return this.getPlayersToChooseToFlyWithCard();
+        }else if(this.isPlayerChoosingPlayerToGiveCardTo()){
+            return this.getPlayersToChooseForGivingCard();
         }
         return new HashSet<>();
     }
@@ -560,7 +580,7 @@ public class BoardGame {
         }
     }
     public void movePlayerToZoneByNavigator(Zone zone) {
-        Player player_to_move = this.getPlayerForTheTurn();
+        Player player_to_move = this.chosen_player_by_navigator;
         if(player_to_move == null){
             throw new InvalidStateOfTheGameException("The player to move is null!");
         }
@@ -582,6 +602,7 @@ public class BoardGame {
                 || this.isNavgiatorChoosingAZoneToMovePlayerTo()
                 || this.isPlayerChoosingZoneToShoreUpWithCard()
                 || this.isPlayerChoosingZoneToFlyWithCard()
+                || this.isPlayerChoosingPlayerToGiveCardTo()
                 ;
     }
     public boolean isPlayerChoosingZoneToMove() {
@@ -605,6 +626,15 @@ public class BoardGame {
     public boolean isPlayerChoosingZoneToFlyWithCard() {
         return this.game_state == GameState.PlayerChooseAZoneToFlyWithCard;
     }
+    public boolean isPlayerChoosingCardToGive() {
+        return this.game_state == GameState. PlayerChoosingCardToGive;
+    }
+    public boolean isThisPlayerChoosingCardToGive(Player player) {
+        return this.isPlayerChoosingCardToGive() && this.getPlayerForTheTurn() == player;
+    }
+    public boolean isPlayerChoosingPlayerToGiveCardTo(){
+        return this.game_state == GameState.PlayerChoosePlayerToGiveCardTo;
+    }
     //----------------
 
     //-------------
@@ -625,6 +655,10 @@ public class BoardGame {
 
     public void setPlayerChooseZoneToShoreUp() {
         this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
+    }
+    public void setPlayerGiveTreasureCards() {
+        this.setGame_state(GameState.PlayerChoosingCardToGive);
+        this.card_to_give_by_player = null;
     }
 
     //end
@@ -788,5 +822,36 @@ public class BoardGame {
             throw new InvalidParameterException("This player is already chosen!");
         }
         this.players_to_fly_with.add(chosen_player);
+    }
+
+
+    public void playerChooseCardToGive(Player p, Card c) {
+        if(!this.isPlayerChoosingCardToGive()){
+            throw new InvalidStateOfTheGameException("The player is not currently choosing a card to give");
+        }
+        if(this.getPlayerForTheTurn() != p){
+            throw new InvalidStateOfTheGameException("This player doesn't have it's turn right now!");
+        }
+        this.card_to_give_by_player = c;
+        this.setGame_state(GameState.PlayerChoosePlayerToGiveCardTo);
+    }
+
+    public void choosePlayerToGiveCardTo(Player player) {
+        if(!this.isPlayerChoosingPlayerToGiveCardTo()){
+            throw new InvalidStateOfTheGameException("The player is not currently choosing a player to give to give the card to");
+        }
+        if(this.getPlayerForTheTurn() == player){
+            throw new InvalidParameterException("You can't choose yourself");
+        }
+        if(this.card_to_give_by_player == null){
+            throw new InvalidStateOfTheGameException("You haven't chosen any card!");
+        }
+        if(player.getHand().getSize() >= 5){
+            throw new InvalidStateOfTheGameException("This player can't take more cards!");
+        }
+        this.getPlayerForTheTurn().getHand().remove(this.card_to_give_by_player);
+        player.getHand().add(this.card_to_give_by_player);
+        this.card_to_give_by_player = null;
+        this.game_state = GameState.Playing;
     }
 }

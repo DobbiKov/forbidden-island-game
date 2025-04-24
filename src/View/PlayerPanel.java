@@ -131,6 +131,7 @@ public class PlayerPanel extends JPanel {
             case FlyToACard    : b.addActionListener(e -> gc.setPilotChooseWhereToFlyTo()); break;
             case MovePlayer    : b.addActionListener(e -> gc.setNavigatorChoosePlayerToMove()); break;
             case DiscardCard   : b.addActionListener(e -> openDiscardDialog()); break;
+            case GiveTreasureCard: b.addActionListener(e -> gc.setPlayerGiveTreasureCards()); break;
         }
         return b;
     }
@@ -150,7 +151,15 @@ public class PlayerPanel extends JPanel {
             }
         };
         imagePanel.setPreferredSize(new Dimension(w, h));
-        if(c.isAction()){
+        if(gc.isThisPlayerChoosingCardToGive(this.getPlayer())){
+            imagePanel.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 5));
+            imagePanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    gc.playerChooseCardToGive(getPlayer(), c);
+                }
+            });
+        }else if(c.isAction()){
             imagePanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
