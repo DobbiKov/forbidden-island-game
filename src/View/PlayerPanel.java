@@ -53,6 +53,9 @@ public class PlayerPanel extends JPanel {
 
     public void update() {
         // badge
+        if(!gc.isPlayerChoosingZoneToFlyWithCard() && !gc.isNavgiatorChoosingAPlayerToMove()){
+            this.makeUnchoosable();
+        }
         if (gc.getPlayerForTheTurn() == player) {
             actionBadge.setText(" " + gc.getCurrentPlayerActionsNumber() + " ");
             actionBadge.setVisible(true);

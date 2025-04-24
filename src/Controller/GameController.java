@@ -167,6 +167,14 @@ public class GameController {
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
+    public void choosePlayerToFlyWithCard(Player chosen_player){
+        try {
+            this.boardGame.choosePlayerToFlyWithCard(chosen_player);
+            GUI.makePlayersUnChoosable();
+            GUI.makePlayersChoosable(this.boardGame.getPlayersToChoose(), this::choosePlayerByNavigator);
+            GUI.updatePlayerPanels();
+        }catch (Exception ex){}
+    }
 
     public void movePlayerToTheZoneByNavigator(Zone zone) {
         try {
@@ -197,6 +205,10 @@ public class GameController {
     public void playerUseActionCard(Player player, Card card) {
         try {
             this.boardGame.playerUseActionCard(player, card);
+            if(card.getType() == CardType.HELICOPTER_LIFT){
+                HashSet<Player> players = this.boardGame.getPlayersToChoose();
+                GUI.makePlayersChoosable(players, this::choosePlayerToFlyWithCard);
+            }
             GUI.updatePlayerPanels();
             GUI.updateZonePanels();
         }catch (InvalidParameterException ex){
@@ -206,6 +218,7 @@ public class GameController {
 
     public void flyPlayerToZoneWithCard(Zone zone) {
         this.boardGame.flyPlayerToZoneWithCard(zone);
+        GUI.makePlayersUnChoosable();
     }
 
     public void shoreUpZoneWithCard(Zone zone) {

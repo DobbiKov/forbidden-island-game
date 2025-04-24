@@ -27,6 +27,7 @@ public class BoardGame {
     private boolean treasureDrawnThisTurn = false;
     private Player player_choosing_card_to_use = null;
     private final EnumSet<Artefact> claimedArtefacts = EnumSet.noneOf(Artefact.class);
+    private ArrayList<Player> players_to_fly_with;
 
     public BoardGame() {
         // zone init
@@ -38,6 +39,7 @@ public class BoardGame {
         this.game_state = GameState.SettingUp;
         this.size = 5;
         this.board = new Zone[size][size];
+        this.players_to_fly_with = new ArrayList<>();
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
                 boolean is_accessible = !(i == 2 && j == 2);
@@ -352,9 +354,11 @@ public class BoardGame {
         this.current_player_actions_num = 3;
     }
 
-    public HashSet<Player> getPlayersToChoose(){
+    //-------------
+    //get players
+    private HashSet<Player> getPlayerToChooseForNavigator(){
         if(this.isPlayerChoosingZoneToMove()){
-            throw new InvalidActionForRole("This player is not a navgiator");
+            throw new InvalidActionForRole("This player is not a navigator");
         }
         Player current_player = this.getPlayerForTheTurn();
         HashSet<Player> res = new HashSet<>();
@@ -366,6 +370,39 @@ public class BoardGame {
         }
         return res;
     }
+
+    private HashSet<Player> getPlayersToChooseToFlyWithCard(){
+        if(!this.isPlayerChoosingZoneToFlyWithCard()){
+            throw new InvalidStateOfTheGameException("The player is not currently choosing a player to fly with card");
+        }
+        Player current_player = this.player_choosing_card_to_use;
+        HashSet<Player> res = new HashSet<>();
+        for(Player p : this.getPlayers()){
+            if(
+                    p == current_player
+                            || p == null
+                            || this.players_to_fly_with.contains(p)
+                            || !current_player.getPlayer_zone().getPlayers_on_zone().contains(p)
+            ){
+                continue;
+            }
+            res.add(p);
+        }
+        return res;
+    }
+
+    public HashSet<Player> getPlayersToChoose(){
+        if(!this.isPlayerChoosingZoneToFlyWithCard() && !this.isNavgiatorChoosingAPlayerToMove()){
+           throw new InvalidStateOfTheGameException("The player is not currently any player!");
+        }
+        if(this.isNavgiatorChoosingAPlayerToMove()){
+            return this.getPlayerToChooseForNavigator();
+        }else if(this.isPlayerChoosingZoneToFlyWithCard()){
+            return this.getPlayersToChooseToFlyWithCard();
+        }
+        return new HashSet<>();
+    }
+    //-------------
 
     //------------
     //get zones
@@ -631,6 +668,7 @@ public class BoardGame {
             case HELICOPTER_LIFT:
                 this.setGame_state(GameState.PlayerChooseAZoneToFlyWithCard);
                 this.player_choosing_card_to_use = player;
+                this.players_to_fly_with = new ArrayList<>();
                 break;
             case SANDBAGS:
                 this.player_choosing_card_to_use = player;
@@ -656,7 +694,13 @@ public class BoardGame {
             throw new InvalidStateOfTheGameException("The player doesn't have a card to fly!");
         }
         player.getHand().remove(card);
+        for(Player p: this.players_to_fly_with){ //TODO
+            this.placePlayerToZone(p, zone);
+        }
         this.placePlayerToZone(player, zone);
+
+        this.players_to_fly_with = new ArrayList<>();
+        this.player_choosing_card_to_use = null;
     }
 
     public void shoreUpZoneWithCard(Zone zone) {
@@ -677,6 +721,8 @@ public class BoardGame {
         }
         player.getHand().remove(card);
         zone.shoreUp();
+
+        this.player_choosing_card_to_use = null;
     }
 
 
@@ -732,5 +778,15 @@ public class BoardGame {
             case Earth: return CardType.EARTH_CARD;
             default:    throw new IllegalArgumentException();
         }
+    }
+
+    public void choosePlayerToFlyWithCard(Player chosen_player) {
+        if(!this.isPlayerChoosingZoneToFlyWithCard()){
+            throw new InvalidStateOfTheGameException("The player is not currently choosing a player to fly with card");
+        }
+        if(this.players_to_fly_with.contains(chosen_player)){
+            throw new InvalidParameterException("This player is already chosen!");
+        }
+        this.players_to_fly_with.add(chosen_player);
     }
 }
