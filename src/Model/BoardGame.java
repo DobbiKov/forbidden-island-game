@@ -818,6 +818,7 @@ public class BoardGame {
             }
         }
         claimedArtefacts.add(artefact);
+        this.useOneAction();
         p.addArtefact(artefact);
 
     }
