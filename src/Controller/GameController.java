@@ -129,6 +129,9 @@ public class GameController {
     public boolean isPlayerChoosingZoneToFlyWithCard() {
         return this.boardGame.isPlayerChoosingZoneToFlyWithCard();
     }
+    public boolean isPlayerChoosingCardToDiscard(){
+        return this.boardGame.isPlayerChoosingCardToDiscard();
+    }
     //end is player choosing
     //------------
 
@@ -244,5 +247,19 @@ public class GameController {
     public void choosePlayerToGiveCardTo(Player player) {
         this.boardGame.choosePlayerToGiveCardTo(player);
         GUI.updatePlayerPanels();
+    }
+
+    public void setPlayerDiscardCard() {
+        this.boardGame.setPlayerDiscardCard();
+        GUI.updatePlayerPanels();
+    }
+
+    public void playerDiscardCard(Player player, Card c) {
+        this.boardGame.playerDiscardCard(player, c);
+        GUI.updatePlayerPanels();
+    }
+
+    public boolean isThisPlayerChoosingCardToDiscard(Player player) {
+        return this.boardGame.isThisPlayerChoosingCardToDiscard(player);
     }
 }

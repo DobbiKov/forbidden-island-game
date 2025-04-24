@@ -635,6 +635,9 @@ public class BoardGame {
     public boolean isPlayerChoosingPlayerToGiveCardTo(){
         return this.game_state == GameState.PlayerChoosePlayerToGiveCardTo;
     }
+    public boolean isPlayerChoosingCardToDiscard(){
+        return this.game_state == GameState.PlayerChooseCardToDiscard;
+    }
     //----------------
 
     //-------------
@@ -659,6 +662,9 @@ public class BoardGame {
     public void setPlayerGiveTreasureCards() {
         this.setGame_state(GameState.PlayerChoosingCardToGive);
         this.card_to_give_by_player = null;
+    }
+    public void setPlayerDiscardCard() {
+        this.game_state = GameState.PlayerChooseCardToDiscard;
     }
 
     //end
@@ -853,5 +859,24 @@ public class BoardGame {
         player.getHand().add(this.card_to_give_by_player);
         this.card_to_give_by_player = null;
         this.game_state = GameState.Playing;
+    }
+
+    public void playerDiscardCard(Player player, Card c) {
+        if(!this.isPlayerChoosingCardToDiscard()){
+            throw new InvalidStateOfTheGameException("The player is not currently choosing a card to discard");
+        }
+        if(player != this.getPlayerForTheTurn()){
+            throw new InvalidStateOfTheGameException("This player doesn't have it's turn right now!");
+        }
+        if(!player.getHand().getCards().contains(c)){
+            throw new InvalidStateOfTheGameException("This player doesn't have this card!");
+        }
+
+        this.setGame_state(GameState.Playing);
+        player.getHand().remove(c);
+    }
+
+    public boolean isThisPlayerChoosingCardToDiscard(Player player) {
+        return this.isPlayerChoosingCardToDiscard() && this.getPlayerForTheTurn() == player;
     }
 }

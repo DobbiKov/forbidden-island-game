@@ -8,6 +8,7 @@ public enum GameState {
     PilotChooseWhereToFly, // when a pilot is choosing where to fly
     PlayerChoosingCardToGive,
     PlayerChoosePlayerToGiveCardTo,
+    PlayerChooseCardToDiscard,
 
     NavigatorChooseAPlayerToMove,
     NavigatorChooseAZoneToMovePlayerTo,

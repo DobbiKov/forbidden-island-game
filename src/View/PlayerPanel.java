@@ -130,7 +130,7 @@ public class PlayerPanel extends JPanel {
             case Drain         : b.addActionListener(e -> gc.setPlayerChooseZoneToShoreUp()); break;
             case FlyToACard    : b.addActionListener(e -> gc.setPilotChooseWhereToFlyTo()); break;
             case MovePlayer    : b.addActionListener(e -> gc.setNavigatorChoosePlayerToMove()); break;
-            case DiscardCard   : b.addActionListener(e -> openDiscardDialog()); break;
+            case DiscardCard   : b.addActionListener(e -> gc.setPlayerDiscardCard()); break;
             case GiveTreasureCard: b.addActionListener(e -> gc.setPlayerGiveTreasureCards()); break;
         }
         return b;
@@ -159,7 +159,17 @@ public class PlayerPanel extends JPanel {
                     gc.playerChooseCardToGive(getPlayer(), c);
                 }
             });
-        }else if(c.isAction()){
+        }else if(gc.isThisPlayerChoosingCardToDiscard(getPlayer())){
+
+            imagePanel.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 5));
+            imagePanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    gc.playerDiscardCard(getPlayer(), c);
+                }
+            });
+        }
+        else if(c.isAction()){
             imagePanel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
