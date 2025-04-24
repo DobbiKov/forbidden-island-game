@@ -77,22 +77,39 @@ public class GameController {
     //------------
     //set player choose
     public void setPlayerChooseZoneToMoveTo(){
-        this.boardGame.setPlayerChooseZoneToMoveTo();
+        try {
+            this.boardGame.setPlayerChooseZoneToMoveTo();
+        }catch (InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("Invalid Action", ex.getMessage());
+        }
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
     public void setPlayerChooseZoneToShoreUp(){
-        this.boardGame.setPlayerChooseZoneToShoreUp();
+        try{
+            this.boardGame.setPlayerChooseZoneToShoreUp();
+
+        }catch (InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("Invalid Action", ex.getMessage());
+        }
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
     public void setPilotChooseWhereToFlyTo(){
+        try{
         this.boardGame.setPilotChooseWhereToFlyTo();
+        }catch (InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("Invalid Action", ex.getMessage());
+        }
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
     public void setNavigatorChoosePlayerToMove(){
+        try{
         this.boardGame.setNavigatorChoosePlayerToMove();
+        }catch (InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("Invalid Action", ex.getMessage());
+        }
         HashSet<Player> players = this.boardGame.getPlayersToChoose();
         GUI.makePlayersChoosable(players, this::choosePlayerByNavigator);
         GUI.updatePlayerPanels();
@@ -197,14 +214,6 @@ public class GameController {
         return this.boardGame.getCurrentPlayerCards(player);
     }
 
-
-
-    public void discardCardFromCurrentPlayer(Card c) {
-        boardGame.getPlayerForTheTurn().discardCard(c, boardGame.getTreasureDeck());
-        GUI.updatePlayerPanels();
-        GUI.updateZonePanels();
-    }
-
     public void playerUseActionCard(Player player, Card card) {
         try {
             this.boardGame.playerUseActionCard(player, card);
@@ -229,7 +238,11 @@ public class GameController {
     }
 
     public void setPlayerGiveTreasureCards() {
-        this.boardGame.setPlayerGiveTreasureCards();
+        try {
+            this.boardGame.setPlayerGiveTreasureCards();
+        }catch (NoActionsLeft ex){
+            GUI.showErrorMess("No actions left", "You used all your actions!");
+        }
         GUI.updatePlayerPanels();
     }
 

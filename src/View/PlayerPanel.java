@@ -19,7 +19,12 @@ public class PlayerPanel extends JPanel {
     private final GameController gc;
     private final Player player;
     private final JPanel buttonBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2));
-    private final JPanel cardsBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2));
+    private final JPanel cardsBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2)) {
+        @Override
+        public Dimension getMinimumSize() {
+            return new Dimension(200, 1);
+        }
+    };
     private final JLabel actionBadge = new JLabel();
 
     public PlayerPanel() {
@@ -188,23 +193,4 @@ public class PlayerPanel extends JPanel {
         this.actionBadge.removeAll();
     }
 
-    private void openDiscardDialog() {
-        JDialog dlg = new JDialog(
-                SwingUtilities.getWindowAncestor(this),
-                "Choose a card to discard",
-                Dialog.ModalityType.APPLICATION_MODAL
-        );
-        dlg.setLayout(new FlowLayout());
-        for (Card c : player.getHand().getCards()) {
-            JButton btn = new JButton("Discard " + c.getType());
-            btn.addActionListener(e -> {
-                gc.discardCardFromCurrentPlayer(c);
-                dlg.dispose();
-            });
-            dlg.add(btn);
-        }
-        dlg.pack();
-        dlg.setLocationRelativeTo(this);
-        dlg.setVisible(true);
-    }
 }

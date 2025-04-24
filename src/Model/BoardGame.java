@@ -645,23 +645,41 @@ public class BoardGame {
     //-------------
     //set player choose
     public void setPilotChooseWhereToFlyTo() {
+        if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
+            throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
         this.setGame_state(GameState.PilotChooseWhereToFly);
     }
     public void setNavigatorChoosePlayerToMove() {
+        if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
+            throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
         this.setGame_state(GameState.NavigatorChooseAPlayerToMove);
     }
     private void setNavigatorChooseZoneToMoveThePlayerTo() {
+        if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
+            throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
         this.setGame_state(GameState.NavigatorChooseAZoneToMovePlayerTo);
     }
     public void setPlayerChooseZoneToMoveTo(){
+        if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
+            throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
         // TODO: verify that it's possible
         this.game_state = GameState.PlayerChooseWhereToMove;
     }
 
     public void setPlayerChooseZoneToShoreUp() {
+        if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
+            throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
         this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
     }
     public void setPlayerGiveTreasureCards() {
+        if(this.getCurrent_player_actions_num() <= 0){
+            throw new NoActionsLeft();
+        }
         this.setGame_state(GameState.PlayerChoosingCardToGive);
         this.card_to_give_by_player = null;
     }
@@ -689,7 +707,8 @@ public class BoardGame {
             throw new IllegalStateException("Not currently discarding");
         }
         Player p = getPlayerForTheTurn();
-        p.discardCard(card, treasureDeck);
+        p.getHand().remove(card);
+        this.treasureDeck.discard(card);
 
         if (!p.getHand().isOverflow()) {
             nextPlayerTurn();
@@ -736,6 +755,7 @@ public class BoardGame {
             throw new InvalidStateOfTheGameException("The player doesn't have a card to fly!");
         }
         player.getHand().remove(card);
+        this.treasureDeck.discard(card);
         for(Player p: this.players_to_fly_with){ //TODO
             this.placePlayerToZone(p, zone);
         }
@@ -762,6 +782,7 @@ public class BoardGame {
             throw new InvalidStateOfTheGameException("The player doesn't have a card to shore up!");
         }
         player.getHand().remove(card);
+        this.treasureDeck.discard(card);
         zone.shoreUp();
 
         this.player_choosing_card_to_use = null;
@@ -791,7 +812,8 @@ public class BoardGame {
         List<Card> handCards = new ArrayList<>(p.getHand().getCards());
         for (Card c : handCards) {
             if (c.getType() == needed && discards < 4) {
-                p.discardCard(c, treasureDeck);
+                p.getHand().remove(c);
+                this.treasureDeck.discard(c);
                 discards++;
             }
         }
@@ -861,6 +883,7 @@ public class BoardGame {
         player.getHand().add(this.card_to_give_by_player);
         this.card_to_give_by_player = null;
         this.game_state = GameState.Playing;
+        this.useOneAction();
     }
 
     public void playerDiscardCard(Player player, Card c) {
@@ -876,9 +899,14 @@ public class BoardGame {
 
         this.setGame_state(GameState.Playing);
         player.getHand().remove(c);
+        treasureDeck.discard(c);
     }
 
     public boolean isThisPlayerChoosingCardToDiscard(Player player) {
         return this.isPlayerChoosingCardToDiscard() && this.getPlayerForTheTurn() == player;
+    }
+
+    public boolean canPlayerUseBasicAction(Player player){
+        return player.getHand().getSize() <= 5;
     }
 }
