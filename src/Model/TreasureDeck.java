@@ -27,7 +27,7 @@ public class TreasureDeck extends Deck<Card> {
 
     public void addWaterRiseCards() {
         for (int i = 0; i < 3; i++) {
-            drawCards.add(new Card(CardType.WATER_CARD));
+            drawCards.add(new Card(CardType.WATER_RISE));
         }
         shuffle();
     }

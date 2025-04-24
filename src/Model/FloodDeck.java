@@ -17,6 +17,12 @@ public class FloodDeck extends Deck<ZoneCard> {
         return cards;
     }
 
+    public void reshuffleDiscardIntoDraw() {
+        if (discardCards.isEmpty()) return;
+        drawCards.addAll(discardCards);
+        discardCards.clear();
+        shuffle();
+    }
 
 
 }

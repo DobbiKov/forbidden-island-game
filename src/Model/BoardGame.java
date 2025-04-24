@@ -29,6 +29,7 @@ public class BoardGame {
     private final EnumSet<Artefact> claimedArtefacts = EnumSet.noneOf(Artefact.class);
     private ArrayList<Player> players_to_fly_with;
     private Card card_to_give_by_player;
+    private WaterMeter water_meter;
 
     public BoardGame() {
         // zone init
@@ -37,6 +38,7 @@ public class BoardGame {
         this.player_factory = new PlayerFactory();
         this.treasureDeck = new TreasureDeck();
         this.floodDeck = new FloodDeck();
+        this.water_meter = new WaterMeter();
         this.game_state = GameState.SettingUp;
         this.size = 5;
         this.card_to_give_by_player = null;
@@ -86,6 +88,7 @@ public class BoardGame {
             p.takeCard(treasureDeck.draw());
             p.takeCard(treasureDeck.draw());
         }
+        treasureDeck.addWaterRiseCards();
         this.moveTurnToNextPlayer();
     }
     public Zone[][] getBoard() {
@@ -320,8 +323,19 @@ public class BoardGame {
     public void finDeTour() {
         Player p = this.getPlayerForTheTurn();
         if(!this.treasureDrawnThisTurn){
-            p.takeCard(treasureDeck.draw());
-            p.takeCard(treasureDeck.draw());
+            for(int i = 0; i < 2; i++){
+                Card card = treasureDeck.draw();
+                if(card.isWaterRise()){
+                    treasureDeck.discard(card);
+                    floodDeck.reshuffleDiscardIntoDraw();
+                    boolean flood_out = water_meter.increaseLevel();
+                    if(flood_out){
+                        throw new IslandFloodedException();
+                    }
+                }else{
+                    p.takeCard(card);
+                }
+            }
             this.treasureDrawnThisTurn = true;
             if(p.getHand().isOverflow()){
                 this.game_state = GameState.Discarding;
@@ -335,7 +349,8 @@ public class BoardGame {
                 this.game_state = GameState.Playing;
             }
         }
-        for (int i = 0; i < 3; i++) {
+        int floodsToDraw = water_meter.getCurrentFloodRate();
+        for (int i = 0; i < floodsToDraw; i++) {
             ZoneCard card;
             try {
                 card = floodDeck.draw();
@@ -909,5 +924,9 @@ public class BoardGame {
 
     public boolean canPlayerUseBasicAction(Player player){
         return player.getHand().getSize() <= 5;
+    }
+
+    public int getWaterMeterLevel() {
+        return water_meter.getLevel();
     }
 }
