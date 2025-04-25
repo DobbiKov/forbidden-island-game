@@ -152,6 +152,9 @@ public class BoardGame {
         return null;
     }
     public Player addPlayer(String name){
+        if(name.length() > 12){
+            throw new InvalidParameterException("The name is too long, must be at most 12 characters");
+        }
         if(player_count > 3){
             throw new MaximumNumberOfPlayersReachedException();
         }

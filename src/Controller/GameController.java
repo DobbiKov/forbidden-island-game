@@ -35,7 +35,9 @@ public class GameController {
         }
         catch (MaximumNumberOfPlayersReachedException e){
             GUI.showErrorMess("max reached", "Maximum number of players reached");
-
+        }
+        catch(InvalidParameterException e){
+            GUI.showErrorMess("Invalid data provided", e.getMessage());
         }
     }
 
