@@ -325,10 +325,12 @@ public class BoardGame {
 
     public void finDeTour() {
         Player p = this.getPlayerForTheTurn();
+        boolean gotWaterRise = false;
         if(!this.treasureDrawnThisTurn){
             for(int i = 0; i < 2; i++){
                 Card card = treasureDeck.draw();
                 if(card.isWaterRise()){
+                    gotWaterRise = true;
                     treasureDeck.discard(card);
                     floodDeck.reshuffleDiscardIntoDraw();
                     boolean flood_out = water_meter.increaseLevel();
@@ -370,6 +372,9 @@ public class BoardGame {
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
         this.setGame_state(GameState.Playing);
+        if(gotWaterRise){
+            throw new WaterRiseException();
+        }
     }
 
     private void setDefaultActionsNum(){

@@ -71,6 +71,10 @@ public class GUI {
         ErrorDialog dlg = new ErrorDialog(window, title, message);
         dlg.setVisible(true);
     }
+    public static void showInfoMess(String title, String message){
+        InfoDialog dlg = new InfoDialog(window, title, message);
+        dlg.setVisible(true);
+    }
     public static void addPlayerPanel(Player new_player){
         panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
         updatePlayerPanels();
