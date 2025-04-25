@@ -355,6 +355,7 @@ public class BoardGame {
             }
         }
         int floodsToDraw = water_meter.getCurrentFloodRate();
+        //checkPlayerDead();
         for (int i = 0; i < floodsToDraw; i++) {
             ZoneCard card;
             try {
@@ -369,12 +370,15 @@ public class BoardGame {
             floodDeck.discard(card);
         }
         this.treasureDrawnThisTurn = false;
+        checkHelicopterZone();
+        checkArtefactLost();
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
         this.setGame_state(GameState.Playing);
         if(gotWaterRise){
             throw new WaterRiseException();
         }
+        checkWaterMeterMax();
     }
 
     private void setDefaultActionsNum(){
@@ -937,4 +941,45 @@ public class BoardGame {
     public int getWaterMeterLevel() {
         return water_meter.getLevel();
     }
+
+    private void checkHelicopterZone(){
+        Zone heli = getZoneByCard(ZoneCard.fodls_landing);
+        if (!heli.isAccessible()) {
+            throw new GameOverException("the helicopter landing site has sunk");
+        }
+    }
+
+    private void checkArtefactLost(){
+        for(Artefact artefact : EnumSet.complementOf(claimedArtefacts)) {
+            int cpt = 0;
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    Zone z = board[x][y];
+                    if (z instanceof ArtefactZone && ((ArtefactZone) z).getArtefact() == artefact) {
+                        if (z.getZone_state() == ZoneState.Inaccessible) {
+                            cpt++;
+                            if(cpt == 2){
+                                throw new GameOverException("you have lost the artefact!");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // have to rework players dying
+    /*private void checkPlayerDead() {
+        Player p = getPlayerForTheTurn();
+        if (!p.getPlayer_zone().isAccessible()) {
+            throw new GameOverException("player is stranded on a sunken zone");
+        }
+    }*/
+
+    private void checkWaterMeterMax() {
+        if (water_meter.getLevel() >= WaterMeter.MAX_LEVEL) {
+            throw new GameOverException("water level has reached maximum");
+        }
+    }
+
+
 }

@@ -28,6 +28,10 @@ public class GameController {
         catch(WaterRiseException ex){
             GUI.showInfoMess("Attention!", "You got a water rise card, the level of water is rising!");
         }
+        catch(GameOverException ex){
+            GUI.showErrorMess("Game Over", ex.getMessage());
+            return;
+        }
             GUI.updatePlayerPanels();
             GUI.updateZonePanels();
     }
