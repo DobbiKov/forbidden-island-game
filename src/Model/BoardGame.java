@@ -30,6 +30,8 @@ public class BoardGame {
     private ArrayList<Player> players_to_fly_with;
     private Card card_to_give_by_player;
     private WaterMeter water_meter;
+    private ArrayList<Player> players_on_inaccessible_zones;
+    private Player current_player_running_from_inaccessible_zone;
 
     public BoardGame() {
         // zone init
@@ -39,6 +41,8 @@ public class BoardGame {
         this.treasureDeck = new TreasureDeck();
         this.floodDeck = new FloodDeck();
         this.water_meter = new WaterMeter();
+        this.players_on_inaccessible_zones = new ArrayList<>();
+        this.current_player_running_from_inaccessible_zone = null;
         this.game_state = GameState.SettingUp;
         this.size = 5;
         this.card_to_give_by_player = null;
@@ -199,8 +203,20 @@ public class BoardGame {
     public boolean isGamePlaying(){
         return !this.isGameSettingUp();
     }
-
+    private ArrayList<PlayerAction> getActionsToRunFromInaccessibleZone(){
+        ArrayList<PlayerAction> actions = new ArrayList<>();
+        actions.add(PlayerAction.RunFromInaccessibleZone);
+        return actions;
+    }
     public ArrayList<PlayerAction> getPossiblePlayerActionsForCurrentTurn(Player player){
+        if(this.arePlayersRunningFromInaccesbleZone())
+        {
+            if(this.players_on_inaccessible_zones.contains(player)) {
+                return this.getActionsToRunFromInaccessibleZone();
+            }else {
+                return new ArrayList<>();
+            }
+        }
         if(player == this.getPlayerForTheTurn())
             return getPossiblePlayerActions(player);
         return new ArrayList<>();
@@ -324,6 +340,9 @@ public class BoardGame {
     }
 
     public void finDeTour() {
+        if(this.game_state == GameState.PlayersRunningFromAnInaccessibleZone){
+            throw new InvalidActionForTheCurrentState("You must move from an inaccessible zone!");
+        }
         Player p = this.getPlayerForTheTurn();
         boolean gotWaterRise = false;
         if(!this.treasureDrawnThisTurn){
@@ -366,6 +385,11 @@ public class BoardGame {
             Zone z = getZoneByCard(card);
             if (z != null) {
                 z.floodZone();
+                if(!z.isAccessible() && !z.getPlayers_on_zone().isEmpty()){
+                   this.players_on_inaccessible_zones.addAll(z.getPlayers_on_zone());
+                   this.setGame_state(GameState.PlayersRunningFromAnInaccessibleZone);
+                   this.current_player_running_from_inaccessible_zone = null;
+                }
             }
             floodDeck.discard(card);
         }
@@ -374,7 +398,9 @@ public class BoardGame {
         checkArtefactLost();
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
-        this.setGame_state(GameState.Playing);
+        if(this.game_state != GameState.PlayersRunningFromAnInaccessibleZone) {
+            this.setGame_state(GameState.Playing);
+        }
         if(gotWaterRise){
             throw new WaterRiseException();
         }
@@ -457,7 +483,10 @@ public class BoardGame {
     //get zones
 
     public ArrayList<Zone> getZonesPossibleForChoosing() {
-        if(this.isPlayerChoosingZoneToMove()){
+        if(this.isPlayerChoosingZoneToRunFromInaccesbleZone()){
+            return this.getZonesToRunFromInaccessibleZone();
+        }
+        else if(this.isPlayerChoosingZoneToMove()){
             return this.getZonesForPlayerToMove(this.getPlayerForTheTurn());
         }else if(this.isPlayerChoosingZoneToShoreUp()){
            return this.getZonesToForPlayerShoreUp(this.getPlayerForTheTurn());
@@ -471,6 +500,18 @@ public class BoardGame {
             return this.getZonesToShoreUpWithCard();
         }
         return new ArrayList<>();
+    }
+    private ArrayList<Zone> getZonesToRunFromInaccessibleZone(){
+        Player current_player = this.current_player_running_from_inaccessible_zone;
+        switch(current_player.getPlayer_role()){
+            case Pilot:
+                return this.getZonesForPlayerToFlyTo(current_player);
+            case Diver:
+                return this.getZonesForDiverRunningFromInaccessible(current_player.getPlayer_zone());
+            case Explorer:
+                return this.getAdjacentZones(current_player.getPlayer_zone(), true, Zone::isAccessible);
+        }
+        return this.getAdjacentZones(current_player.getPlayer_zone(), false, Zone::isAccessible);
     }
     private ArrayList<Zone> getAdjacentZones(Zone zone, boolean accept_diagonals, Predicate<Zone> filter){
         ArrayList<Zone> adjacentZones = new ArrayList<>();
@@ -491,18 +532,40 @@ public class BoardGame {
     }
 
     private ArrayList<Zone> getZonesForDiver(Zone zone){
-        HashSet<Zone> res_zones = new HashSet<>(this.getAdjacentZones(zone, false, Zone::isDry));
+       return this.getZonesForDiverWithChoice(zone, true);
+    }
+    private ArrayList<Zone> getZonesForDiverRunningFromInaccessible(Zone zone){
+        return this.getZonesForDiverWithChoice(zone, false);
+    }
+    private ArrayList<Zone> getZonesForDiverWithChoice(Zone zone, boolean is_dry){
+        HashSet<Zone> res_zones = new HashSet<>(this.getAdjacentZones(zone, false, z -> {
+            if(is_dry) return z.isDry();
+            return z.isAccessible();
+        }));
         LinkedList<Zone> floodedQueue = new LinkedList<>(this.getAdjacentZones(zone, true, z -> !z.isDry()));
         HashSet<Zone> exploredFlooded = new HashSet<>();
 
         while(!floodedQueue.isEmpty()){
             Zone floodedZone = floodedQueue.poll();
             exploredFlooded.add(floodedZone);
-            ArrayList<Zone> dryZones = this.getAdjacentZones(floodedZone, true, z -> {
-                if(res_zones.contains(z)){ return false;}
-                return z.isDry();
-            });
-            res_zones.addAll(dryZones);
+            if(is_dry) {
+                ArrayList<Zone> dryZones = this.getAdjacentZones(floodedZone, true, z -> {
+                    if (res_zones.contains(z)) {
+                        return false;
+                    }
+                    return z.isDry();
+                });
+                res_zones.addAll(dryZones);
+            }else{
+
+                ArrayList<Zone> accZones = this.getAdjacentZones(floodedZone, true, z -> {
+                    if (res_zones.contains(z)) {
+                        return false;
+                    }
+                    return z.isAccessible();
+                });
+                res_zones.addAll(accZones);
+            }
 
             ArrayList<Zone> floodedZones = this.getAdjacentZones(floodedZone, true, z -> {
                 if(exploredFlooded.contains(z)){ return false;}
@@ -632,6 +695,8 @@ public class BoardGame {
                 || this.isPlayerChoosingZoneToShoreUpWithCard()
                 || this.isPlayerChoosingZoneToFlyWithCard()
                 || this.isPlayerChoosingPlayerToGiveCardTo()
+                || this.isPlayerChoosingZoneToShoreUpWithCard()
+                || this.isPlayerChoosingZoneToRunFromInaccesbleZone()
                 ;
     }
     public boolean isPlayerChoosingZoneToMove() {
@@ -666,6 +731,12 @@ public class BoardGame {
     }
     public boolean isPlayerChoosingCardToDiscard(){
         return this.game_state == GameState.PlayerChooseCardToDiscard;
+    }
+    public boolean arePlayersRunningFromInaccesbleZone(){
+        return this.game_state == GameState.PlayersRunningFromAnInaccessibleZone;
+    }
+    public boolean isPlayerChoosingZoneToRunFromInaccesbleZone(){
+        return this.game_state == GameState.PlayersRunningFromAnInaccessibleZone && this.current_player_running_from_inaccessible_zone != null;
     }
     //----------------
 
@@ -749,6 +820,9 @@ public class BoardGame {
     }
 
     public void playerUseActionCard(Player player, Card card) {
+        if(this.arePlayersRunningFromInaccesbleZone()){
+            throw new InvalidActionForTheCurrentState("You can't use a card now!");
+        }
         if(!player.getHand().getCards().contains(card)){
             throw new InvalidParameterException("You do not have such a card!");
         }
@@ -822,6 +896,9 @@ public class BoardGame {
 
     public void takeArtefact() {
         Player p = getPlayerForTheTurn();
+        if(this.current_player_actions_num <= 0){
+            throw new NoActionsLeft();
+        }
         Zone current_zone = p.getPlayer_zone();
         if(!(current_zone instanceof ArtefactZone)){
             throw new InvalidStateOfTheGameException("You must stand on the zone with artefact");
@@ -829,7 +906,7 @@ public class BoardGame {
         ArtefactZone artefactZone = (ArtefactZone) current_zone;
         Artefact artefact = artefactZone.getArtefact();
         if(claimedArtefacts.contains(artefact)){
-            throw new InvalidStateOfTheGameException("You must stand on the matching artefact zone");
+            throw new InvalidStateOfTheGameException("This artefact is already taken!");
         }
         CardType needed = cardTypeFor(artefact);
         if (!hasAtLeast(needed)) {
@@ -982,4 +1059,34 @@ public class BoardGame {
     }
 
 
+
+    public boolean isArtefactTaken(Artefact artefact) {
+        return this.claimedArtefacts.contains(artefact);
+    }
+
+    public void setPlayerChooseZoneToRunFromInaccessbileZone(Player player) {
+        if(this.current_player_running_from_inaccessible_zone != null){
+            throw new InvalidStateOfTheGameException("There is already a player running from inaccessible zone");
+        }
+        this.current_player_running_from_inaccessible_zone = player;
+    }
+
+    public void chooseZoneToRunFromInaccessible(Zone zone) {
+        if(!this.isPlayerChoosingZoneToRunFromInaccesbleZone()){
+            throw new InvalidStateOfTheGameException("Nobody is trying to run from inaccessible zone");
+        }
+        if(!zone.isAccessible()){
+            throw new InvalidParameterException("This zone is not accessbile!");
+        }
+        this.placePlayerToZone(this.current_player_running_from_inaccessible_zone, zone);
+        this.players_on_inaccessible_zones.remove(this.current_player_running_from_inaccessible_zone);
+        this.current_player_running_from_inaccessible_zone = null;
+
+        if(!this.players_on_inaccessible_zones.isEmpty()){
+            this.setGame_state(GameState.PlayersRunningFromAnInaccessibleZone);
+        }
+        else{
+            this.setGame_state(GameState.Playing);
+        }
+    }
 }

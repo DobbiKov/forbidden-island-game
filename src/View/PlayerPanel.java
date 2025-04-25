@@ -162,6 +162,7 @@ public class PlayerPanel extends JPanel {
             case DiscardCard   : b.addActionListener(e -> gc.setPlayerDiscardCard()); break;
             case GiveTreasureCard: b.addActionListener(e -> gc.setPlayerGiveTreasureCards()); break;
             case TakeArtefact  : b.addActionListener(e -> gc.takeArtefact()); break;
+            case RunFromInaccessibleZone: b.addActionListener(e -> gc.setPlayerChooseZoneToRunFromInaccessbileZone(getPlayer()));
         }
         return b;
     }

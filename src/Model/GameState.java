@@ -9,6 +9,7 @@ public enum GameState {
     PlayerChoosingCardToGive,
     PlayerChoosePlayerToGiveCardTo,
     PlayerChooseCardToDiscard,
+    PlayersRunningFromAnInaccessibleZone,
 
     NavigatorChooseAPlayerToMove,
     NavigatorChooseAZoneToMovePlayerTo,

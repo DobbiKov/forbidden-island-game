@@ -5,10 +5,7 @@ import Errors.MaximumNumberOfPlayersReachedException;
 import Errors.NoPlayersException;
 import Helper.AddPlayerCallback;
 import Helper.ChoosablePlayerCallback;
-import Model.Player;
-import Model.PlayerAction;
-import Model.Zone;
-import Model.ZoneState;
+import Model.*;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -39,7 +36,42 @@ public class GUI {
     private static JPanel buttonPanel;
     private static JButton add_player;
 
+    private static JLabel topLeft;
+    private static JLabel topRight;
+
+    private static JLabel botLeft;
+    private static JLabel botRight;
+
     private static JButton start_game;
+
+//    topLeft  = new JLabel(scaledIcon("artefacts_images/earth_stone.png", artefactSize, artefactSize));
+//    topRight = new JLabel(scaledIcon("artefacts_images/statue_of_wind.png", artefactSize, artefactSize));
+//
+//    botLeft  = new JLabel(scaledIcon("artefacts_images/crystal_of_fire.png", artefactSize, artefactSize));
+//    botRight = new JLabel(scaledIcon("artefacts_images/oceans_chalice.png", artefactSize, artefactSize));
+    public static void updateCornerArtefacts(){
+        if(gameController.isArtefactTaken(Artefact.Earth)){
+            topLeft.setVisible(false);
+            topLeft.revalidate();
+            topLeft.repaint();
+        }
+        if(gameController.isArtefactTaken(Artefact.Wind)){
+            topRight.setVisible(false);
+            topRight.revalidate();
+            topRight.repaint();
+        }
+        if(gameController.isArtefactTaken(Artefact.Fire)){
+            botLeft.setVisible(false);
+            botLeft.revalidate();
+            botLeft.repaint();
+        }
+        if(gameController.isArtefactTaken(Artefact.Water)){
+            botRight.setVisible(false);
+            botRight.revalidate();
+            botRight.repaint();
+        }
+
+    }
 
     private static JPanel getZone(Zone z){
         JPanel button = new FilteredImagePanel(z, zone_size);
@@ -145,7 +177,10 @@ public class GUI {
                     panel.addMouseListener(new MouseAdapter() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
-                            if(gameController.isPlayerChoosingZoneToShoreUp()){
+                            if(gameController.isPlayerChoosingZoneToRunFromInaccesbleZone()){
+                                gameController.chooseZoneToRunFromInaccessible(zones[finalI][finalJ]);
+                            }
+                            else if(gameController.isPlayerChoosingZoneToShoreUp()){
                                 gameController.playerShoreUpZone(zones[finalI][finalJ]);
                             }
                             else if(gameController.isPlayerChoosingZoneToMove()) {
@@ -315,8 +350,11 @@ public class GUI {
         topCorners.setLayout(new BoxLayout(topCorners, BoxLayout.X_AXIS));
         topCorners.setPreferredSize(new Dimension(0, artefactSize));
 
-        JLabel topLeft  = new JLabel(scaledIcon("artefacts_images/earth_stone.png", artefactSize, artefactSize));
-        JLabel topRight = new JLabel(scaledIcon("artefacts_images/statue_of_wind.png", artefactSize, artefactSize));
+        topLeft  = new JLabel(scaledIcon("artefacts_images/earth_stone.png", artefactSize, artefactSize));
+        topRight = new JLabel(scaledIcon("artefacts_images/statue_of_wind.png", artefactSize, artefactSize));
+
+        botLeft  = new JLabel(scaledIcon("artefacts_images/crystal_of_fire.png", artefactSize, artefactSize));
+        botRight = new JLabel(scaledIcon("artefacts_images/oceans_chalice.png", artefactSize, artefactSize));
 
         topCorners.add(topLeft);
         topCorners.add(Box.createHorizontalGlue());
@@ -328,8 +366,6 @@ public class GUI {
         bottomCorners.setLayout(new BoxLayout(bottomCorners, BoxLayout.X_AXIS));
         bottomCorners.setPreferredSize(new Dimension(0, artefactSize));
 
-        JLabel botLeft  = new JLabel(scaledIcon("artefacts_images/crystal_of_fire.png", artefactSize, artefactSize));
-        JLabel botRight = new JLabel(scaledIcon("artefacts_images/oceans_chalice.png", artefactSize, artefactSize));
 
         bottomCorners.add(botLeft);
         bottomCorners.add(Box.createHorizontalGlue());

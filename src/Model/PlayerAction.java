@@ -7,7 +7,8 @@ public enum PlayerAction {
     FlyToACard,
     MovePlayer,
     DiscardCard,
-    TakeArtefact;
+    TakeArtefact,
+    RunFromInaccessibleZone;
 
     @Override
     public String toString() {
@@ -19,6 +20,7 @@ public enum PlayerAction {
             case MovePlayer: return "move player";
             case DiscardCard: return "discard card";
             case TakeArtefact: return "take artefact";
+            case RunFromInaccessibleZone: return "run from an inaccessible zone";
         }
         return "";
     }

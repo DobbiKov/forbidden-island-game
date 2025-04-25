@@ -32,6 +32,9 @@ public class GameController {
             GUI.showErrorMess("Game Over", ex.getMessage());
             return;
         }
+        catch(InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("You got an invalid action for this state", ex.getMessage());
+        }
             GUI.updatePlayerPanels();
             GUI.updateZonePanels();
     }
@@ -124,6 +127,15 @@ public class GameController {
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
     }
+    public void setPlayerChooseZoneToRunFromInaccessbileZone(Player player){
+        try {
+            this.boardGame.setPlayerChooseZoneToRunFromInaccessbileZone(player);
+        }catch (InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("Invalid Action", ex.getMessage());
+        }
+        GUI.updateZonePanels();
+        GUI.updatePlayerPanels();
+    }
 
 
     //end set player choose
@@ -157,6 +169,12 @@ public class GameController {
     }
     public boolean isPlayerChoosingCardToDiscard(){
         return this.boardGame.isPlayerChoosingCardToDiscard();
+    }
+    public boolean arePlayersRunningFromInaccessibleZone(){
+        return this.boardGame.arePlayersRunningFromInaccesbleZone();
+    }
+    public boolean isPlayerChoosingZoneToRunFromInaccesbleZone(){
+        return this.boardGame.isPlayerChoosingZoneToRunFromInaccesbleZone();
     }
     //end is player choosing
     //------------
@@ -234,6 +252,8 @@ public class GameController {
             GUI.updateZonePanels();
         }catch (InvalidParameterException ex){
             GUI.showErrorMess("Invalid card", "You don't have such a card!");
+        }catch(InvalidActionForTheCurrentState ex){
+            GUI.showErrorMess("Invalid action", ex.getMessage());
         }
     }
 
@@ -290,8 +310,30 @@ public class GameController {
             boardGame.takeArtefact();
         } catch (IllegalStateException ex) {
             GUI.showErrorMess("Cannot Take Artefact", ex.getMessage());
+        } catch (InvalidStateOfTheGameException ex){
+            GUI.showErrorMess("Cannot Take Artefact", ex.getMessage());
+        }catch (NoActionsLeft ex){
+            GUI.showErrorMess("Cannot Take Artefact", "You used all your actions!");
         }
         GUI.updatePlayerPanels();
         GUI.updateZonePanels();
+        GUI.updateCornerArtefacts();
+    }
+
+    public boolean isArtefactTaken(Artefact artefact) {
+        return this.boardGame.isArtefactTaken(artefact);
+    }
+
+    public void chooseZoneToRunFromInaccessible(Zone zone) {
+        try {
+            this.boardGame.chooseZoneToRunFromInaccessible(zone);
+        }
+        catch(InvalidStateOfTheGameException ex){
+            GUI.showErrorMess("Invalid action", ex.getMessage());
+        }catch(InvalidParameterException ex){
+            GUI.showErrorMess("Invalid action", ex.getMessage());
+        }
+        GUI.updateZonePanels();
+        GUI.updatePlayerPanels();
     }
 }
