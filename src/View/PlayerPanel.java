@@ -45,6 +45,18 @@ public class PlayerPanel extends JPanel {
 
         update();                                    // initial fill
     }
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(200, 1);
+    }
+    @Override
+    public Dimension getPreferredSize() {
+        // let the normal layout compute a size first
+        Dimension pref = super.getPreferredSize();
+        // enforce a floor of 200 px
+        int w = Math.max(pref.width, 200);
+        return new Dimension(w, pref.height);
+    }
 
     /* ---------- public API ---------- */
 

@@ -77,11 +77,31 @@ public class GUI {
     }
     public static void addPlayerPanel(Player new_player){
         panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
+        window.remove(rightPanel);
+        rightPanel = new JPanel();
+        rightPanel.setLayout(new GridLayout(2, 1));
+        rightPanel.add(panelPlayers[0]);
+        rightPanel.add(panelPlayers[1]);
+        rightPanel.setVisible(true);
+        window.add(rightPanel, BorderLayout.EAST);
+
+        window.remove(leftPanel);
+        leftPanel = new JPanel();
+        leftPanel.setLayout(new GridLayout(2, 1));
+        leftPanel.add(panelPlayers[2]);
+        leftPanel.add(panelPlayers[3]);
+        leftPanel.setVisible(true);
+        window.add(leftPanel, BorderLayout.WEST);
+
         updatePlayerPanels();
         updateZonePanels();
     }
 
     public static void updateZonePanels() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(GUI::updateZonePanels);
+            return;
+        }
         zones = gameController.getZones(); // get the new state
         HashSet<Zone> zoneSet = new HashSet<>();
         if(gameController.isPlayerChoosingSomething()){
@@ -150,6 +170,10 @@ public class GUI {
         }
     }
     public static void updatePlayerPanels(){
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(GUI::updatePlayerPanels);
+            return;
+        }
         for(PlayerPanel panel : panelPlayers){
             if(panel.getPlayer() == null){
                 continue;
@@ -163,23 +187,9 @@ public class GUI {
             }
         }
 
-        window.remove(rightPanel);
-        rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(2, 1));
-        rightPanel.add(panelPlayers[0]);
-        rightPanel.add(panelPlayers[1]);
-        rightPanel.setVisible(true);
-        window.add(rightPanel, BorderLayout.EAST);
 
-        window.remove(leftPanel);
-        leftPanel = new JPanel();
-        leftPanel.setLayout(new GridLayout(2, 1));
-        leftPanel.add(panelPlayers[2]);
-        leftPanel.add(panelPlayers[3]);
-        leftPanel.setVisible(true);
-        window.add(leftPanel, BorderLayout.WEST);
-
-        window.validate();
+        window.revalidate();
+        window.repaint();
     }
 
     public static void startGameHandleView(){
