@@ -1,10 +1,7 @@
 package View;
 
 import Controller.GameController;
-import Model.BoardGame;
-import Model.Player;
-import Model.Card;
-import Model.PlayerAction;
+import Model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,6 +22,9 @@ public class PlayerPanel extends JPanel {
             return new Dimension(200, 1);
         }
     };
+    private final JPanel artefactBar = new JPanel(
+            new FlowLayout(FlowLayout.LEFT, 2, 0));
+
     private final JLabel actionBadge = new JLabel();
 
     public PlayerPanel() {
@@ -41,6 +41,7 @@ public class PlayerPanel extends JPanel {
         add(createHeader(), BorderLayout.NORTH);
         add(new JScrollPane(buttonBar),        BorderLayout.CENTER);
         add(new JScrollPane(cardsBar),         BorderLayout.SOUTH);
+        artefactBar.setBackground(player.getPlayerColor().getColor());
 
         update();                                    // initial fill
     }
@@ -81,6 +82,16 @@ public class PlayerPanel extends JPanel {
             cardsBar.add(buildPlayerCard(c));
         }
         cardsBar.setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
+
+        //artefacts
+
+        artefactBar.removeAll();
+        for (Artefact a : player.getArtefacts()) {
+            JLabel icon = new JLabel(new ImageIcon(
+                    new ImageIcon("artefacts_images/" + a.toImgString() + ".png")
+                            .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH)));
+            artefactBar.add(icon);
+        }
         revalidate();
         repaint();
     }
@@ -111,6 +122,7 @@ public class PlayerPanel extends JPanel {
         var labels = Box.createVerticalBox();
         labels.add(name);
         labels.add(role);
+        labels.add(artefactBar);
 
         // badge
         actionBadge.setOpaque(true);
