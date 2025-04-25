@@ -12,6 +12,7 @@ class FilteredImagePanel extends JPanel {
     private boolean showBlueFilter = false;
     private Zone zone;
     private Image overlayImage;
+    private int TILE  = 150;
 
     public void setBlueFilterVisible(boolean visible) {
         this.showBlueFilter = visible;
@@ -22,8 +23,22 @@ class FilteredImagePanel extends JPanel {
         return showBlueFilter;
     }
 
-    public FilteredImagePanel(Zone z) {
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(TILE, TILE); // your exact size
+    }
+    @Override public Dimension getMinimumSize()   { return getPreferredSize(); }
+    @Override public Dimension getMaximumSize()   { return getPreferredSize(); }
+
+    public FilteredImagePanel(Zone z, int zone_size) {
         super();
+        this.TILE = zone_size;
+        Dimension fixedSize = new Dimension(this.TILE, this.TILE);
+        setPreferredSize(fixedSize);
+        setMinimumSize(fixedSize);
+        setMaximumSize(fixedSize);
+        setSize(fixedSize);
+//        this.setLayout(null);
         this.zone = z;
         if(z != null){
             if(z.getZone_type() == ZoneType.ArtefactAssociated){

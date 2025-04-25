@@ -232,7 +232,7 @@ public class BoardGame {
         if(player_on_same_card || player.getPlayer_role() == PlayerRole.Messenger){
             possibleActions.add(PlayerAction.GiveTreasureCard);
         }
-        if (game_state == GameState.Discarding && player == getPlayerForTheTurn()) {
+        if (player == getPlayerForTheTurn() && getPlayerForTheTurn().getHand().getSize() > 5) {
             possibleActions.add(PlayerAction.DiscardCard);
         }
         if(player.getPlayer_zone() instanceof ArtefactZone){

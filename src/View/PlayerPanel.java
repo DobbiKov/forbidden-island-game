@@ -39,8 +39,8 @@ public class PlayerPanel extends JPanel {
         setOpaque(false);                            // let header paint its own bg
 
         add(createHeader(), BorderLayout.NORTH);
-        add(buttonBar,        BorderLayout.CENTER);
-        add(cardsBar,        BorderLayout.SOUTH);
+        add(new JScrollPane(buttonBar),        BorderLayout.CENTER);
+        add(new JScrollPane(cardsBar),         BorderLayout.SOUTH);
 
         update();                                    // initial fill
     }

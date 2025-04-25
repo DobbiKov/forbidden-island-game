@@ -24,8 +24,8 @@ public class GUI {
     private static int w_height = 600;
 
     private static Zone[][] zones;
-    private static int zone_size;
-    private static int artefactSize = zone_size;
+    private static int zone_size = 150;
+    private static int artefactSize = (int)(zone_size*(0.7));
 
     private static JPanel[][] zonePanels;
 
@@ -42,9 +42,7 @@ public class GUI {
     private static JButton start_game;
 
     private static JPanel getZone(Zone z){
-        JPanel button = new FilteredImagePanel(z);
-        button.setSize(zone_size, zone_size);
-
+        JPanel button = new FilteredImagePanel(z, zone_size);
         return button;
     }
 
@@ -217,8 +215,6 @@ public class GUI {
         buttonPanel = new JPanel();
         window = new JFrame();
 
-        zone_size = 50;
-        artefactSize = (int)(zone_size*(1.5));
 
         zonePanels = new JPanel[zones.length][zones.length];
 
@@ -254,21 +250,31 @@ public class GUI {
         buttonPanel.add(add_player);
         buttonPanel.add(start_game);
 
+        boardPanel.setLayout(new GridBagLayout());
+        int prefered_board_size = (int)(zone_size * 1.1) * zones.length;
+        boardPanel.setPreferredSize(new Dimension(prefered_board_size, prefered_board_size));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0,0,0,0);
+
         for(int i = 0; i < zones.length; i++){
             for(int j = 0; j < zones[i].length; j++){
+                gbc.gridx = i;
+                gbc.gridy = j;
                 zonePanels[i][j] = getZone(zones[i][j]);
 
                 // adding button in JFrame
-                boardPanel.add(zonePanels[i][j]);
+                boardPanel.add(zonePanels[i][j], gbc);
             }
         }
         updateZonePanels();
 
 
-        boardPanel.setSize(zones.length * zone_size, zones.length * zone_size);
-        boardPanel.setLayout(new GridLayout(zones.length, zones.length));
+//        boardPanel.setSize(zones.length * zone_size, zones.length * zone_size);
+//        boardPanel.setLayout(new GridLayout(zones.length, zones.length));
         boardPanel.setVisible(true);
-        window.setSize(w_width, w_height);
+        window.pack();
+        window.setResizable(false);
+        window.setSize(1480, 1080);
 
 
         //player pane panels
@@ -337,7 +343,6 @@ public class GUI {
 
 
         // making the frame visible
-        window.pack();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setVisible(true);
     }
