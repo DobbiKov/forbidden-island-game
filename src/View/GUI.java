@@ -259,11 +259,12 @@ public class GUI {
         boardPanel.setPreferredSize(new Dimension(prefered_board_size, prefered_board_size));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(0,0,0,0);
-
+        final int PAD = 6;
         for(int i = 0; i < zones.length; i++){
             for(int j = 0; j < zones[i].length; j++){
                 gbc.gridx = i;
                 gbc.gridy = j;
+                gbc.insets = new Insets(PAD, PAD, PAD, PAD);
                 zonePanels[i][j] = getZone(zones[i][j]);
 
                 // adding button in JFrame
