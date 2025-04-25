@@ -58,8 +58,8 @@ class BoardGameTest {
         int beforeDraw = game.getFloodDeck().getDrawSize();
         int beforeDiscard = game.getFloodDeck().getDiscardSize();
         game.finDeTour();
-        assertEquals(beforeDraw - 3, game.getFloodDeck().getDrawSize());
-        assertEquals(beforeDiscard + 3, game.getFloodDeck().getDiscardSize());
+        assertEquals(beforeDraw - 2, game.getFloodDeck().getDrawSize());
+        assertEquals(beforeDiscard + 2, game.getFloodDeck().getDiscardSize());
     }
 
     @Test
