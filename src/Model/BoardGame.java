@@ -354,7 +354,7 @@ public class BoardGame {
                     floodDeck.reshuffleDiscardIntoDraw();
                     boolean flood_out = water_meter.increaseLevel();
                     if(flood_out){
-                        throw new IslandFloodedException();
+                        throw new GameOverException("water level has reached maximum");
                     }
                 }else{
                     p.takeCard(card);
@@ -373,8 +373,8 @@ public class BoardGame {
                 this.game_state = GameState.Playing;
             }
         }
+        checkWin();
         int floodsToDraw = water_meter.getCurrentFloodRate();
-        //checkPlayerDead();
         for (int i = 0; i < floodsToDraw; i++) {
             ZoneCard card;
             try {
@@ -393,6 +393,7 @@ public class BoardGame {
             }
             floodDeck.discard(card);
         }
+        checkPlayerDead();
         this.treasureDrawnThisTurn = false;
         checkHelicopterZone();
         checkArtefactLost();
@@ -1044,13 +1045,12 @@ public class BoardGame {
             }
         }
     }
-    // have to rework players dying
-    /*private void checkPlayerDead() {
-        Player p = getPlayerForTheTurn();
-        if (!p.getPlayer_zone().isAccessible()) {
-            throw new GameOverException("player is stranded on a sunken zone");
+
+    private void checkPlayerDead() {
+        if(this.getActionsToRunFromInaccessibleZone().isEmpty()){
+            throw new GameOverException("you have lost the player!");
         }
-    }*/
+    }
 
     private void checkWaterMeterMax() {
         if (water_meter.getLevel() >= WaterMeter.MAX_LEVEL) {
@@ -1088,5 +1088,29 @@ public class BoardGame {
         else{
             this.setGame_state(GameState.Playing);
         }
+    }
+
+    private void checkWin(){
+        if(claimedArtefacts.size() < Artefact.values().length) return;
+
+        Zone heli = getZoneByCard(ZoneCard.fodls_landing);
+        for (Player p : players) {
+            if (p == null) continue;
+            if (p.getPlayer_zone() != heli) return;
+        }
+        boolean hasLift = false;
+        for (Player p : players) {
+            if (p == null) continue;
+            for (Card c : p.getHand().getCards()) {
+                if (c.getType() == CardType.HELICOPTER_LIFT) {
+                    hasLift = true;
+                    break;
+                }
+            }
+            if (hasLift) break;
+        }
+        if (!hasLift) return;
+
+        throw new GameWonException();
     }
 }

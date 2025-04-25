@@ -69,7 +69,7 @@ public class GameOverTest {
     }
 
 
-    /*@Test
+    @Test
     void playerDead_throwsGameOver() {
         Player player = game.getPlayers()[0];
         Zone startZone = player.getPlayer_zone();
@@ -77,6 +77,6 @@ public class GameOverTest {
         startZone.floodZone();
 
         assertThrows(GameOverException.class, () -> game.finDeTour(), "Expected GameOverException when a player is stranded");
-    }*/
+    }
 
 }

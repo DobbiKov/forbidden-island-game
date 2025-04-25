@@ -25,6 +25,10 @@ public class GameController {
         } catch (TooManyCardsInTheHand ex) {
             GUI.showErrorMess("Too Many Cards", ex.getMessage());
         }
+        catch(GameWonException ex){
+            GUI.showInfoMess("Congratulations!", ex.getMessage());
+            return;
+        }
         catch(WaterRiseException ex){
             GUI.showInfoMess("Attention!", "You got a water rise card, the level of water is rising!");
         }
