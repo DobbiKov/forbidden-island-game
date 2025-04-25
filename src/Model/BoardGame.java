@@ -588,7 +588,7 @@ public class BoardGame {
     }
 
     private ArrayList<Zone> getZonesToForPlayerShoreUp(Player player) {
-        ArrayList<Zone> res = this.getAdjacentZones(player.getPlayer_zone(), true, Zone::isFlooded);
+        ArrayList<Zone> res = this.getAdjacentZones(player.getPlayer_zone(), player.getPlayer_role() == PlayerRole.Explorer, Zone::isFlooded);
 
         Zone curr = player.getPlayer_zone(); // adding current if it's also flooded
         if(curr.isFlooded()){
