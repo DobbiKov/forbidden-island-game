@@ -1099,8 +1099,37 @@ public class BoardGame {
     }
 
     private void checkPlayerDead() {
-        if(this.getActionsToRunFromInaccessibleZone().isEmpty()){
-            throw new GameOverException("you have lost the player!");
+        if (playersOnInaccessibleZones == null || playersOnInaccessibleZones.isEmpty()) {
+            return;  // no one stranded
+        }
+
+        for (Player p : playersOnInaccessibleZones) {
+            Zone current = p.getPlayer_zone();
+            List<Zone> escapeZones;
+
+            // determine legal “run from inaccessible” zones depending on role
+            switch (p.getPlayer_role()) {
+                case Pilot:
+                    // pilot may fly to any accessible tile
+                    escapeZones = getZonesForPlayerToFlyTo(p);
+                    break;
+                case Diver:
+                    // diver may swim through flooded/inaccessible to adjacent accessible
+                    escapeZones = getZonesForDiverRunningFromInaccessible(current);
+                    break;
+                case Explorer:
+                    // explorer may move diagonally but only to accessible tiles
+                    escapeZones = getAdjacentZones(current, true, Zone::isAccessible);
+                    break;
+                default:
+                    // everyone else only orthogonally to accessible tiles
+                    escapeZones = getAdjacentZones(current, false, Zone::isAccessible);
+                    break;
+            }
+
+            if (escapeZones.isEmpty()) {
+                throw new GameOverException("you have lost the player!");
+            }
         }
     }
 
