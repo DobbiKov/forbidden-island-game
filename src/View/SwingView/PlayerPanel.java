@@ -10,10 +10,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class PlayerPanel extends JPanel {
     private final GameController gc;
     private final Player player;
+    private final Map<PlayerAction, JButton> actionButtons = new EnumMap<>(PlayerAction.class);
     private final JPanel buttonBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2));
     private final JPanel cardsBar = new JPanel(new WrapLayout(FlowLayout.LEFT, 4, 2)) {
         @Override
@@ -76,6 +79,13 @@ public class PlayerPanel extends JPanel {
     }
 
     public void update() {
+        ensureButtons();                       // create once
+
+        // enable/disable instead of remove/add
+        for (var e : actionButtons.entrySet()) {
+            e.getValue().setVisible(
+                    gc.getPossiblePlayerActionsForCurrentTurn(player).contains(e.getKey()));
+        }
         // badge
         if(!gc.isPlayerChoosingZoneToFlyWithCard() && !gc.isNavgiatorChoosingAPlayerToMove()){
             this.makeUnchoosable();
@@ -86,13 +96,6 @@ public class PlayerPanel extends JPanel {
         } else {
             actionBadge.setVisible(false);
         }
-
-        // action buttons
-        buttonBar.removeAll();
-        for (PlayerAction a : gc.getPossiblePlayerActionsForCurrentTurn(player)) {
-            buttonBar.add(buildActionButton(a));
-        }
-        buttonBar.setMaximumSize(new Dimension(100, Integer.MAX_VALUE));
 
         //cards
         cardsBar.removeAll();
@@ -152,8 +155,13 @@ public class PlayerPanel extends JPanel {
 
         return header;
     }
+    private void ensureButtons() {
+        for (PlayerAction a : PlayerAction.values()) {
+            actionButtons.computeIfAbsent(a, this::createActionButton);
+        }
+    }
 
-    private JButton buildActionButton(PlayerAction action) {
+    private JButton createActionButton(PlayerAction action) {
         JButton b = new JButton(action.toString());
         b.setFocusable(false);
         switch (action) {
@@ -166,6 +174,7 @@ public class PlayerPanel extends JPanel {
             case TakeArtefact  : b.addActionListener(e -> gc.takeArtefact()); break;
             case RunFromInaccessibleZone: b.addActionListener(e -> gc.setPlayerChooseZoneToRunFromInaccessbileZone(getPlayer()));
         }
+        buttonBar.add(b);
         return b;
     }
 
