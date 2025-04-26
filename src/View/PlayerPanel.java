@@ -24,6 +24,7 @@ public class PlayerPanel extends JPanel {
     };
     private final JPanel artefactBar = new JPanel(
             new FlowLayout(FlowLayout.LEFT, 2, 0));
+    private JLabel avatar;
 
     private final JLabel actionBadge = new JLabel();
 
@@ -63,10 +64,16 @@ public class PlayerPanel extends JPanel {
     public void makeChoosable(Runnable onClick) {
         setBorder(new LineBorder(new Color(255,140,0), 3, true));
         addMouseListener(new MouseAdapter() { public void mouseClicked(MouseEvent e){ onClick.run(); }});
+
+        avatar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        avatar.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) { onClick.run(); }
+        });
     }
     public void makeUnchoosable() {
         setBorder(null);
         for(MouseListener l : getMouseListeners()) removeMouseListener(l);
+        for(MouseListener l : avatar.getMouseListeners()) avatar.removeMouseListener(l);
     }
 
     public void update() {
@@ -121,7 +128,7 @@ public class PlayerPanel extends JPanel {
         header.setBorder(new EmptyBorder(6, 8, 6, 8));
 
         // avatar 70×70
-        var avatar = new JLabel(new ImageIcon(
+        avatar = new JLabel(new ImageIcon(
                 new ImageIcon("roles_images/" + player.getPlayer_role().toImgString() + ".png")
                         .getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH)));
 

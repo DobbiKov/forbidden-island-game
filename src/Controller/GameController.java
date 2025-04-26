@@ -26,7 +26,7 @@ public class GameController {
             GUI.showErrorMess("Too Many Cards", ex.getMessage());
         }
         catch(GameWonException ex){
-            GUI.showInfoMess("Congratulations!", ex.getMessage());
+            GUI.showInfoMess("Congratulations!", "You won the game!");
             return;
         }
         catch(WaterRiseException ex){
