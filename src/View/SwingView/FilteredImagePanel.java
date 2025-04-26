@@ -1,5 +1,6 @@
 package View.SwingView;
 
+import Controller.GameController;
 import Model.Artefact;
 import Model.ArtefactZone;
 import Model.Zone;
@@ -7,12 +8,19 @@ import Model.ZoneType;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashSet;
 
 class FilteredImagePanel extends JPanel {
     private boolean showBlueFilter = false;
     private Zone zone;
     private Image overlayImage;
     private int TILE  = 150;
+    private boolean selectable;
+    private GameController gameController;
+    public boolean showBlueOverlay;
+    public boolean isInaccessible;
 
     public void setBlueFilterVisible(boolean visible) {
         this.showBlueFilter = visible;
@@ -23,6 +31,15 @@ class FilteredImagePanel extends JPanel {
         return showBlueFilter;
     }
 
+    public void setInaccessible() {
+        this.isInaccessible = true;
+        this.setVisible(false);
+        repaint();
+    }
+    public boolean isInaccessible() {
+        return isInaccessible;
+    }
+
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(TILE, TILE); // your exact size
@@ -30,8 +47,11 @@ class FilteredImagePanel extends JPanel {
     @Override public Dimension getMinimumSize()   { return getPreferredSize(); }
     @Override public Dimension getMaximumSize()   { return getPreferredSize(); }
 
-    public FilteredImagePanel(Zone z, int zone_size) {
+    public FilteredImagePanel(Zone z, int zone_size, GameController gameController) {
         super();
+        this.selectable = false;
+        this.gameController = gameController;
+        this.isInaccessible = false;
         this.TILE = zone_size;
         Dimension fixedSize = new Dimension(this.TILE, this.TILE);
         setPreferredSize(fixedSize);
@@ -43,13 +63,44 @@ class FilteredImagePanel extends JPanel {
         if(z != null){
             if(z.getZone_type() == ZoneType.ArtefactAssociated){
                 Artefact art = ((ArtefactZone)z).getArtefact();
-                overlayImage = ResourceMapper.getArtefactIcon(art).getImage();
+                overlayImage = ResourceMapper.getArtefactIcon(art, -1, -1).getImage();
             }else if(z.getZone_type() == ZoneType.Helicopter){
 
                 overlayImage = new ImageIcon("/artefacts_images/" + "helicopter_no_background" + ".png").getImage();
             }
         }
+        this.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                if (!FilteredImagePanel.this.isSelectable()) return;        // fast exit
+                dispatchZoneClick(FilteredImagePanel.this.zone);                       // switch-statement below
+            }
+        });
 
+    }
+    public void setSelectable() {
+        this.selectable = true;
+    }
+    public void setUnSelectable() {
+        this.selectable = false;
+    }
+    public boolean isSelectable(){
+        return this.selectable;
+    }
+    private void dispatchZoneClick(Zone z) {
+        if (gameController.isPlayerChoosingZoneToRunFromInaccesbleZone())
+            gameController.chooseZoneToRunFromInaccessible(z);
+        else if (gameController.isPlayerChoosingZoneToShoreUp())
+            gameController.playerShoreUpZone(z);
+        else if (gameController.isPlayerChoosingZoneToMove())
+            gameController.movePlayerToTheZone(z);
+        else if (gameController.isPlayerChoosingZoneToFlyTo())
+            gameController.flyPilotToTheZone(z);
+        else if (gameController.isNavgiatorChoosingAZoneToMovePlayerTo())
+            gameController.movePlayerToTheZoneByNavigator(z);
+        else if (gameController.isPlayerChoosingZoneToFlyWithCard())
+            gameController.flyPlayerToZoneWithCard(z);
+        else if (gameController.isPlayerChoosingZoneToShoreUpWithCard())
+            gameController.shoreUpZoneWithCard(z);
     }
 
     @Override

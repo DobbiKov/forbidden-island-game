@@ -7,8 +7,25 @@ import java.awt.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ResourceMapper {
+    // ─── IMAGE CACHE ────────────────────────────────────────────────────────────
+    private static final Map<String, ImageIcon> ICON_CACHE = new ConcurrentHashMap<>();
+
+    /** Returns the (optionally-scaled) image; never hits disk twice. */
+    private static ImageIcon cachedIcon(String path, int w, int h) {
+        String key = path + "#" + w + "x" + h;
+        return ICON_CACHE.computeIfAbsent(key, k -> {
+            URL url = ResourceMapper.class.getResource(path);
+            if (url == null) return new ImageIcon();             // fallback
+            ImageIcon raw = new ImageIcon(url);
+            if (w <= 0 || h <= 0) return raw;                    // no scaling
+            Image scaled = raw.getImage().getScaledInstance(
+                    w, h, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        });
+    }
 
     // --- Color Mapping ---
     private static final Map<PlayerColor, Color> playerColorMap = new HashMap<>();
@@ -57,17 +74,6 @@ public class ResourceMapper {
         return url;
     }
 
-    // Helper method to create scaled ImageIcon from classpath
-    public static ImageIcon getScaledIcon(String resourcePath, int width, int height) {
-        URL url = getResourceUrl(resourcePath);
-        if (url != null) {
-            ImageIcon rawIcon = new ImageIcon(url);
-            Image img = rawIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            return new ImageIcon(img);
-        }
-        return new ImageIcon(); // Return empty icon or null if resource not found
-    }
-
     // Map PlayerRole to image paths
     private static final Map<PlayerRole, String> roleImageMap = new HashMap<>();
     static {
@@ -79,14 +85,6 @@ public class ResourceMapper {
         roleImageMap.put(PlayerRole.Messenger, "/roles_images/messenger.png");
         roleImageMap.put(PlayerRole.Navigator, "/roles_images/navigator.png");
         roleImageMap.put(PlayerRole.Explorer, "/roles_images/explorer.png");
-    }
-
-    public static ImageIcon getRoleImage(PlayerRole role, int width, int height) {
-        String path = roleImageMap.get(role);
-        if (path != null) {
-            return getScaledIcon(path, width, height);
-        }
-        return new ImageIcon(); // Default
     }
 
     // Map CardType to image paths
@@ -102,14 +100,6 @@ public class ResourceMapper {
         // WATER_RISE cards typically don't have a player hand image
     }
 
-    public static ImageIcon getCardImage(CardType cardType, int width, int height) {
-        if (cardType == CardType.WATER_RISE) return new ImageIcon(); // Water Rise not shown in hand
-        String path = cardImageMap.get(cardType);
-        if (path != null) {
-            return getScaledIcon(path, width, height);
-        }
-        return new ImageIcon(); // Default
-    }
 
     // Map Artefact to image paths
     private static final Map<Artefact, String> artefactImageMap = new HashMap<>();
@@ -121,21 +111,6 @@ public class ResourceMapper {
         artefactImageMap.put(Artefact.Earth, "/artefacts_images/earth_stone.png");
     }
 
-    public static ImageIcon getArtefactIcon(Artefact artefact, int width, int height) {
-        String path = artefactImageMap.get(artefact);
-        if (path != null) {
-            return getScaledIcon(path, width, height);
-        }
-        return new ImageIcon(); // Default
-    }
-    public static ImageIcon getArtefactIcon(Artefact artefact) {
-        String path = artefactImageMap.get(artefact);
-        if (path != null) {
-            return new ImageIcon(path);
-        }
-        return new ImageIcon(); // Default
-    }
-
     // Map special ZoneTypes to overlay image paths
     private static final Map<Model.ZoneType, String> zoneOverlayImageMap = new HashMap<>();
     static {
@@ -143,17 +118,6 @@ public class ResourceMapper {
         // Note: Helicopter might need a different path if its image isn't generic
         zoneOverlayImageMap.put(Model.ZoneType.Helicopter, "/artefacts_images/helicopter_no_background.png"); // Use the same image path as before
         // Artefact images are handled via the Artefact enum lookup above
-    }
-
-    public static ImageIcon getZoneOverlayImage(Model.ZoneType zoneType, Artefact artefactIfArtefactZone, int width, int height) {
-        if (zoneType == Model.ZoneType.ArtefactAssociated && artefactIfArtefactZone != null) {
-            return getArtefactIcon(artefactIfArtefactZone, width, height);
-        }
-        String path = zoneOverlayImageMap.get(zoneType);
-        if (path != null) {
-            return getScaledIcon(path, width, height);
-        }
-        return null; // No overlay for this zone type
     }
 
     // Map ZoneCard (for background) to image paths
@@ -188,15 +152,20 @@ public class ResourceMapper {
         zoneCardImageMap.put(Model.ZoneCard.misty_marsh, "/island_card_images/misty_marsh.png");
     }
 
-    public static ImageIcon getZoneCardImage(Model.ZoneCard zoneCard) {
-        String path = zoneCardImageMap.get(zoneCard);
-        if (path != null) {
-            URL url = getResourceUrl(path);
-            if (url != null) {
-                // Don't use getScaledIcon here, we need the raw Image later
-                return new ImageIcon(url);
-            }
-        }
-        return null; // Or return a default "missing image" icon
+    public static ImageIcon getScaledIcon(String path, int w, int h) {
+        return cachedIcon(path, w, h);
+    }
+    public static ImageIcon getRoleImage(PlayerRole r, int w, int h) {
+        return cachedIcon(roleImageMap.get(r), w, h);
+    }
+    public static ImageIcon getCardImage(CardType t, int w, int h) {
+        if (t == CardType.WATER_RISE) return new ImageIcon();
+        return cachedIcon(cardImageMap.get(t), w, h);
+    }
+    public static ImageIcon getArtefactIcon(Artefact a, int w, int h) {
+        return cachedIcon(artefactImageMap.get(a), w, h);
+    }
+    public static ImageIcon getZoneCardImage(ZoneCard z) {
+        return cachedIcon(zoneCardImageMap.get(z), -1, -1);      // raw size
     }
 }

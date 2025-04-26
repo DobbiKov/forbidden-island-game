@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
+import java.util.logging.Filter;
 import javax.swing.*;
 
 public class GUI extends JFrame implements GameView {
@@ -66,7 +67,7 @@ public class GUI extends JFrame implements GameView {
     }
 
     private JPanel createPanelForZone(Zone z){
-        return new FilteredImagePanel(z, zone_size);
+        return new FilteredImagePanel(z, zone_size, gameController);
     }
 
     public void makePlayersChoosable(HashSet<Player> players, ChoosablePlayerCallback callback){
@@ -136,24 +137,19 @@ public class GUI extends JFrame implements GameView {
             for (int j = 0; j < zones[i].length; j++) {
                 ZoneState state = zones[i][j].getZone_state();
                 JPanel panel = zonePanels[i][j];
-                if(panel.getMouseListeners().length > 0)
-                    panel.removeMouseListener(panel.getMouseListeners()[0]);
-                panel.removeAll();
+                FilteredImagePanel panel_im = (FilteredImagePanel)panel;
 
-                switch (state) {
-                    case Normal:
-                        ((FilteredImagePanel)panel).setBlueFilterVisible(false);
-                        panel.setBorder(null);
-                        break;
-                    case Flooded:
-                        ((FilteredImagePanel)panel).setBlueFilterVisible(true);
-                        panel.setBorder(null);
-                        break;
-                    case Inaccessible:
-                        panel.setBackground(Color.WHITE);
-                        panel.setBorder(null);
-                        break;
+                panel.removeAll();
+                boolean blue = (state == ZoneState.Flooded);
+                if (panel_im.isBlueFilterVisible() != blue) {
+                    panel_im.setBlueFilterVisible(blue);
                 }
+
+                boolean is_inacc = (state == ZoneState.Inaccessible);
+                if (panel_im.isInaccessible() != is_inacc) {
+                    panel_im.setInaccessible();
+                }
+
                 if(zones[i][j] != null) {
                     for (Player player : zones[i][j].getPlayers_on_zone()) {
                         java.awt.Color color = ResourceMapper.getAwtColor(player.getPlayerColor());
@@ -165,33 +161,12 @@ public class GUI extends JFrame implements GameView {
                 }
                 if(zoneSet.contains(zones[i][j])){
                     panel.setBorder(BorderFactory.createLineBorder(Color.ORANGE, 5));
-                    int finalI = i;
-                    int finalJ = j;
-                    panel.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            if(gameController.isPlayerChoosingZoneToRunFromInaccesbleZone()){
-                                gameController.chooseZoneToRunFromInaccessible(zones[finalI][finalJ]);
-                            }
-                            else if(gameController.isPlayerChoosingZoneToShoreUp()){
-                                gameController.playerShoreUpZone(zones[finalI][finalJ]);
-                            }
-                            else if(gameController.isPlayerChoosingZoneToMove()) {
-                                gameController.movePlayerToTheZone(zones[finalI][finalJ]);
-                            }else if(gameController.isPlayerChoosingZoneToFlyTo()){
-                                gameController.flyPilotToTheZone(zones[finalI][finalJ]);
-                            }else if(gameController.isNavgiatorChoosingAZoneToMovePlayerTo()){
-                                gameController.movePlayerToTheZoneByNavigator(zones[finalI][finalJ]);
-                            }else if(gameController.isPlayerChoosingZoneToFlyWithCard()){
-                                gameController.flyPlayerToZoneWithCard(zones[finalI][finalJ]);
-                            } else if(gameController.isPlayerChoosingZoneToShoreUpWithCard()){
-                                gameController.shoreUpZoneWithCard(zones[finalI][finalJ]);
-                            }
-                            updatePlayerPanels();
-                            updateZonePanels();
-                            repaint();
-                        }
-                    });
+                    panel_im.setSelectable();
+                }else{
+                    if(panel_im.isSelectable()){
+                        panel.setBorder(null);
+                        panel_im.setUnSelectable();
+                    }
                 }
                 panel.validate();
             }
