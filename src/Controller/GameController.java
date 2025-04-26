@@ -210,12 +210,16 @@ public class GameController {
         modelActionHandler.handleModelAction(() -> {
             this.boardGame.flyPlayerToZoneWithCard(zone);
             this.gameView.makePlayersUnChoosable();
+            this.gameView.updateZonePanels();
+            this.gameView.updatePlayerPanels();
         }, gameView);
     }
 
     public void shoreUpZoneWithCard(Zone zone) {
         modelActionHandler.handleModelAction(() -> {
             this.boardGame.shoreUpZoneWithCard(zone);
+            this.gameView.updateZonePanels();
+            this.gameView.updatePlayerPanels();
         }, gameView);
     }
 

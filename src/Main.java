@@ -1,27 +1,30 @@
 import Controller.GameController;
 import View.SwingView.GUI;
 import View.contract.GameView;
+import View.SwingView.ResourceMapper;
+import Model.ZoneCard;
+import Model.PlayerRole;
+import Model.CardType;
+import Model.Artefact;
 
 import javax.swing.*;
 import java.net.URL;
 
+
 public class Main {
-    public static void main(String[] args) {
-        System.out.println("Checking resource path...");
-        String testPath = "/roles_images/pilot.png"; // Use one of your paths
-        URL url = Main.class.getResource(testPath); // Or ResourceMapper.class.getResource(testPath)
-        if (url == null) {
-            System.err.println("TEST FAILED: Resource not found: " + testPath);
-        } else {
-            System.out.println("TEST SUCCESS: Resource found at URL: " + url);
-            // Optional: Try loading the icon
-            ImageIcon icon = new ImageIcon(url);
-            if (icon.getImageLoadStatus() != java.awt.MediaTracker.COMPLETE) {
-                System.err.println("TEST FAILED: Image did not load completely from URL: " + url);
-            } else {
-                System.out.println("TEST SUCCESS: Image loaded completely.");
+    private static void preloadImages(){
+        SwingWorker<Void,Void> preload = new SwingWorker<>() {
+            @Override protected Void doInBackground() {
+                for (ZoneCard z : ZoneCard.values()) ResourceMapper.getZoneCardImage(z);
+                for (PlayerRole r : PlayerRole.values()) ResourceMapper.getRoleImage(r,70,70);
+                for (CardType c : CardType.values()) ResourceMapper.getCardImage(c,80,80);
+                for (Artefact a : Artefact.values()) ResourceMapper.getArtefactIcon(a,50,50);
+                return null;
             }
-        }
+        };
+        preload.execute();
+    }
+    public static void main(String[] args) {
 
         GameView gameView = new GUI();
         GameController gameController = new GameController(gameView);
