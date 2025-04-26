@@ -339,7 +339,7 @@ public class BoardGame {
         return this.current_player_actions_num;
     }
 
-    public void finDeTour() {
+    public void endTurn() {
         if(this.game_state == GameState.PlayersRunningFromAnInaccessibleZone){
             throw new InvalidActionForTheCurrentState("You must move from an inaccessible zone!");
         }

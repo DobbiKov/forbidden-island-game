@@ -224,7 +224,7 @@ public class GUI extends JFrame implements GameView {
         JButton fin_de_tour = new JButton("Fin de Tour");
         fin_de_tour.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                gameController.finDeTour();
+                gameController.endTurn();
                 updateZonePanels();
             }
         });

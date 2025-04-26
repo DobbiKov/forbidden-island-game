@@ -7,7 +7,6 @@ import View.contract.GameView;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
 
 public class GameController {
     private BoardGame boardGame;
@@ -20,54 +19,24 @@ public class GameController {
         return this.boardGame.getBoard();
     }
 
-    public void finDeTour(){
+    public void endTurn(){
             this.gameView.removeActionsForPlayerPanel();
-        try {
-            this.boardGame.finDeTour();
-        } catch (TooManyCardsInTheHand ex) {
-            this.gameView.showErrorMess("Too Many Cards", ex.getMessage());
-        }
-        catch(GameWonException ex){
-            this.gameView.showInfoMess("Congratulations!", "You won the game!");
-            return;
-        }
-        catch(WaterRiseException ex){
-            this.gameView.showInfoMess("Attention!", "You got a water rise card, the level of water is rising!");
-        }
-        catch(GameOverException ex){
-            this.gameView.showErrorMess("Game Over", ex.getMessage());
-            return;
-        }
-        catch(InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("You got an invalid action for this state", ex.getMessage());
-        }
+            modelActionHandler.handleModelAction(() -> this.boardGame.endTurn(), gameView);
             this.gameView.updatePlayerPanels();
             this.gameView.updateZonePanels();
     }
     public void addPlayerToTheGame(String playerName){
-        try {
+        modelActionHandler.handleModelAction(() ->{
             Player p = boardGame.addPlayer(playerName);
             this.gameView.addPlayerPanel(p);
-        }
-        catch (MaximumNumberOfPlayersReachedException e){
-            this.gameView.showErrorMess("max reached", "Maximum number of players reached");
-        }
-        catch(InvalidParameterException e){
-            this.gameView.showErrorMess("Invalid data provided", e.getMessage());
-        }
+        }, gameView);
     }
 
     public void startGame(){
-        try {
+        modelActionHandler.handleModelAction(() -> {
             boardGame.startGame();
             this.gameView.startGameHandleView();
-        }
-        catch (NoPlayersException ex){
-            this.gameView.showErrorMess("No Players", "The game can't be started without players!");
-        }
-        catch (InvalidNumberOfPlayersException ex){
-            this.gameView.showErrorMess("Invalid number of players", ex.getMessage());
-        }
+        }, gameView);
     }
 
 
@@ -95,50 +64,40 @@ public class GameController {
     //------------
     //set player choose
     public void setPlayerChooseZoneToMoveTo(){
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.setPlayerChooseZoneToMoveTo();
-        }catch (InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("Invalid Action", ex.getMessage());
-        }
+        }, gameView);
         this.gameView.updatePlayerPanels();
         this.gameView.updateZonePanels();
     }
     public void setPlayerChooseZoneToShoreUp(){
-        try{
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.setPlayerChooseZoneToShoreUp();
 
-        }catch (InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("Invalid Action", ex.getMessage());
-        }
+        }, gameView);
         this.gameView.updatePlayerPanels();
         this.gameView.updateZonePanels();
     }
     public void setPilotChooseWhereToFlyTo(){
-        try{
+        modelActionHandler.handleModelAction(() -> {
         this.boardGame.setPilotChooseWhereToFlyTo();
-        }catch (InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("Invalid Action", ex.getMessage());
-        }
+        }, gameView);
         this.gameView.updatePlayerPanels();
         this.gameView.updateZonePanels();
     }
     public void setNavigatorChoosePlayerToMove(){
-        try{
-        this.boardGame.setNavigatorChoosePlayerToMove();
-        }catch (InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("Invalid Action", ex.getMessage());
-        }
-        HashSet<Player> players = this.boardGame.getPlayersToChoose();
-        this.gameView.makePlayersChoosable(players, this::choosePlayerByNavigator);
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.setNavigatorChoosePlayerToMove();
+            HashSet<Player> players = this.boardGame.getPlayersToChoose();
+            this.gameView.makePlayersChoosable(players, this::choosePlayerByNavigator);
+        }, gameView);
         this.gameView.updatePlayerPanels();
         this.gameView.updateZonePanels();
     }
     public void setPlayerChooseZoneToRunFromInaccessbileZone(Player player){
-        try {
+        modelActionHandler.handleModelAction(() ->  {
             this.boardGame.setPlayerChooseZoneToRunFromInaccessbileZone(player);
-        }catch (InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("Invalid Action", ex.getMessage());
-        }
+        }, gameView);
         this.gameView.updateZonePanels();
         this.gameView.updatePlayerPanels();
     }
@@ -188,31 +147,23 @@ public class GameController {
     //------------
     //actions
     public void movePlayerToTheZone(Zone zone){
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.movePlayerToZone(zone);
             this.gameView.updateZonePanels();
             this.gameView.updatePlayerPanels();
-        }catch (NoActionsLeft ex){
-            this.gameView.showErrorMess("No actions left", "You used all your actions!");
-        }
+        }, gameView);
     }
     public void flyPilotToTheZone(Zone zone){
-        try{
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.flyPilotToZone(zone);
-        }catch (NoActionsLeft ex){
-            this.gameView.showErrorMess("No actions left", "You used all your actions!");
-        }catch (InvalidActionForRole ex){
-            this.gameView.showErrorMess("Invalid action", "Only a pilot can fly");
-        }
+        },gameView);
     }
     public void playerShoreUpZone(Zone zone) {
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.playerShoreUpZone(zone);
             this.gameView.updateZonePanels();
             this.gameView.updatePlayerPanels();
-        }catch (NoActionsLeft ex){
-            this.gameView.showErrorMess("No actions left", "You used all your actions!");
-        }
+        },gameView);
     }
     private void choosePlayerByNavigator(Player chosen_player) {
         this.boardGame.choosePlayerByNavigator(chosen_player);
@@ -221,22 +172,20 @@ public class GameController {
         this.gameView.updateZonePanels();
     }
     public void choosePlayerToFlyWithCard(Player chosen_player){
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.choosePlayerToFlyWithCard(chosen_player);
             this.gameView.makePlayersUnChoosable();
             this.gameView.makePlayersChoosable(this.boardGame.getPlayersToChoose(), this::choosePlayerByNavigator);
             this.gameView.updatePlayerPanels();
-        }catch (Exception ex){}
+        }, gameView);
     }
 
     public void movePlayerToTheZoneByNavigator(Zone zone) {
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.movePlayerToZoneByNavigator(zone);
             this.gameView.updateZonePanels();
             this.gameView.updatePlayerPanels();
-        }catch (NoActionsLeft ex){
-            this.gameView.showErrorMess("No actions left", "You used all your actions!");
-        }
+        },gameView);
     }
     //------------
 
@@ -248,7 +197,7 @@ public class GameController {
     }
 
     public void playerUseActionCard(Player player, Card card) {
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.playerUseActionCard(player, card);
             if(card.getType() == CardType.HELICOPTER_LIFT){
                 HashSet<Player> players = this.boardGame.getPlayersToChoose();
@@ -256,28 +205,26 @@ public class GameController {
             }
             this.gameView.updatePlayerPanels();
             this.gameView.updateZonePanels();
-        }catch (InvalidParameterException ex){
-            this.gameView.showErrorMess("Invalid card", "You don't have such a card!");
-        }catch(InvalidActionForTheCurrentState ex){
-            this.gameView.showErrorMess("Invalid action", ex.getMessage());
-        }
+        },gameView);
     }
 
     public void flyPlayerToZoneWithCard(Zone zone) {
-        this.boardGame.flyPlayerToZoneWithCard(zone);
-        this.gameView.makePlayersUnChoosable();
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.flyPlayerToZoneWithCard(zone);
+            this.gameView.makePlayersUnChoosable();
+        }, gameView);
     }
 
     public void shoreUpZoneWithCard(Zone zone) {
-        this.boardGame.shoreUpZoneWithCard(zone);
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.shoreUpZoneWithCard(zone);
+        }, gameView);
     }
 
     public void setPlayerGiveTreasureCards() {
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.setPlayerGiveTreasureCards();
-        }catch (NoActionsLeft ex){
-            this.gameView.showErrorMess("No actions left", "You used all your actions!");
-        }
+        }, gameView);
         this.gameView.updatePlayerPanels();
     }
 
@@ -286,25 +233,33 @@ public class GameController {
     }
 
     public void playerChooseCardToGive(Player p, Card c) {
-        this.boardGame.playerChooseCardToGive(p, c);
-        this.gameView.updatePlayerPanels();
-        HashSet<Player> players = this.boardGame.getPlayersToChoose();
-        this.gameView.makePlayersChoosable(players, this::choosePlayerToGiveCardTo);
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.playerChooseCardToGive(p, c);
+            this.gameView.updatePlayerPanels();
+            HashSet<Player> players = this.boardGame.getPlayersToChoose();
+            this.gameView.makePlayersChoosable(players, this::choosePlayerToGiveCardTo);
+        }, gameView);
     }
 
     public void choosePlayerToGiveCardTo(Player player) {
-        this.boardGame.choosePlayerToGiveCardTo(player);
-        this.gameView.updatePlayerPanels();
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.choosePlayerToGiveCardTo(player);
+            this.gameView.updatePlayerPanels();
+        }, gameView);
     }
 
     public void setPlayerDiscardCard() {
-        this.boardGame.setPlayerDiscardCard();
-        this.gameView.updatePlayerPanels();
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.setPlayerDiscardCard();
+            this.gameView.updatePlayerPanels();
+        }, gameView);
     }
 
     public void playerDiscardCard(Player player, Card c) {
-        this.boardGame.playerDiscardCard(player, c);
-        this.gameView.updatePlayerPanels();
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.playerDiscardCard(player, c);
+            this.gameView.updatePlayerPanels();
+        }, gameView);
     }
 
     public boolean isThisPlayerChoosingCardToDiscard(Player player) {
@@ -312,15 +267,9 @@ public class GameController {
     }
 
     public void takeArtefact() {
-        try {
+        modelActionHandler.handleModelAction(() -> {
             boardGame.takeArtefact();
-        } catch (IllegalStateException ex) {
-            this.gameView.showErrorMess("Cannot Take Artefact", ex.getMessage());
-        } catch (InvalidStateOfTheGameException ex){
-            this.gameView.showErrorMess("Cannot Take Artefact", ex.getMessage());
-        }catch (NoActionsLeft ex){
-            this.gameView.showErrorMess("Cannot Take Artefact", "You used all your actions!");
-        }
+        }, gameView);
         this.gameView.updatePlayerPanels();
         this.gameView.updateZonePanels();
         this.gameView.updateCornerArtefacts();
@@ -331,14 +280,10 @@ public class GameController {
     }
 
     public void chooseZoneToRunFromInaccessible(Zone zone) {
-        try {
+        modelActionHandler.handleModelAction(() -> {
             this.boardGame.chooseZoneToRunFromInaccessible(zone);
-        }
-        catch(InvalidStateOfTheGameException ex){
-            this.gameView.showErrorMess("Invalid action", ex.getMessage());
-        }catch(InvalidParameterException ex){
-            this.gameView.showErrorMess("Invalid action", ex.getMessage());
-        }
+        },gameView);
+
         this.gameView.updateZonePanels();
         this.gameView.updatePlayerPanels();
     }

@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GameOverTest {
 
@@ -30,7 +28,7 @@ public class GameOverTest {
         heli.floodZone();
         heli.floodZone();
 
-        assertThrows(GameOverException.class, () -> game.finDeTour(), "Expected GameOverException when helicopter site sinks");
+        assertThrows(GameOverException.class, () -> game.endTurn(), "Expected GameOverException when helicopter site sinks");
     }
 
     @Test
@@ -56,7 +54,7 @@ public class GameOverTest {
         zone1.floodZone();
 
         try {
-            game.finDeTour();
+            game.endTurn();
         } catch (GameOverException goe) {
             fail("GameOver should NOT be thrown when only one artefact zone is lost");
         }
@@ -64,7 +62,7 @@ public class GameOverTest {
         zone2.floodZone();
         zone2.floodZone();
 
-        assertThrows(GameOverException.class, () -> game.finDeTour(),
+        assertThrows(GameOverException.class, () -> game.endTurn(),
                 "Expected GameOverException when both Fire artefact zones are gone");
     }
 
@@ -76,7 +74,7 @@ public class GameOverTest {
         startZone.floodZone();
         startZone.floodZone();
 
-        assertThrows(GameOverException.class, () -> game.finDeTour(), "Expected GameOverException when a player is stranded");
+        assertThrows(GameOverException.class, () -> game.endTurn(), "Expected GameOverException when a player is stranded");
     }
 
 }

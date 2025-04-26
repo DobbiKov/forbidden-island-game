@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-
 class BoardGameTest {
     private BoardGame game;
 
@@ -51,13 +49,13 @@ class BoardGameTest {
     }
 
     @Test
-    void testFinDeTourFloodsViaDeck() {
+    void testEndTurnFloodsViaDeck() {
         game.addPlayer("Yehor");
         game.addPlayer("Ivan");
         game.startGame();
         int beforeDraw = game.getFloodDeck().getDrawSize();
         int beforeDiscard = game.getFloodDeck().getDiscardSize();
-        game.finDeTour();
+        game.endTurn();
         assertEquals(beforeDraw - 2, game.getFloodDeck().getDrawSize());
         assertEquals(beforeDiscard + 2, game.getFloodDeck().getDiscardSize());
     }
