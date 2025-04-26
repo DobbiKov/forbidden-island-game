@@ -72,7 +72,7 @@ public class PlayerPanel extends JPanel {
     public void makeUnchoosable() {
         setBorder(null);
         for(MouseListener l : getMouseListeners()) removeMouseListener(l);
-        for(MouseListener l : avatar.getMouseListeners()) avatar.removeMouseListener(l);
+        for(MouseListener l : avatar.getMouseListeners()) { if(l != null) { avatar.removeMouseListener(l); } }
     }
 
     public void update() {

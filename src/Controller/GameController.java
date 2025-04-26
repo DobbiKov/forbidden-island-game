@@ -166,8 +166,8 @@ public class GameController {
     private void choosePlayerByNavigator(Player chosen_player) {
         this.boardGame.choosePlayerByNavigator(chosen_player);
         this.gameView.makePlayersUnChoosable();
-        this.gameView.updatePlayerPanels();
         this.gameView.updateZonePanels();
+        this.gameView.updatePlayerPanels();
     }
     public void choosePlayerToFlyWithCard(Player chosen_player){
         modelActionHandler.handleModelAction(() -> {

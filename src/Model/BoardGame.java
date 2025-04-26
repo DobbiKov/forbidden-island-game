@@ -32,6 +32,7 @@ public class BoardGame {
     private WaterMeter waterMeter;
     private ArrayList<Player> playersOnInaccessibleZones;
     private Player currentPlayerRunningFromInaccessibleZone;
+    private static final int TREASURES_PER_TURN = 2;
 
     public BoardGame() {
         // zone init
@@ -338,74 +339,127 @@ public class BoardGame {
     }
 
     public void endTurn() {
-        if(this.gameState == GameState.PlayersRunningFromAnInaccessibleZone){
-            throw new InvalidActionForTheCurrentState("You must move from an inaccessible zone!");
-        }
-        Player p = this.getPlayerForTheTurn();
-        boolean gotWaterRise = false;
-        if(!this.treasureDrawnThisTurn){
-            for(int i = 0; i < 2; i++){
-                Card card = treasureDeck.draw();
-                if(card.isWaterRise()){
-                    gotWaterRise = true;
-                    treasureDeck.discard(card);
-                    floodDeck.reshuffleDiscardIntoDraw();
-                    boolean flood_out = waterMeter.increaseLevel();
-                    if(flood_out){
-                        throw new GameOverException("water level has reached maximum");
-                    }
-                }else{
-                    p.takeCard(card);
-                }
-            }
-            this.treasureDrawnThisTurn = true;
-            if(p.getHand().isOverflow()){
-                this.gameState = GameState.Discarding;
-                throw new TooManyCardsInTheHand();
-            }
-        }else{
-            if (p.getHand().isOverflow()) {
-                this.gameState = GameState.Discarding;
-                throw new TooManyCardsInTheHand();
-            }else{
-                this.gameState = GameState.Playing;
-            }
-        }
-        checkWin();
-        int floodsToDraw = waterMeter.getCurrentFloodRate();
-        for (int i = 0; i < floodsToDraw; i++) {
-            ZoneCard card;
-            try {
-                card = floodDeck.draw();
-            } catch (IllegalStateException e) {
-                break;
-            }
-            Zone z = getZoneByCard(card);
-            if (z != null) {
-                z.floodZone();
-                if(!z.isAccessible() && !z.getPlayers_on_zone().isEmpty()){
-                   this.playersOnInaccessibleZones.addAll(z.getPlayers_on_zone());
-                   this.setGameState(GameState.PlayersRunningFromAnInaccessibleZone);
-                   this.currentPlayerRunningFromInaccessibleZone = null;
-                }
-            }
-            floodDeck.discard(card);
-        }
-        checkPlayerDead();
-        this.treasureDrawnThisTurn = false;
+        ensureNotResolvingInaccessibleRun();                  // ❶ state-guard
+
+        Player current = getPlayerForTheTurn();
+
+        /* ---------- 1. treasure-card phase ---------- */
+        boolean waterRiseTriggered = handleTreasurePhase(current);
+
+        /* ---------- 2. flood-deck phase ------------- */
+        resolveFloodPhase(waterMeter.getCurrentFloodRate());
+
+        /* ---------- 3. victory / defeat checks ------ */
         checkHelicopterZone();
         checkArtefactLost();
-        this.nextPlayerTurn();
-        this.setDefaultActionsNum();
-        if(this.gameState != GameState.PlayersRunningFromAnInaccessibleZone) {
-            this.setGameState(GameState.Playing);
-        }
-        if(gotWaterRise){
-            throw new WaterRiseException();
-        }
+        checkWin();
         checkWaterMeterMax();
+        checkPlayerDead();                                    // may throw
+
+        /* ---------- 4. prepare next player ---------- */
+        treasureDrawnThisTurn = false;       // reset for next player
+        nextPlayerTurn();
+        setDefaultActionsNum();
+
+        if (gameState != GameState.PlayersRunningFromAnInaccessibleZone) {
+            gameState = GameState.Playing;   // normal flow resumes
+        }
+
+        /* ---------- 5. notify view if needed -------- */
+        if (waterRiseTriggered) {
+            throw new WaterRiseException();  // controller pops the dialog
+        }
     }
 
+    // ============
+    // end turn helper
+    /** Guard: you cannot end a turn while someone still has to escape. */
+    private void ensureNotResolvingInaccessibleRun() {
+        if (gameState == GameState.PlayersRunningFromAnInaccessibleZone) {
+            throw new InvalidActionForTheCurrentState(
+                    "You must move the stranded players before ending the turn");
+        }
+    }
+
+    /** Draw two treasure cards, handle Water-Rise, enforce hand limit. */
+    private boolean handleTreasurePhase(Player current) {
+        // If we already did it this turn, only hand-limit may still apply
+        if (treasureDrawnThisTurn) {
+            enforceHandLimitOrContinue(current);
+            return false;
+        }
+
+        boolean sawWaterRise = false;
+
+        for (int i = 0; i < TREASURES_PER_TURN; i++) {
+            Card c = treasureDeck.draw();
+            if (c.isWaterRise()) {
+                sawWaterRise = true;
+                treasureDeck.discard(c);
+
+                // 1. increase level
+                if (waterMeter.increaseLevel()) {
+                    throw new GameOverException("water level has reached maximum");
+                }
+                // 2. reshuffle flood discard into draw pile
+                floodDeck.reshuffleDiscardIntoDraw();
+            } else {
+                current.takeCard(c);
+            }
+        }
+        treasureDrawnThisTurn = true;
+        enforceHandLimitOrContinue(current);
+
+        return sawWaterRise;
+    }
+
+    /** If hand overflow -> switch state & throw, otherwise keep Playing. */
+    private void enforceHandLimitOrContinue(Player current) {
+        if (current.getHand().isOverflow()) {
+            gameState = GameState.Discarding;
+            throw new TooManyCardsInTheHand();
+        }
+        gameState = GameState.Playing;
+    }
+
+    /** Flood N cards; strand players if their tile just sank. */
+    private void resolveFloodPhase(int cardsToDraw) {
+        for (int i = 0; i < cardsToDraw; i++) {
+
+            if (floodDeck.getDrawSize() == 0 && floodDeck.getDiscardSize() == 0) {
+                throw new IllegalStateException(
+                        "Flood deck exhausted – rule-set violation");
+            }
+
+            ZoneCard drawn = floodDeck.draw();
+            Zone z = getZoneByCard(drawn);
+
+            if (z != null) {
+                z.floodZone();
+
+                if (!z.isAccessible() && !z.getPlayers_on_zone().isEmpty()) {
+                    strandPlayersOn(z);
+                }
+            }
+            floodDeck.discard(drawn);
+        }
+    }
+
+    /** Move every player on a sunken tile to the “must escape” set. */
+    private void strandPlayersOn(Zone z) {
+        if (playersOnInaccessibleZones == null) {
+            playersOnInaccessibleZones = new ArrayList<>();
+        }
+        for (Player p : z.getPlayers_on_zone()) {
+            if (!playersOnInaccessibleZones.contains(p)) {
+                playersOnInaccessibleZones.add(p);
+            }
+        }
+        currentPlayerRunningFromInaccessibleZone = null;
+        gameState = GameState.PlayersRunningFromAnInaccessibleZone;
+    }
+    // end of end turn helpers
+    // ====================
     private void setDefaultActionsNum(){
         this.currentPlayerActionsNum = 3;
     }
