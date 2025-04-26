@@ -14,48 +14,48 @@ public class BoardGame {
     private int size;
     private Zone[][] board;
     private Player[] players;
-    private int player_count;
-    private GameState game_state;
-    private int player_turn_id; // idx in the array of players or -1
-    private int current_player_actions_num;
+    private int playerCount;
+    private GameState gameState;
+    private int playerTurnId; // idx in the array of players or -1
+    private int currentPlayerActionsNum;
     private final TreasureDeck treasureDeck;
     private final FloodDeck floodDeck;
-    private int shore_ups_left = 0; // for engineer to count 2 shore ups per action
-    private Player chosen_player_by_navigator = null;
-    private ZoneFactory zone_factory;
-    private PlayerFactory player_factory;
+    private int shoreUpsLeft = 0; // for engineer to count 2 shore ups per action
+    private Player chosenPlayerByNavigator = null;
+    private ZoneFactory zoneFactory;
+    private PlayerFactory playerFactory;
     private boolean treasureDrawnThisTurn = false;
-    private Player player_choosing_card_to_use = null;
+    private Player playerChoosingCardToUse = null;
     private final EnumSet<Artefact> claimedArtefacts = EnumSet.noneOf(Artefact.class);
-    private ArrayList<Player> players_to_fly_with;
-    private Card card_to_give_by_player;
-    private WaterMeter water_meter;
-    private ArrayList<Player> players_on_inaccessible_zones;
-    private Player current_player_running_from_inaccessible_zone;
+    private ArrayList<Player> playersToFlyWith;
+    private Card cardToGiveByPlayer;
+    private WaterMeter waterMeter;
+    private ArrayList<Player> playersOnInaccessibleZones;
+    private Player currentPlayerRunningFromInaccessibleZone;
 
     public BoardGame() {
         // zone init
-        this.player_count = 0;
-        this.zone_factory = new ZoneFactory();
-        this.player_factory = new PlayerFactory();
+        this.playerCount = 0;
+        this.zoneFactory = new ZoneFactory();
+        this.playerFactory = new PlayerFactory();
         this.treasureDeck = new TreasureDeck();
         this.floodDeck = new FloodDeck();
-        this.water_meter = new WaterMeter();
-        this.players_on_inaccessible_zones = new ArrayList<>();
-        this.current_player_running_from_inaccessible_zone = null;
-        this.game_state = GameState.SettingUp;
+        this.waterMeter = new WaterMeter();
+        this.playersOnInaccessibleZones = new ArrayList<>();
+        this.currentPlayerRunningFromInaccessibleZone = null;
+        this.gameState = GameState.SettingUp;
         this.size = 5;
-        this.card_to_give_by_player = null;
+        this.cardToGiveByPlayer = null;
         this.board = new Zone[size][size];
-        this.players_to_fly_with = new ArrayList<>();
+        this.playersToFlyWith = new ArrayList<>();
         for(int i = 0; i < size; i++) {
             for(int j = 0; j < size; j++) {
                 boolean is_accessible = !(i == 2 && j == 2);
                 if(!is_accessible) {
-                    this.board[i][j] = zone_factory.createInaccessibleZone(i, j);
+                    this.board[i][j] = zoneFactory.createInaccessibleZone(i, j);
                 }
                 else {
-                    this.board[i][j] = zone_factory.createRandomZone(i, j);
+                    this.board[i][j] = zoneFactory.createRandomZone(i, j);
                 }
             }
         }
@@ -69,25 +69,25 @@ public class BoardGame {
         }
 
         // turn
-        player_turn_id = -1;
-        current_player_actions_num = 3;
+        playerTurnId = -1;
+        currentPlayerActionsNum = 3;
     }
     public void startGame() {
-        if(game_state != GameState.SettingUp) {
+        if(gameState != GameState.SettingUp) {
             throw new RuntimeException("Can't start the game because the game isn't in the state of setting up");
         }
-        if(player_count == 0){
+        if(playerCount == 0){
             throw new NoPlayersException();
         }
-        if(player_count < 2 || player_count > 4){
+        if(playerCount < 2 || playerCount > 4){
             String message = "The number of players is less then 2";
-            if(player_count > 4){
+            if(playerCount > 4){
                 message = "The number of players is greater than 4";
             }
             throw new InvalidNumberOfPlayersException(message);
         }
-        this.game_state = GameState.Playing;
-        for(int i = 0; i< player_count; i++){
+        this.gameState = GameState.Playing;
+        for(int i = 0; i< playerCount; i++){
             Player p = players[i];
             p.takeCard(treasureDeck.draw());
             p.takeCard(treasureDeck.draw());
@@ -95,6 +95,7 @@ public class BoardGame {
         treasureDeck.addWaterRiseCards();
         this.moveTurnToNextPlayer();
     }
+
     public Zone[][] getBoard() {
         return board;
     }
@@ -103,9 +104,6 @@ public class BoardGame {
     }
     public Player[] getPlayers() {
         return this.players;
-    }
-    public void floodZone(int x, int y){
-        this.board[x][y].floodZone();
     }
     public Zone getZone(int x, int y){
         return this.board[x][y];
@@ -159,22 +157,22 @@ public class BoardGame {
         if(name.length() > 12){
             throw new InvalidParameterException("The name is too long, must be at most 12 characters");
         }
-        if(player_count > 3){
+        if(playerCount > 3){
             throw new MaximumNumberOfPlayersReachedException();
         }
-        Player player = this.player_factory.createPlayer(name);
+        Player player = this.playerFactory.createPlayer(name);
         Zone new_zone = this.chooseZoneForPlayer(player);
         if(new_zone == null){
             throw new MaximumNumberOfPlayersReachedException();
         }
         player.setPlayerToZone(new_zone);
         ((PlayerStartZone)new_zone).associatePlayer(player);
-        this.players[player_count++] = player;
+        this.players[playerCount++] = player;
         return player;
     }
 
     public int getPlayerTurnId(){
-        return player_turn_id;
+        return playerTurnId;
     }
     public Player getPlayerForTheTurn(){
         if (this.getPlayerTurnId() == -1){
@@ -184,9 +182,9 @@ public class BoardGame {
     }
     /// Gives the turn to the next player
     public void nextPlayerTurn(){
-        player_turn_id++;
-        if(player_turn_id >= this.player_count){
-            this.player_turn_id = 0;
+        playerTurnId++;
+        if(playerTurnId >= this.playerCount){
+            this.playerTurnId = 0;
         }
     }
     public Player moveTurnToNextPlayer(){
@@ -194,10 +192,10 @@ public class BoardGame {
         return this.getPlayerForTheTurn();
     }
     public boolean isGameSettingUp(){
-        return this.game_state == GameState.SettingUp;
+        return this.gameState == GameState.SettingUp;
     }
     public boolean isPlayerChoosingToMove(){
-        return this.game_state == GameState.PlayerChooseWhereToMove;
+        return this.gameState == GameState.PlayerChooseWhereToMove;
     }
 
     public boolean isGamePlaying(){
@@ -211,7 +209,7 @@ public class BoardGame {
     public ArrayList<PlayerAction> getPossiblePlayerActionsForCurrentTurn(Player player){
         if(this.arePlayersRunningFromInaccesbleZone())
         {
-            if(this.players_on_inaccessible_zones.contains(player)) {
+            if(this.playersOnInaccessibleZones.contains(player)) {
                 return this.getActionsToRunFromInaccessibleZone();
             }else {
                 return new ArrayList<>();
@@ -267,12 +265,12 @@ public class BoardGame {
 
 
 
-    public void setGame_state(GameState game_state){
-        this.game_state = game_state;
+    public void setGameState(GameState gameState){
+        this.gameState = gameState;
     }
 
     private boolean isEnoughActions(){
-        return this.current_player_actions_num > 0;
+        return this.currentPlayerActionsNum > 0;
     }
     /// THe player clicked move and chose the zone
     public void movePlayerToZone(Zone zone){
@@ -291,7 +289,7 @@ public class BoardGame {
         player.getPlayer_zone().removePlayerFromZone(player);
         player.move_Player(zone);
         zone.addPlayerToZone(player);
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
         this.useOneAction();
     }
     /// THe player clicked move and chose the zone
@@ -314,33 +312,33 @@ public class BoardGame {
         player.getPlayer_zone().removePlayerFromZone(player);
         player.move_Player(zone);
         zone.addPlayerToZone(player);
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
         this.useOneAction();
     }
     public void choosePlayerByNavigator(Player player){
         if(!this.isNavgiatorChoosingAPlayerToMove()){
             throw new InvalidActionForTheCurrentState("The navigator is not currently choosing a player to move");
         }
-        this.chosen_player_by_navigator = player;
+        this.chosenPlayerByNavigator = player;
         this.setNavigatorChooseZoneToMoveThePlayerTo();
     }
 
 
     private void useOneAction() {
-        if(this.current_player_actions_num <= 0){
+        if(this.currentPlayerActionsNum <= 0){
             throw new NoActionsLeft();
         }
-        this.current_player_actions_num--;
+        this.currentPlayerActionsNum--;
     }
 
 
 
-    public int getCurrent_player_actions_num() {
-        return this.current_player_actions_num;
+    public int getCurrentPlayerActionsNum() {
+        return this.currentPlayerActionsNum;
     }
 
     public void endTurn() {
-        if(this.game_state == GameState.PlayersRunningFromAnInaccessibleZone){
+        if(this.gameState == GameState.PlayersRunningFromAnInaccessibleZone){
             throw new InvalidActionForTheCurrentState("You must move from an inaccessible zone!");
         }
         Player p = this.getPlayerForTheTurn();
@@ -352,7 +350,7 @@ public class BoardGame {
                     gotWaterRise = true;
                     treasureDeck.discard(card);
                     floodDeck.reshuffleDiscardIntoDraw();
-                    boolean flood_out = water_meter.increaseLevel();
+                    boolean flood_out = waterMeter.increaseLevel();
                     if(flood_out){
                         throw new GameOverException("water level has reached maximum");
                     }
@@ -362,19 +360,19 @@ public class BoardGame {
             }
             this.treasureDrawnThisTurn = true;
             if(p.getHand().isOverflow()){
-                this.game_state = GameState.Discarding;
+                this.gameState = GameState.Discarding;
                 throw new TooManyCardsInTheHand();
             }
         }else{
             if (p.getHand().isOverflow()) {
-                this.game_state = GameState.Discarding;
+                this.gameState = GameState.Discarding;
                 throw new TooManyCardsInTheHand();
             }else{
-                this.game_state = GameState.Playing;
+                this.gameState = GameState.Playing;
             }
         }
         checkWin();
-        int floodsToDraw = water_meter.getCurrentFloodRate();
+        int floodsToDraw = waterMeter.getCurrentFloodRate();
         for (int i = 0; i < floodsToDraw; i++) {
             ZoneCard card;
             try {
@@ -386,9 +384,9 @@ public class BoardGame {
             if (z != null) {
                 z.floodZone();
                 if(!z.isAccessible() && !z.getPlayers_on_zone().isEmpty()){
-                   this.players_on_inaccessible_zones.addAll(z.getPlayers_on_zone());
-                   this.setGame_state(GameState.PlayersRunningFromAnInaccessibleZone);
-                   this.current_player_running_from_inaccessible_zone = null;
+                   this.playersOnInaccessibleZones.addAll(z.getPlayers_on_zone());
+                   this.setGameState(GameState.PlayersRunningFromAnInaccessibleZone);
+                   this.currentPlayerRunningFromInaccessibleZone = null;
                 }
             }
             floodDeck.discard(card);
@@ -399,8 +397,8 @@ public class BoardGame {
         checkArtefactLost();
         this.nextPlayerTurn();
         this.setDefaultActionsNum();
-        if(this.game_state != GameState.PlayersRunningFromAnInaccessibleZone) {
-            this.setGame_state(GameState.Playing);
+        if(this.gameState != GameState.PlayersRunningFromAnInaccessibleZone) {
+            this.setGameState(GameState.Playing);
         }
         if(gotWaterRise){
             throw new WaterRiseException();
@@ -409,7 +407,7 @@ public class BoardGame {
     }
 
     private void setDefaultActionsNum(){
-        this.current_player_actions_num = 3;
+        this.currentPlayerActionsNum = 3;
     }
 
     //-------------
@@ -433,13 +431,13 @@ public class BoardGame {
         if(!this.isPlayerChoosingZoneToFlyWithCard()){
             throw new InvalidStateOfTheGameException("The player is not currently choosing a player to fly with card");
         }
-        Player current_player = this.player_choosing_card_to_use;
+        Player current_player = this.playerChoosingCardToUse;
         HashSet<Player> res = new HashSet<>();
         for(Player p : this.getPlayers()){
             if(
                     p == current_player
                             || p == null
-                            || this.players_to_fly_with.contains(p)
+                            || this.playersToFlyWith.contains(p)
                             || !current_player.getPlayer_zone().getPlayers_on_zone().contains(p)
             ){
                 continue;
@@ -503,7 +501,7 @@ public class BoardGame {
         return new ArrayList<>();
     }
     private ArrayList<Zone> getZonesToRunFromInaccessibleZone(){
-        Player current_player = this.current_player_running_from_inaccessible_zone;
+        Player current_player = this.currentPlayerRunningFromInaccessibleZone;
         switch(current_player.getPlayer_role()){
             case Pilot:
                 return this.getZonesForPlayerToFlyTo(current_player);
@@ -609,7 +607,7 @@ public class BoardGame {
         return res;
     }
     private ArrayList<Zone> getZonesForNavigatorToMovePlayerTo(){
-        Player player_to_move = this.chosen_player_by_navigator;
+        Player player_to_move = this.chosenPlayerByNavigator;
         if(player_to_move == null){
             throw new InvalidStateOfTheGameException("The player to move is null!");
         }
@@ -658,14 +656,14 @@ public class BoardGame {
         }
 
         zone.shoreUp();
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
         if(player.getPlayer_role() == PlayerRole.Engineer){
-            if(shore_ups_left == 0)
+            if(shoreUpsLeft == 0)
             {
                 this.useOneAction();
-                shore_ups_left = 1;
+                shoreUpsLeft = 1;
             }else{
-                shore_ups_left=0;
+                shoreUpsLeft =0;
             }
         }
         else {
@@ -673,15 +671,15 @@ public class BoardGame {
         }
     }
     public void movePlayerToZoneByNavigator(Zone zone) {
-        Player player_to_move = this.chosen_player_by_navigator;
+        Player player_to_move = this.chosenPlayerByNavigator;
         if(player_to_move == null){
             throw new InvalidStateOfTheGameException("The player to move is null!");
         }
 
         placePlayerToZone(player_to_move, zone);
-        this.chosen_player_by_navigator = null;
+        this.chosenPlayerByNavigator = null;
         this.useOneAction();
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
     }
 
     //----------------
@@ -701,43 +699,43 @@ public class BoardGame {
                 ;
     }
     public boolean isPlayerChoosingZoneToMove() {
-        return this.game_state == GameState.PlayerChooseWhereToMove;
+        return this.gameState == GameState.PlayerChooseWhereToMove;
     }
     public boolean isPilotChoosingZoneToFly() {
-        return this.game_state == GameState.PilotChooseWhereToFly;
+        return this.gameState == GameState.PilotChooseWhereToFly;
     }
     public boolean isPlayerChoosingZoneToShoreUp() {
-        return this.game_state == GameState.PlayerChooseWhereToShoreUp;
+        return this.gameState == GameState.PlayerChooseWhereToShoreUp;
     }
     public boolean isNavgiatorChoosingAPlayerToMove(){
-        return this.game_state == GameState.NavigatorChooseAPlayerToMove;
+        return this.gameState == GameState.NavigatorChooseAPlayerToMove;
     }
     public boolean isNavgiatorChoosingAZoneToMovePlayerTo(){
-        return this.game_state == GameState.NavigatorChooseAZoneToMovePlayerTo;
+        return this.gameState == GameState.NavigatorChooseAZoneToMovePlayerTo;
     }
     public boolean isPlayerChoosingZoneToShoreUpWithCard() {
-        return this.game_state == GameState.PlayerChooseAZoneToShoreUpWithCard;
+        return this.gameState == GameState.PlayerChooseAZoneToShoreUpWithCard;
     }
     public boolean isPlayerChoosingZoneToFlyWithCard() {
-        return this.game_state == GameState.PlayerChooseAZoneToFlyWithCard;
+        return this.gameState == GameState.PlayerChooseAZoneToFlyWithCard;
     }
     public boolean isPlayerChoosingCardToGive() {
-        return this.game_state == GameState. PlayerChoosingCardToGive;
+        return this.gameState == GameState. PlayerChoosingCardToGive;
     }
     public boolean isThisPlayerChoosingCardToGive(Player player) {
         return this.isPlayerChoosingCardToGive() && this.getPlayerForTheTurn() == player;
     }
     public boolean isPlayerChoosingPlayerToGiveCardTo(){
-        return this.game_state == GameState.PlayerChoosePlayerToGiveCardTo;
+        return this.gameState == GameState.PlayerChoosePlayerToGiveCardTo;
     }
     public boolean isPlayerChoosingCardToDiscard(){
-        return this.game_state == GameState.PlayerChooseCardToDiscard;
+        return this.gameState == GameState.PlayerChooseCardToDiscard;
     }
     public boolean arePlayersRunningFromInaccesbleZone(){
-        return this.game_state == GameState.PlayersRunningFromAnInaccessibleZone;
+        return this.gameState == GameState.PlayersRunningFromAnInaccessibleZone;
     }
     public boolean isPlayerChoosingZoneToRunFromInaccesbleZone(){
-        return this.game_state == GameState.PlayersRunningFromAnInaccessibleZone && this.current_player_running_from_inaccessible_zone != null;
+        return this.gameState == GameState.PlayersRunningFromAnInaccessibleZone && this.currentPlayerRunningFromInaccessibleZone != null;
     }
     //----------------
 
@@ -747,43 +745,43 @@ public class BoardGame {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
-        this.setGame_state(GameState.PilotChooseWhereToFly);
+        this.setGameState(GameState.PilotChooseWhereToFly);
     }
     public void setNavigatorChoosePlayerToMove() {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
-        this.setGame_state(GameState.NavigatorChooseAPlayerToMove);
+        this.setGameState(GameState.NavigatorChooseAPlayerToMove);
     }
     private void setNavigatorChooseZoneToMoveThePlayerTo() {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
-        this.setGame_state(GameState.NavigatorChooseAZoneToMovePlayerTo);
+        this.setGameState(GameState.NavigatorChooseAZoneToMovePlayerTo);
     }
     public void setPlayerChooseZoneToMoveTo(){
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
         // TODO: verify that it's possible
-        this.game_state = GameState.PlayerChooseWhereToMove;
+        this.gameState = GameState.PlayerChooseWhereToMove;
     }
 
     public void setPlayerChooseZoneToShoreUp() {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
-        this.setGame_state(GameState.PlayerChooseWhereToShoreUp);
+        this.setGameState(GameState.PlayerChooseWhereToShoreUp);
     }
     public void setPlayerGiveTreasureCards() {
-        if(this.getCurrent_player_actions_num() <= 0){
+        if(this.getCurrentPlayerActionsNum() <= 0){
             throw new NoActionsLeft();
         }
-        this.setGame_state(GameState.PlayerChoosingCardToGive);
-        this.card_to_give_by_player = null;
+        this.setGameState(GameState.PlayerChoosingCardToGive);
+        this.cardToGiveByPlayer = null;
     }
     public void setPlayerDiscardCard() {
-        this.game_state = GameState.PlayerChooseCardToDiscard;
+        this.gameState = GameState.PlayerChooseCardToDiscard;
     }
 
     //end
@@ -802,7 +800,7 @@ public class BoardGame {
     }
 
     public void discardTreasureCard(Card card) {
-        if (game_state != GameState.Discarding) {
+        if (gameState != GameState.Discarding) {
             throw new IllegalStateException("Not currently discarding");
         }
         Player p = getPlayerForTheTurn();
@@ -812,7 +810,7 @@ public class BoardGame {
         if (!p.getHand().isOverflow()) {
             nextPlayerTurn();
             setDefaultActionsNum();
-            this.game_state = GameState.Playing;
+            this.gameState = GameState.Playing;
         }
     }
 
@@ -829,23 +827,23 @@ public class BoardGame {
         }
         switch(card.getType()){
             case HELICOPTER_LIFT:
-                this.setGame_state(GameState.PlayerChooseAZoneToFlyWithCard);
-                this.player_choosing_card_to_use = player;
-                this.players_to_fly_with = new ArrayList<>();
+                this.setGameState(GameState.PlayerChooseAZoneToFlyWithCard);
+                this.playerChoosingCardToUse = player;
+                this.playersToFlyWith = new ArrayList<>();
                 break;
             case SANDBAGS:
-                this.player_choosing_card_to_use = player;
-                this.setGame_state(GameState.PlayerChooseAZoneToShoreUpWithCard);
+                this.playerChoosingCardToUse = player;
+                this.setGameState(GameState.PlayerChooseAZoneToShoreUpWithCard);
                 break;
         }
     }
 
     public void flyPlayerToZoneWithCard(Zone zone) {
-        Player player = this.player_choosing_card_to_use;
+        Player player = this.playerChoosingCardToUse;
         if(!this.isPlayerChoosingZoneToFlyWithCard()){
             throw new InvalidStateOfTheGameException("Player is not choosing to fly to a zone!");
         }
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
         Card card = null;
         for(Card c : player.getHand().getCards()){
             if(c.getType() == CardType.HELICOPTER_LIFT){
@@ -858,21 +856,21 @@ public class BoardGame {
         }
         player.getHand().remove(card);
         this.treasureDeck.discard(card);
-        for(Player p: this.players_to_fly_with){ //TODO
+        for(Player p: this.playersToFlyWith){ //TODO
             this.placePlayerToZone(p, zone);
         }
         this.placePlayerToZone(player, zone);
 
-        this.players_to_fly_with = new ArrayList<>();
-        this.player_choosing_card_to_use = null;
+        this.playersToFlyWith = new ArrayList<>();
+        this.playerChoosingCardToUse = null;
     }
 
     public void shoreUpZoneWithCard(Zone zone) {
-        Player player = this.player_choosing_card_to_use;
+        Player player = this.playerChoosingCardToUse;
         if(!this.isPlayerChoosingZoneToShoreUpWithCard()){
             throw new InvalidStateOfTheGameException("Player is not choosing to shore up a zone!");
         }
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
         Card card = null;
         for(Card c : player.getHand().getCards()){
             if(c.getType() == CardType.SANDBAGS){
@@ -887,7 +885,7 @@ public class BoardGame {
         this.treasureDeck.discard(card);
         zone.shoreUp();
 
-        this.player_choosing_card_to_use = null;
+        this.playerChoosingCardToUse = null;
     }
 
 
@@ -897,7 +895,7 @@ public class BoardGame {
 
     public void takeArtefact() {
         Player p = getPlayerForTheTurn();
-        if(this.current_player_actions_num <= 0){
+        if(this.currentPlayerActionsNum <= 0){
             throw new NoActionsLeft();
         }
         Zone current_zone = p.getPlayer_zone();
@@ -954,10 +952,10 @@ public class BoardGame {
         if(!this.isPlayerChoosingZoneToFlyWithCard()){
             throw new InvalidStateOfTheGameException("The player is not currently choosing a player to fly with card");
         }
-        if(this.players_to_fly_with.contains(chosen_player)){
+        if(this.playersToFlyWith.contains(chosen_player)){
             throw new InvalidParameterException("This player is already chosen!");
         }
-        this.players_to_fly_with.add(chosen_player);
+        this.playersToFlyWith.add(chosen_player);
     }
 
 
@@ -968,8 +966,8 @@ public class BoardGame {
         if(this.getPlayerForTheTurn() != p){
             throw new InvalidStateOfTheGameException("This player doesn't have it's turn right now!");
         }
-        this.card_to_give_by_player = c;
-        this.setGame_state(GameState.PlayerChoosePlayerToGiveCardTo);
+        this.cardToGiveByPlayer = c;
+        this.setGameState(GameState.PlayerChoosePlayerToGiveCardTo);
     }
 
     public void choosePlayerToGiveCardTo(Player player) {
@@ -979,16 +977,16 @@ public class BoardGame {
         if(this.getPlayerForTheTurn() == player){
             throw new InvalidParameterException("You can't choose yourself");
         }
-        if(this.card_to_give_by_player == null){
+        if(this.cardToGiveByPlayer == null){
             throw new InvalidStateOfTheGameException("You haven't chosen any card!");
         }
         if(player.getHand().getSize() >= 5){
             throw new InvalidStateOfTheGameException("This player can't take more cards!");
         }
-        this.getPlayerForTheTurn().getHand().remove(this.card_to_give_by_player);
-        player.getHand().add(this.card_to_give_by_player);
-        this.card_to_give_by_player = null;
-        this.game_state = GameState.Playing;
+        this.getPlayerForTheTurn().getHand().remove(this.cardToGiveByPlayer);
+        player.getHand().add(this.cardToGiveByPlayer);
+        this.cardToGiveByPlayer = null;
+        this.gameState = GameState.Playing;
         this.useOneAction();
     }
 
@@ -1003,7 +1001,7 @@ public class BoardGame {
             throw new InvalidStateOfTheGameException("This player doesn't have this card!");
         }
 
-        this.setGame_state(GameState.Playing);
+        this.setGameState(GameState.Playing);
         player.getHand().remove(c);
         treasureDeck.discard(c);
     }
@@ -1017,7 +1015,7 @@ public class BoardGame {
     }
 
     public int getWaterMeterLevel() {
-        return water_meter.getLevel();
+        return waterMeter.getLevel();
     }
 
     private void checkHelicopterZone(){
@@ -1053,7 +1051,7 @@ public class BoardGame {
     }
 
     private void checkWaterMeterMax() {
-        if (water_meter.getLevel() >= WaterMeter.MAX_LEVEL) {
+        if (waterMeter.getLevel() >= WaterMeter.MAX_LEVEL) {
             throw new GameOverException("water level has reached maximum");
         }
     }
@@ -1065,10 +1063,10 @@ public class BoardGame {
     }
 
     public void setPlayerChooseZoneToRunFromInaccessbileZone(Player player) {
-        if(this.current_player_running_from_inaccessible_zone != null){
+        if(this.currentPlayerRunningFromInaccessibleZone != null){
             throw new InvalidStateOfTheGameException("There is already a player running from inaccessible zone");
         }
-        this.current_player_running_from_inaccessible_zone = player;
+        this.currentPlayerRunningFromInaccessibleZone = player;
     }
 
     public void chooseZoneToRunFromInaccessible(Zone zone) {
@@ -1078,15 +1076,15 @@ public class BoardGame {
         if(!zone.isAccessible()){
             throw new InvalidParameterException("This zone is not accessbile!");
         }
-        this.placePlayerToZone(this.current_player_running_from_inaccessible_zone, zone);
-        this.players_on_inaccessible_zones.remove(this.current_player_running_from_inaccessible_zone);
-        this.current_player_running_from_inaccessible_zone = null;
+        this.placePlayerToZone(this.currentPlayerRunningFromInaccessibleZone, zone);
+        this.playersOnInaccessibleZones.remove(this.currentPlayerRunningFromInaccessibleZone);
+        this.currentPlayerRunningFromInaccessibleZone = null;
 
-        if(!this.players_on_inaccessible_zones.isEmpty()){
-            this.setGame_state(GameState.PlayersRunningFromAnInaccessibleZone);
+        if(!this.playersOnInaccessibleZones.isEmpty()){
+            this.setGameState(GameState.PlayersRunningFromAnInaccessibleZone);
         }
         else{
-            this.setGame_state(GameState.Playing);
+            this.setGameState(GameState.Playing);
         }
     }
 

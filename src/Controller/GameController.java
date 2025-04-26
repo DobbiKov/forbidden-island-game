@@ -1,10 +1,8 @@
 package Controller;
 
-import Errors.*;
 import Model.*;
 import View.contract.GameView;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -190,7 +188,7 @@ public class GameController {
     //------------
 
     public int getCurrentPlayerActionsNumber(){
-        return this.boardGame.getCurrent_player_actions_num();
+        return this.boardGame.getCurrentPlayerActionsNum();
     }
     public ArrayList<Card> getCurrentPlayerCards(Player player){
         return this.boardGame.getCurrentPlayerCards(player);

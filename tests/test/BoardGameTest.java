@@ -43,7 +43,7 @@ class BoardGameTest {
         game.addPlayer("Ivan");
         game.startGame();
         Player first = game.getPlayerForTheTurn();
-        assertEquals(3, game.getCurrent_player_actions_num());
+        assertEquals(3, game.getCurrentPlayerActionsNum());
         game.nextPlayerTurn();
         assertNotEquals(first, game.getPlayerForTheTurn());
     }
