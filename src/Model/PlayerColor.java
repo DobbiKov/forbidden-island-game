@@ -21,15 +21,4 @@ public enum PlayerColor {
             default: return Gold;
         }
     }
-    public Color getColor(){
-        switch (this) {
-            case Iron: return Color.DARK_GRAY;
-            case Silver: return Color.GRAY;
-            case Copper: return Color.GREEN;
-            case Gold: return Color.YELLOW;
-            case Blue: return Color.BLUE;
-            case Bronze: return Color.getHSBColor(25, 0.7f, 0.54f);
-            default: return Color.BLACK;
-        }
-    }
 }

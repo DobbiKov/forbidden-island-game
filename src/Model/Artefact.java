@@ -16,14 +16,4 @@ public enum Artefact {
             default: return "";
         }
     }
-
-    public String toImgString(){
-        switch (this){
-            case Fire: return "crystal_of_fire";
-            case Water: return "oceans_chalice";
-            case Wind: return "statue_of_wind";
-            case Earth: return "earth_stone";
-            default: return "";
-        }
-    }
 }

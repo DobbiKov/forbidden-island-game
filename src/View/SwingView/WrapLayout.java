@@ -1,7 +1,6 @@
-package View;
+package View.SwingView;
 
 import java.awt.*;
-import javax.swing.*;
 
 /**
  * A FlowLayout subclass that supports wrapping.

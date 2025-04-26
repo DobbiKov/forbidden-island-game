@@ -1,4 +1,4 @@
-package View;
+package View.SwingView;
 
 import Controller.GameController;
 import Model.*;
@@ -10,7 +10,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 
 public class PlayerPanel extends JPanel {
     private final GameController gc;
@@ -42,7 +41,7 @@ public class PlayerPanel extends JPanel {
         add(createHeader(), BorderLayout.NORTH);
         add(new JScrollPane(buttonBar),        BorderLayout.CENTER);
         add(new JScrollPane(cardsBar),         BorderLayout.SOUTH);
-        artefactBar.setBackground(player.getPlayerColor().getColor());
+        artefactBar.setBackground(ResourceMapper.getAwtColor(player.getPlayerColor()));
 
         update();                                    // initial fill
     }
@@ -106,9 +105,7 @@ public class PlayerPanel extends JPanel {
 
         artefactBar.removeAll();
         for (Artefact a : player.getArtefacts()) {
-            JLabel icon = new JLabel(new ImageIcon(
-                    new ImageIcon("artefacts_images/" + a.toImgString() + ".png")
-                            .getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH)));
+            JLabel icon = new JLabel(new ImageIcon( ResourceMapper.getArtefactIcon(a, 24, 24) .getImage()));
             artefactBar.add(icon);
         }
         revalidate();
@@ -121,16 +118,14 @@ public class PlayerPanel extends JPanel {
     private JComponent createHeader() {
         JPanel header = new JPanel(new BorderLayout(6, 0)) {
             @Override protected void paintComponent(Graphics g) {        // pastel bg
-                g.setColor(player.getPlayerColor().getColor());
+                g.setColor(ResourceMapper.getAwtColor(player.getPlayerColor()));
                 g.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
             }
         };
         header.setBorder(new EmptyBorder(6, 8, 6, 8));
 
         // avatar 70×70
-        avatar = new JLabel(new ImageIcon(
-                new ImageIcon("roles_images/" + player.getPlayer_role().toImgString() + ".png")
-                        .getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH)));
+        avatar = new JLabel(new ImageIcon(ResourceMapper.getRoleImage(player.getPlayer_role(), 70, 70).getImage()));
 
         // name + role
         var name   = new JLabel(player.getPlayer_name());
@@ -179,8 +174,7 @@ public class PlayerPanel extends JPanel {
         int w = c_size;
         int h = c_size;
         JPanel imagePanel = new JPanel() {
-            private final Image image = new ImageIcon("player_cards_images/" + c.getType().getImgString() + ".png")
-                    .getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+            private final Image image = ResourceMapper.getCardImage(c.getType(), w, h).getImage();
 
             @Override
             protected void paintComponent(Graphics g) {

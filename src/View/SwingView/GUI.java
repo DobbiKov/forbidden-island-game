@@ -1,11 +1,9 @@
-package View;
+package View.SwingView;
 import Controller.GameController;
-import Errors.InvalidNumberOfPlayersException;
-import Errors.MaximumNumberOfPlayersReachedException;
-import Errors.NoPlayersException;
 import Helper.AddPlayerCallback;
 import Helper.ChoosablePlayerCallback;
 import Model.*;
+import View.contract.GameView;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,41 +13,35 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import javax.swing.*;
 
-public class GUI {
-    private static GameController gameController;
-    private static int w_width = 800;
-    private static int w_height = 600;
+public class GUI extends JFrame implements GameView {
+    private GameController gameController;
+    private int w_width = 800;
+    private int w_height = 600;
 
-    private static Zone[][] zones;
-    private static int zone_size = 150;
-    private static int artefactSize = (int)(zone_size*(0.7));
+    private Zone[][] zones;
+    private int zone_size = 150;
+    private int artefactSize = (int)(zone_size*(0.7));
 
-    private static JPanel[][] zonePanels;
+    private JPanel[][] zonePanels;
 
-    private static PlayerPanel[] panelPlayers;
-    private static int player_panel_size = 0;
+    private PlayerPanel[] panelPlayers;
+    private int player_panel_size = 0;
 
-    private static JPanel rightPanel;
-    private static JPanel leftPanel;
-    private static JFrame window;
-    private static JPanel boardPanel;
-    private static JPanel buttonPanel;
-    private static JButton add_player;
+    private JPanel rightPanel;
+    private JPanel leftPanel;
+    private JPanel boardPanel;
+    private JPanel buttonPanel;
+    private JButton add_player;
 
-    private static JLabel topLeft;
-    private static JLabel topRight;
+    private JLabel topLeft;
+    private JLabel topRight;
 
-    private static JLabel botLeft;
-    private static JLabel botRight;
+    private JLabel botLeft;
+    private JLabel botRight;
 
-    private static JButton start_game;
+    private JButton start_game;
 
-//    topLeft  = new JLabel(scaledIcon("artefacts_images/earth_stone.png", artefactSize, artefactSize));
-//    topRight = new JLabel(scaledIcon("artefacts_images/statue_of_wind.png", artefactSize, artefactSize));
-//
-//    botLeft  = new JLabel(scaledIcon("artefacts_images/crystal_of_fire.png", artefactSize, artefactSize));
-//    botRight = new JLabel(scaledIcon("artefacts_images/oceans_chalice.png", artefactSize, artefactSize));
-    public static void updateCornerArtefacts(){
+    public void updateCornerArtefacts(){
         if(gameController.isArtefactTaken(Artefact.Earth)){
             topLeft.setVisible(false);
             topLeft.revalidate();
@@ -73,12 +65,11 @@ public class GUI {
 
     }
 
-    private static JPanel getZone(Zone z){
-        JPanel button = new FilteredImagePanel(z, zone_size);
-        return button;
+    private JPanel createPanelForZone(Zone z){
+        return new FilteredImagePanel(z, zone_size);
     }
 
-    public static void makePlayersChoosable(HashSet<Player> players, ChoosablePlayerCallback callback){
+    public void makePlayersChoosable(HashSet<Player> players, ChoosablePlayerCallback callback){
         for(PlayerPanel panel : panelPlayers){
             if(players.contains(panel.getPlayer())){
                 panel.makeChoosable(() -> {
@@ -87,51 +78,53 @@ public class GUI {
             }
         }
     }
-    public static void makePlayersUnChoosable(){
+    public void makePlayersUnChoosable(){
         for(PlayerPanel panel : panelPlayers){
             panel.makeUnchoosable();
         }
     }
-    public static void removeActionsForPlayerPanel(){
+    public void removeActionsForPlayerPanel(){
         for(PlayerPanel p : panelPlayers){
             if(p.getPlayer() == gameController.getPlayerForTheTurn()){
                 p.removeActions();
             }
         }
     }
-    public static void showErrorMess(String title, String message){
-        ErrorDialog dlg = new ErrorDialog(window, title, message);
+    public void showErrorMess(String title, String message){
+        ErrorDialog dlg = new ErrorDialog(this, title, message);
         dlg.setVisible(true);
     }
-    public static void showInfoMess(String title, String message){
-        InfoDialog dlg = new InfoDialog(window, title, message);
+    public void showInfoMess(String title, String message){
+        InfoDialog dlg = new InfoDialog(this, title, message);
         dlg.setVisible(true);
     }
-    public static void addPlayerPanel(Player new_player){
+
+
+    public void addPlayerPanel(Player new_player){
         panelPlayers[player_panel_size++] = new PlayerPanel(gameController, new_player);
-        window.remove(rightPanel);
+        this.remove(rightPanel);
         rightPanel = new JPanel();
         rightPanel.setLayout(new GridLayout(2, 1));
         rightPanel.add(panelPlayers[0]);
         rightPanel.add(panelPlayers[1]);
         rightPanel.setVisible(true);
-        window.add(rightPanel, BorderLayout.EAST);
+        this.add(rightPanel, BorderLayout.EAST);
 
-        window.remove(leftPanel);
+        this.remove(leftPanel);
         leftPanel = new JPanel();
         leftPanel.setLayout(new GridLayout(2, 1));
         leftPanel.add(panelPlayers[2]);
         leftPanel.add(panelPlayers[3]);
         leftPanel.setVisible(true);
-        window.add(leftPanel, BorderLayout.WEST);
+        this.add(leftPanel, BorderLayout.WEST);
 
         updatePlayerPanels();
         updateZonePanels();
     }
 
-    public static void updateZonePanels() {
+    public void updateZonePanels() {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(GUI::updateZonePanels);
+            SwingUtilities.invokeLater(this::updateZonePanels);
             return;
         }
         zones = gameController.getZones(); // get the new state
@@ -163,7 +156,7 @@ public class GUI {
                 }
                 if(zones[i][j] != null) {
                     for (Player player : zones[i][j].getPlayers_on_zone()) {
-                        java.awt.Color color = player.getPlayerColor().getColor();
+                        java.awt.Color color = ResourceMapper.getAwtColor(player.getPlayerColor());
                         JPanel circle = new PawnPanel(color);
                         circle.setPreferredSize(new Dimension(50, 100));
 //                        circle.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -196,7 +189,7 @@ public class GUI {
                             }
                             updatePlayerPanels();
                             updateZonePanels();
-                            window.repaint();
+                            repaint();
                         }
                     });
                 }
@@ -204,9 +197,9 @@ public class GUI {
             }
         }
     }
-    public static void updatePlayerPanels(){
+    public void updatePlayerPanels(){
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(GUI::updatePlayerPanels);
+            SwingUtilities.invokeLater(this::updatePlayerPanels);
             return;
         }
         for(PlayerPanel panel : panelPlayers){
@@ -223,11 +216,11 @@ public class GUI {
         }
 
 
-        window.revalidate();
-        window.repaint();
+        this.revalidate();
+        this.repaint();
     }
 
-    public static void startGameHandleView(){
+    public void startGameHandleView(){
         JButton fin_de_tour = new JButton("Fin de Tour");
         fin_de_tour.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -243,13 +236,18 @@ public class GUI {
         buttonPanel.add(fin_de_tour);
         buttonPanel.setBackground(Color.WHITE);
         updatePlayerPanels();
-        window.validate();
-        window.repaint();
+        this.validate();
+        this.repaint();
     }
 
-    public static void main(String[] args)
-    {
-        gameController = new GameController();
+    public GUI(){
+        super("Forbidden Island");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    @Override
+    public void initialize(GameController controller) {
+        this.gameController = controller;
         zones = gameController.getZones();
 
         // init player panels
@@ -262,7 +260,6 @@ public class GUI {
 
         boardPanel = new JPanel();
         buttonPanel = new JPanel();
-        window = new JFrame();
 
 
         zonePanels = new JPanel[zones.length][zones.length];
@@ -283,7 +280,7 @@ public class GUI {
 
         add_player.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                AddPlayerDialog dlg = new AddPlayerDialog(window, new AddPlayerCallback() {
+                AddPlayerDialog dlg = new AddPlayerDialog(GUI.this, new AddPlayerCallback() {
                     @Override public void callAddPlayer(String name) {
                         gameController.addPlayerToTheGame(name);
                     }
@@ -310,7 +307,7 @@ public class GUI {
                 gbc.gridx = i;
                 gbc.gridy = j;
                 gbc.insets = new Insets(PAD, PAD, PAD, PAD);
-                zonePanels[i][j] = getZone(zones[i][j]);
+                zonePanels[i][j] = createPanelForZone(zones[i][j]);
 
                 // adding button in JFrame
                 boardPanel.add(zonePanels[i][j], gbc);
@@ -322,9 +319,10 @@ public class GUI {
 //        boardPanel.setSize(zones.length * zone_size, zones.length * zone_size);
 //        boardPanel.setLayout(new GridLayout(zones.length, zones.length));
         boardPanel.setVisible(true);
-        window.pack();
-        window.setResizable(false);
-        window.setSize(1480, 1080);
+
+        this.pack();
+        this.setResizable(false);
+        this.setSize(1480, 1080);
 
 
         //player pane panels
@@ -340,9 +338,9 @@ public class GUI {
 
         //window adders
 
-        window.add(buttonPanel, BorderLayout.NORTH);
-        window.add(rightPanel, BorderLayout.EAST);
-        window.add(leftPanel, BorderLayout.WEST);
+        this.add(buttonPanel, BorderLayout.NORTH);
+        this.add(rightPanel, BorderLayout.EAST);
+        this.add(leftPanel, BorderLayout.WEST);
 
         // top row
         JPanel topCorners = new JPanel();
@@ -350,11 +348,11 @@ public class GUI {
         topCorners.setLayout(new BoxLayout(topCorners, BoxLayout.X_AXIS));
         topCorners.setPreferredSize(new Dimension(0, artefactSize));
 
-        topLeft  = new JLabel(scaledIcon("artefacts_images/earth_stone.png", artefactSize, artefactSize));
-        topRight = new JLabel(scaledIcon("artefacts_images/statue_of_wind.png", artefactSize, artefactSize));
+        topLeft = new JLabel(ResourceMapper.getArtefactIcon(Artefact.Earth, artefactSize, artefactSize));
+        topRight = new JLabel(ResourceMapper.getArtefactIcon(Artefact.Wind, artefactSize, artefactSize));
 
-        botLeft  = new JLabel(scaledIcon("artefacts_images/crystal_of_fire.png", artefactSize, artefactSize));
-        botRight = new JLabel(scaledIcon("artefacts_images/oceans_chalice.png", artefactSize, artefactSize));
+        botLeft  = new JLabel(ResourceMapper.getArtefactIcon(Artefact.Fire, artefactSize, artefactSize));
+        botRight = new JLabel(ResourceMapper.getArtefactIcon(Artefact.Water, artefactSize, artefactSize));
 
         topCorners.add(topLeft);
         topCorners.add(Box.createHorizontalGlue());
@@ -384,18 +382,16 @@ public class GUI {
         gameArea.add(boardPanelWrapper,  BorderLayout.CENTER);
         gameArea.add(bottomCorners,  BorderLayout.SOUTH);
 
-        // 3. Finally stitch everything into the frame:
-        window.getContentPane().removeAll();
-        window.getContentPane().setLayout(new BorderLayout());
-        window.getContentPane().add(buttonPanel,    BorderLayout.NORTH);
-        window.getContentPane().add(gameArea,      BorderLayout.CENTER);
-        window.getContentPane().add(rightPanel, BorderLayout.EAST);
-        window.getContentPane().add(leftPanel, BorderLayout.WEST);
+        this.getContentPane().removeAll();
+        this.getContentPane().setLayout(new BorderLayout());
+        this.getContentPane().add(buttonPanel,    BorderLayout.NORTH);
+        this.getContentPane().add(gameArea,      BorderLayout.CENTER);
+        this.getContentPane().add(rightPanel, BorderLayout.EAST);
+        this.getContentPane().add(leftPanel, BorderLayout.WEST);
 
 
         // making the frame visible
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setVisible(true);
+        this.setVisible(true);
     }
     private static Icon scaledIcon(String path, int w, int h) {
         ImageIcon raw = new ImageIcon(path);

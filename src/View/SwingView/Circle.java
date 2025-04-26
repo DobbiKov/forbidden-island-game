@@ -1,8 +1,7 @@
-package View;
+package View.SwingView;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 
 class Circle extends JPanel {
     private java.awt.Color color;

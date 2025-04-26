@@ -1,4 +1,4 @@
-package View;
+package View.SwingView;
 
 import Model.Artefact;
 import Model.ArtefactZone;
@@ -43,10 +43,10 @@ class FilteredImagePanel extends JPanel {
         if(z != null){
             if(z.getZone_type() == ZoneType.ArtefactAssociated){
                 Artefact art = ((ArtefactZone)z).getArtefact();
-                overlayImage = new ImageIcon("artefacts_images/" + art.toImgString() + ".png").getImage();
+                overlayImage = ResourceMapper.getArtefactIcon(art).getImage();
             }else if(z.getZone_type() == ZoneType.Helicopter){
 
-                overlayImage = new ImageIcon("artefacts_images/" + "helicopter_no_background" + ".png").getImage();
+                overlayImage = new ImageIcon("/artefacts_images/" + "helicopter_no_background" + ".png").getImage();
             }
         }
 
@@ -56,7 +56,7 @@ class FilteredImagePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (this.zone.isAccessible()) {
-            Image backgroundImage = new ImageIcon("island_card_images/" + this.zone.getZoneCard().toString() + ".png").getImage();
+            Image backgroundImage = ResourceMapper.getZoneCardImage(this.zone.getZoneCard()).getImage();
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
 
             // draw the overlay in the bottom‐right corner

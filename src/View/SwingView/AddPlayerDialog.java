@@ -1,4 +1,4 @@
-package View;
+package View.SwingView;
 
 import Helper.AddPlayerCallback;
 
