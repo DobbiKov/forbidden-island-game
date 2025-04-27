@@ -1,7 +1,9 @@
 package View.SwingView;
 
 import Controller.GameController;
+import Helper.ChoosablePlayerCallback;
 import Model.*;
+import View.SwingView.utils.WrapLayout; // Assuming WrapLayout is in this package
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -13,6 +15,11 @@ import java.awt.event.MouseListener;
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * Represents the UI panel displaying information and actions for a single player.
+ * This includes their avatar, name, role, remaining actions, owned artefacts,
+ * hand cards, and available action buttons.
+ */
 public class PlayerPanel extends JPanel {
     private final GameController gc;
     private final Player player;
@@ -30,10 +37,19 @@ public class PlayerPanel extends JPanel {
 
     private final JLabel actionBadge = new JLabel();
 
+    /** Placeholder constructor for UI designers or prototyping. */
     public PlayerPanel() {
         this.gc = null;
         this.player = null;
     }
+
+    /**
+     * Creates a PlayerPanel associated with a specific player and game controller.
+     * Initializes the layout and components, then performs an initial update.
+     *
+     * @param gc The main game controller.
+     * @param p  The Player model object this panel represents.
+     */
     public PlayerPanel(GameController gc, Player p) {
         this.gc = gc;
         this.player = p;
@@ -63,6 +79,12 @@ public class PlayerPanel extends JPanel {
 
     /* ---------- public API ---------- */
 
+    /**
+     * Makes this panel visually distinct (e.g., with a border) and attaches a click listener
+     * to the panel itself and its avatar. Used when the player needs to be selected (e.g., by the Navigator).
+     *
+     * @param onClick The Runnable to execute when this panel or its avatar is clicked.
+     */
     public void makeChoosable(Runnable onClick) {
         setBorder(new LineBorder(new Color(255,140,0), 3, true));
         addMouseListener(new MouseAdapter() { public void mouseClicked(MouseEvent e){ onClick.run(); }});
@@ -72,12 +94,21 @@ public class PlayerPanel extends JPanel {
             @Override public void mouseClicked(MouseEvent e) { onClick.run(); }
         });
     }
+
+    /**
+     * Removes the visual distinction and click listeners added by {@link #makeChoosable(Runnable)}.
+     */
     public void makeUnchoosable() {
         setBorder(null);
         for(MouseListener l : getMouseListeners()) removeMouseListener(l);
         for(MouseListener l : avatar.getMouseListeners()) { if(l != null) { avatar.removeMouseListener(l); } }
     }
 
+    /**
+     * Updates the panel's display based on the current game state.
+     * This includes enabling/disabling action buttons, updating the action count badge,
+     * refreshing the card display, and showing owned artefacts.
+     */
     public void update() {
         ensureButtons();                       // create once
 
@@ -118,6 +149,12 @@ public class PlayerPanel extends JPanel {
 
     /* ---------- private helpers ---------- */
 
+    /**
+     * Creates the header section of the panel, including the player's avatar,
+     * name, role, artefact icons, and action count badge.
+     *
+     * @return The JComponent representing the header.
+     */
     private JComponent createHeader() {
         JPanel header = new JPanel(new BorderLayout(6, 0)) {
             @Override protected void paintComponent(Graphics g) {        // pastel bg
@@ -155,12 +192,24 @@ public class PlayerPanel extends JPanel {
 
         return header;
     }
+
+    /**
+     * Ensures that all potential action buttons (one for each PlayerAction enum value)
+     * have been created and added to the button bar. Buttons are created lazily on first update.
+     */
     private void ensureButtons() {
         for (PlayerAction a : PlayerAction.values()) {
             actionButtons.computeIfAbsent(a, this::createActionButton);
         }
     }
 
+    /**
+     * Creates a single JButton for a given PlayerAction, configures its appearance,
+     * attaches the appropriate ActionListener to call the GameController, and adds it to the button bar.
+     *
+     * @param action The PlayerAction this button represents.
+     * @return The newly created JButton.
+     */
     private JButton createActionButton(PlayerAction action) {
         JButton b = new JButton(action.toString());
         b.setFocusable(false);
@@ -178,6 +227,14 @@ public class PlayerPanel extends JPanel {
         return b;
     }
 
+    /**
+     * Creates a visual representation (JPanel with background image) for a player's card.
+     * Adds mouse listeners for specific game states (choosing card to give/discard)
+     * or for using action cards.
+     *
+     * @param c The Card model object to display.
+     * @return A Component (specifically, a JPanel) representing the card.
+     */
     private Component buildPlayerCard(Card c) {
         int c_size = 80;
         int w = c_size;
@@ -221,9 +278,18 @@ public class PlayerPanel extends JPanel {
         return imagePanel;
     }
 
+    /**
+     * Returns the Player model object associated with this panel.
+     * @return The Player object.
+     */
     public Player getPlayer() {
         return player;
     }
+
+    /**
+     * Removes all components from the action badge.
+     * Note: This seems unusual, typically you'd hide or update the text. Consider revising if needed.
+     */
     public void removeActions(){
         this.actionBadge.removeAll();
     }
