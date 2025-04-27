@@ -94,7 +94,7 @@ public class GameController {
     }
     public void setPlayerChooseZoneToRunFromInaccessbileZone(Player player){
         modelActionHandler.handleModelAction(() ->  {
-            this.boardGame.setPlayerChooseZoneToRunFromInaccessbileZone(player);
+            this.boardGame.setPlayerChooseZoneToRunFromInaccessibleZone(player);
         }, gameView);
         this.gameView.updateZonePanels();
         this.gameView.updatePlayerPanels();

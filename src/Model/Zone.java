@@ -4,6 +4,7 @@ package Model;
 import Errors.AllTheCardsAreUsedException;
 import Errors.ZoneIsInaccessibleException;
 
+import java.security.InvalidParameterException;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -50,6 +51,7 @@ public class Zone {
     }
 
     public boolean isAdjecantTo(Zone other){
+        if(this.getX() == other.getX() && this.getY() == other.getY()){return false;}
         return !(Math.abs(this.getX() - other.getX()) > 1 || Math.abs(this.getY() - other.getY()) > 1);
     }
     public boolean isDiagonalTo(Zone other){
@@ -93,6 +95,8 @@ public class Zone {
     public void shoreUp(){
         if(this.zone_state == ZoneState.Inaccessible){
             throw new ZoneIsInaccessibleException();
+        }if(this.zone_state == ZoneState.Normal){
+            throw new InvalidParameterException("This zone is not flooded!");
         }
         this.zone_state = ZoneState.Normal;
     }
@@ -102,6 +106,7 @@ public class Zone {
         output += "Zone Name: " + this.zone_name + "\n";
         output += "Zone Type: " + zone_type + "\n";
         output += "Zone State: " + zone_state + "\n";
+        output += "Zone coordinates: " + this.X + ", " + this.Y + "\n";
         return output;
     }
 
@@ -128,5 +133,8 @@ public class Zone {
     }
     public void makeInaccessible(){
         this.zone_state = ZoneState.Inaccessible;
+    }
+    public void makeAccessible(){
+        this.zone_state = ZoneState.Normal;
     }
 }

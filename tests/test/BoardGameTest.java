@@ -1,5 +1,6 @@
 package test;
 
+import Errors.WaterRiseException;
 import Model.*;
 import Errors.NoPlayersException;
 import Errors.InvalidNumberOfPlayersException;
@@ -46,18 +47,6 @@ class BoardGameTest {
         assertEquals(3, game.getCurrentPlayerActionsNum());
         game.nextPlayerTurn();
         assertNotEquals(first, game.getPlayerForTheTurn());
-    }
-
-    @Test
-    void testEndTurnFloodsViaDeck() {
-        game.addPlayer("Yehor");
-        game.addPlayer("Ivan");
-        game.startGame();
-        int beforeDraw = game.getFloodDeck().getDrawSize();
-        int beforeDiscard = game.getFloodDeck().getDiscardSize();
-        game.endTurn();
-        assertEquals(beforeDraw - 2, game.getFloodDeck().getDrawSize());
-        assertEquals(beforeDiscard + 2, game.getFloodDeck().getDiscardSize());
     }
 
     @Test

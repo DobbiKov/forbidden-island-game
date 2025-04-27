@@ -338,7 +338,20 @@ public class BoardGame {
         return this.currentPlayerActionsNum;
     }
 
+    private void checkLose(){
+        checkWaterMeterMax();
+        checkPlayerDead();                                    // may throw
+        checkHelicopterZone();
+        checkArtefactLost();
+    }
+
     public void endTurn() {
+        /* ---------- 0. victory / defeat checks ------ */
+        checkLose();
+        checkWin();
+
+
+        /* ---------- 0.5 move from inaccessible ------ */
         ensureNotResolvingInaccessibleRun();                  // ❶ state-guard
 
         Player current = getPlayerForTheTurn();
@@ -349,12 +362,6 @@ public class BoardGame {
         /* ---------- 2. flood-deck phase ------------- */
         resolveFloodPhase(waterMeter.getCurrentFloodRate());
 
-        /* ---------- 3. victory / defeat checks ------ */
-        checkHelicopterZone();
-        checkArtefactLost();
-        checkWin();
-        checkWaterMeterMax();
-        checkPlayerDead();                                    // may throw
 
         /* ---------- 4. prepare next player ---------- */
         treasureDrawnThisTurn = false;       // reset for next player
@@ -364,6 +371,9 @@ public class BoardGame {
         if (gameState != GameState.PlayersRunningFromAnInaccessibleZone) {
             gameState = GameState.Playing;   // normal flow resumes
         }
+
+        // check lose again
+        checkLose();
 
         /* ---------- 5. notify view if needed -------- */
         if (waterRiseTriggered) {
@@ -554,7 +564,7 @@ public class BoardGame {
         }
         return new ArrayList<>();
     }
-    private ArrayList<Zone> getZonesToRunFromInaccessibleZone(){
+    public ArrayList<Zone> getZonesToRunFromInaccessibleZone(){
         Player current_player = this.currentPlayerRunningFromInaccessibleZone;
         switch(current_player.getPlayer_role()){
             case Pilot:
@@ -639,7 +649,7 @@ public class BoardGame {
         return this.getAdjacentZones(player.getPlayer_zone(), false, Zone::isDry);
     }
 
-    private ArrayList<Zone> getZonesToForPlayerShoreUp(Player player) {
+    public ArrayList<Zone> getZonesToForPlayerShoreUp(Player player) {
         ArrayList<Zone> res = this.getAdjacentZones(player.getPlayer_zone(), player.getPlayer_role() == PlayerRole.Explorer, Zone::isFlooded);
 
         Zone curr = player.getPlayer_zone(); // adding current if it's also flooded
@@ -799,11 +809,17 @@ public class BoardGame {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
+        if(this.currentPlayerActionsNum <= 0){
+            throw new NoActionsLeft();
+        }
         this.setGameState(GameState.PilotChooseWhereToFly);
     }
     public void setNavigatorChoosePlayerToMove() {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
+        if(this.currentPlayerActionsNum <= 0){
+            throw new NoActionsLeft();
         }
         this.setGameState(GameState.NavigatorChooseAPlayerToMove);
     }
@@ -817,13 +833,18 @@ public class BoardGame {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
         }
-        // TODO: verify that it's possible
+        if(this.currentPlayerActionsNum <= 0){
+            throw new NoActionsLeft();
+        }
         this.gameState = GameState.PlayerChooseWhereToMove;
     }
 
     public void setPlayerChooseZoneToShoreUp() {
         if(!canPlayerUseBasicAction(this.getPlayerForTheTurn())){
             throw new InvalidActionForTheCurrentState("You have to discard a card!");
+        }
+        if(this.currentPlayerActionsNum <= 0){
+            throw new NoActionsLeft();
         }
         this.setGameState(GameState.PlayerChooseWhereToShoreUp);
     }
@@ -908,13 +929,13 @@ public class BoardGame {
         if(card == null) {
             throw new InvalidStateOfTheGameException("The player doesn't have a card to fly!");
         }
-        player.getHand().remove(card);
-        this.treasureDeck.discard(card);
         for(Player p: this.playersToFlyWith){ //TODO
             this.placePlayerToZone(p, zone);
         }
         this.placePlayerToZone(player, zone);
 
+        player.getHand().remove(card);
+        this.treasureDeck.discard(card);
         this.playersToFlyWith = new ArrayList<>();
         this.playerChoosingCardToUse = null;
     }
@@ -1009,6 +1030,9 @@ public class BoardGame {
         if(this.playersToFlyWith.contains(chosen_player)){
             throw new InvalidParameterException("This player is already chosen!");
         }
+        if(!this.getPlayersToChoose().contains(chosen_player)){
+            throw new InvalidParameterException("This player is not choosable!");
+        }
         this.playersToFlyWith.add(chosen_player);
     }
 
@@ -1037,6 +1061,9 @@ public class BoardGame {
         if(player.getHand().getSize() >= 5){
             throw new InvalidStateOfTheGameException("This player can't take more cards!");
         }
+        if(this.getPlayerForTheTurn().getPlayer_role() != PlayerRole.Messenger && player.getPlayer_zone() != this.getPlayerForTheTurn().getPlayer_zone()){
+            throw new InvalidParameterException("Chosen player must stand on the same zone as you!");
+        }
         this.getPlayerForTheTurn().getHand().remove(this.cardToGiveByPlayer);
         player.getHand().add(this.cardToGiveByPlayer);
         this.cardToGiveByPlayer = null;
@@ -1058,6 +1085,9 @@ public class BoardGame {
         this.setGameState(GameState.Playing);
         player.getHand().remove(c);
         treasureDeck.discard(c);
+        if(player.getHand().getSize() > 5){
+            this.setGameState(GameState.PlayerChooseCardToDiscard);
+        }
     }
 
     public boolean isThisPlayerChoosingCardToDiscard(Player player) {
@@ -1145,7 +1175,7 @@ public class BoardGame {
         return this.claimedArtefacts.contains(artefact);
     }
 
-    public void setPlayerChooseZoneToRunFromInaccessbileZone(Player player) {
+    public void setPlayerChooseZoneToRunFromInaccessibleZone(Player player) {
         if(this.currentPlayerRunningFromInaccessibleZone != null){
             throw new InvalidStateOfTheGameException("There is already a player running from inaccessible zone");
         }

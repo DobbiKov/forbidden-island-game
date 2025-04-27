@@ -2,7 +2,12 @@ package test;
 
 import Model.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,4 +71,57 @@ class TreasureDeckTest {
         assertThrows(IllegalStateException.class, deck::draw,
                 "When both draw and discard piles are empty, draw() must throw");
     }
+
+    @Test
+    @DisplayName("TreasureDeck initializes with correct card counts")
+    void initializesWithCorrectCounts() {
+        TreasureDeck deck = new TreasureDeck();
+        List<Card> cards = deck.getDrawCards();
+
+        Map<CardType, Long> counts = cards.stream()
+                .collect(Collectors.groupingBy(Card::getType, Collectors.counting()));
+
+        assertEquals(5, counts.get(CardType.EARTH_CARD));
+        assertEquals(5, counts.get(CardType.AIR_CARD));
+        assertEquals(5, counts.get(CardType.FIRE_CARD));
+        assertEquals(5, counts.get(CardType.WATER_CARD));
+        assertEquals(3, counts.get(CardType.HELICOPTER_LIFT));
+        assertEquals(2, counts.get(CardType.SANDBAGS));
+        assertFalse(counts.containsKey(CardType.WATER_RISE)); // Water Rise not in initial deck
+
+        assertEquals(25, deck.getDrawSize()); // 5*4 + 3 + 2 = 25
+        assertEquals(0, deck.getDiscardSize());
+    }
+
+    @Test
+    @DisplayName("addWaterRiseCards adds 3 water rise cards and reshuffles")
+    void addWaterRiseCardsAddsAndReshuffles() {
+        TreasureDeck deck = new TreasureDeck();
+        int initialSize = deck.getDrawSize();
+        List<Card> cardsBefore = deck.getDrawCards(); // Get reference BEFORE shuffle
+
+        deck.addWaterRiseCards();
+
+        assertEquals(initialSize + 3, deck.getDrawSize());
+
+        List<Card> cardsAfter = deck.getDrawCards();
+        long waterRiseCount = cardsAfter.stream()
+                .filter(Card::isWaterRise)
+                .count();
+        assertEquals(3, waterRiseCount);
+
+        // Check if shuffle happened (probabilistic test)
+        // Draw cards until you find a Water Rise or original card
+        boolean foundWaterRise = false;
+        boolean foundOriginal = false;
+        for(int i=0; i < deck.getDrawSize(); i++){
+            Card drawn = deck.getDrawCards().get(i);
+            if(drawn.isWaterRise()) foundWaterRise = true;
+            else foundOriginal = true;
+            if(foundWaterRise && foundOriginal) break; // Found both types, implies mixing
+        }
+        assertTrue(foundWaterRise, "Should contain Water Rise cards after adding");
+        assertTrue(foundOriginal, "Should contain original cards after adding (implies mixing/reshuffle)");
+    }
+
 }

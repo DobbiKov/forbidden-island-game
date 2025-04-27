@@ -9,7 +9,7 @@ public class FloodDeck extends Deck<ZoneCard> {
         shuffle();
     }
 
-    private static List<ZoneCard> collectAllZoneCards() {
+    public static List<ZoneCard> collectAllZoneCards() {
         List<ZoneCard> cards = new ArrayList<>();
         for(int i = 0; i < 24; i++){
             cards.add(ZoneCard.fromInt(i));

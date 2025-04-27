@@ -10,7 +10,7 @@ public class TreasureDeck extends Deck<Card> {
         shuffle();
     }
 
-    private static List<Card> initTreasureCards() {
+    public static List<Card> initTreasureCards() {
         List<Card> all = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {

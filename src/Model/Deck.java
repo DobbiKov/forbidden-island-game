@@ -25,6 +25,13 @@ public class Deck<T> {
         return discardCards.size();
     }
 
+    public List<T> getDrawCards() {
+        return drawCards;
+    }
+    public List<T> getDiscardCards() {
+        return discardCards;
+    }
+
     public T draw() {
         if (drawCards.isEmpty()) {
             reshuffleDiscardIntoDraw();
