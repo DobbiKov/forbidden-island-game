@@ -115,6 +115,9 @@ This combination of patterns helps ensure a structured, modular, and maintainabl
 *   Standard Java libraries (java.awt, javax.swing, java.util etc.).
 *   No external third-party libraries are required.
 
+## Gameplay examples
+![GamePlay Example](./images/game-example.png)
+![Game WIN](./images/game-win.jpg)
 ---
 
 *This project is a university project of the Forbidden Island board game for educational use. It is not affiliated with, endorsed, or sponsored by the game's original creators, Matt Leacock and Gamewright.*
