@@ -3,7 +3,6 @@ package View.SwingView;
 import Controller.GameController;
 import Helper.ChoosablePlayerCallback;
 import Model.*;
-import View.SwingView.utils.WrapLayout; // Assuming WrapLayout is in this package
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
