@@ -17,6 +17,7 @@ public class modelActionHandler {
        }
        catch(GameWonException ex){
            gameView.showInfoMess("Congratulations!", "You have won the game!");
+           gameView.onGameOver();
        }
        catch(InvalidActionForRole ex){
            gameView.showErrorMess("Invalid action for your role", ex.getMessage());

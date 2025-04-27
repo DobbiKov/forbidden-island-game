@@ -173,7 +173,8 @@ public class GameController {
         modelActionHandler.handleModelAction(() -> {
             this.boardGame.choosePlayerToFlyWithCard(chosen_player);
             this.gameView.makePlayersUnChoosable();
-            this.gameView.makePlayersChoosable(this.boardGame.getPlayersToChoose(), this::choosePlayerByNavigator);
+            HashSet<Player> remaining = boardGame.getPlayersToChoose();
+            this.gameView.makePlayersChoosable(this.boardGame.getPlayersToChoose(), this::choosePlayerToFlyWithCard);
             this.gameView.updatePlayerPanels();
         }, gameView);
     }
