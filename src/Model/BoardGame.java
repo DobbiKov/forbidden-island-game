@@ -1483,6 +1483,10 @@ public class BoardGame {
         return waterMeter.getLevel();
     }
 
+    public int getFloodRate(){
+        return waterMeter.getCurrentFloodRate();
+    }
+
     /** Checks if the Helicopter Landing zone (Fools' Landing) has sunk. Throws GameOverException if it has. */
     private void checkHelicopterZone(){
         Zone heli = getZoneByCard(ZoneCard.fodls_landing);

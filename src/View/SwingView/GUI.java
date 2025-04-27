@@ -41,7 +41,12 @@ public class GUI extends JFrame implements GameView {
     private JLabel botRight;
 
     private JButton start_game;
-    private final Color backgroundColor = new Color(173, 216, 230);
+    public final static Color backgroundColor = new Color(173, 216, 230);
+
+    private JPanel waterMeterPanel;
+    private JProgressBar waterLevelBar;
+    private JLabel floodRateLabel;
+
 
     public void updateCornerArtefacts(){
         if(gameController.isArtefactTaken(Artefact.Earth)){
@@ -122,6 +127,36 @@ public class GUI extends JFrame implements GameView {
 
         updatePlayerPanels();
         updateZonePanels();
+    }
+
+    @Override
+    public void updateWaterMeter() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::updateWaterMeter);
+            return;
+        }
+
+        int level = gameController.getWaterMeterLevel();
+        int rate = gameController.getFloodRate();
+
+        // Ensure components exist before updating
+        if (waterLevelBar != null && floodRateLabel != null) {
+            waterLevelBar.setValue(level);
+            waterLevelBar.setString("Level: " + level + " / " + WaterMeter.MAX_LEVEL);
+            floodRateLabel.setText("Flood Rate: " + rate);
+
+            // Optional: Change color of the bar based on level
+            if (level >= 7) { // Example: dangerous levels
+                waterLevelBar.setForeground(Color.RED);
+            } else if (level >= 4) { // Example: medium levels
+                waterLevelBar.setForeground(Color.ORANGE);
+            } else { // Example: low levels
+                waterLevelBar.setForeground(Color.GREEN.darker());
+            }
+
+            waterMeterPanel.revalidate();
+            waterMeterPanel.repaint();
+        }
     }
 
     public void updateZonePanels() {
@@ -282,6 +317,26 @@ public class GUI extends JFrame implements GameView {
         buttonPanel.add(add_player);
         buttonPanel.add(start_game);
 
+
+        // ============
+        // water meter
+        waterMeterPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5)); // FlowLayout for simplicity
+        waterMeterPanel.setBackground(backgroundColor);
+        waterLevelBar = new JProgressBar(0, WaterMeter.MAX_LEVEL); // Max level from Model
+        waterLevelBar.setStringPainted(true); // Show text like "Level: X/10"
+        waterLevelBar.setPreferredSize(new Dimension(300, 25));
+        waterLevelBar.setBorderPainted(false); // Optional: remove border
+        waterLevelBar.setBackground(Color.CYAN.brighter()); // Base color for the bar track
+
+
+        floodRateLabel = new JLabel("Flood Rate: ?");
+        floodRateLabel.setFont(floodRateLabel.getFont().deriveFont(Font.BOLD, 14f));
+
+        waterMeterPanel.add(new JLabel("Water Level:")); // Label before the bar
+        waterMeterPanel.add(waterLevelBar);
+        waterMeterPanel.add(floodRateLabel);
+        // ============
+
         boardPanel.setLayout(new GridBagLayout());
         int prefered_board_size = (int)(zone_size * 1.1) * zones.length;
         boardPanel.setPreferredSize(new Dimension(prefered_board_size, prefered_board_size));
@@ -378,10 +433,12 @@ public class GUI extends JFrame implements GameView {
         this.getContentPane().add(gameArea,      BorderLayout.CENTER);
         this.getContentPane().add(rightPanel, BorderLayout.EAST);
         this.getContentPane().add(leftPanel, BorderLayout.WEST);
+        this.getContentPane().add(waterMeterPanel, BorderLayout.SOUTH);
 
 
         // making the frame visible
         this.setVisible(true);
+        updateWaterMeter();
     }
     private static Icon scaledIcon(String path, int w, int h) {
         ImageIcon raw = new ImageIcon(path);

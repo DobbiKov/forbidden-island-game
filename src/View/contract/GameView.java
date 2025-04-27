@@ -29,6 +29,11 @@ public interface GameView {
      * Update the display of artefacts in the corner of the game board
      */
     void updateCornerArtefacts();
+
+    /**
+     * Update the display of the water meter and flood rate.
+     */
+    void updateWaterMeter();
     
     /**
      * Remove the actions for the current player's panel

@@ -45,6 +45,7 @@ public class GameController {
             modelActionHandler.handleModelAction(() -> this.boardGame.endTurn(), gameView);
             this.gameView.updatePlayerPanels();
             this.gameView.updateZonePanels();
+            this.gameView.updateWaterMeter();
     }
 
     /**
@@ -493,5 +494,20 @@ public class GameController {
 
         this.gameView.updateZonePanels();
         this.gameView.updatePlayerPanels();
+    }
+    /**
+     * Gets the current flood rate (number of cards drawn per flood phase) from the model.
+     * @return The current flood rate.
+     */
+    public int getFloodRate() {
+        return this.boardGame.getFloodRate();
+    }
+
+    /**
+     * Gets the current water level from the model.
+     * @return The current water level (0-10).
+     */
+    public int getWaterMeterLevel() {
+        return this.boardGame.getWaterMeterLevel();
     }
 }
