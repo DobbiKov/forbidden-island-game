@@ -41,6 +41,7 @@ public class GUI extends JFrame implements GameView {
     private JLabel botRight;
 
     private JButton start_game;
+    private final Color backgroundColor = new Color(173, 216, 230);
 
     public void updateCornerArtefacts(){
         if(gameController.isArtefactTaken(Artefact.Earth)){
@@ -354,15 +355,19 @@ public class GUI extends JFrame implements GameView {
         bottomCorners.add(Box.createHorizontalGlue());
         bottomCorners.add(botRight);
 
+        boardPanel.setBackground(backgroundColor);
+
         //board wrapper
         //-----------
         JPanel boardPanelWrapper = new JPanel(new BorderLayout());
+        boardPanelWrapper.setBackground(backgroundColor);
         boardPanelWrapper.add(Box.createHorizontalStrut(artefactSize), BorderLayout.WEST);
         boardPanelWrapper.add(boardPanel,  BorderLayout.CENTER);
         boardPanelWrapper.add(Box.createHorizontalStrut(artefactSize), BorderLayout.EAST);
         //-----------
 
         JPanel gameArea = new JPanel(new BorderLayout());
+        gameArea.setBackground(backgroundColor);
         gameArea.add(topCorners, BorderLayout.NORTH);
         gameArea.add(boardPanelWrapper,  BorderLayout.CENTER);
         gameArea.add(bottomCorners,  BorderLayout.SOUTH);

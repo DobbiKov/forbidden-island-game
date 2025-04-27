@@ -34,7 +34,7 @@ class FilteredImagePanel extends JPanel {
 
     public void setInaccessible() {
         this.isInaccessible = true;
-        //this.setVisible(false);
+        this.setVisible(false);
         repaint();
     }
     public boolean isInaccessible() {
