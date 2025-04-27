@@ -1,4 +1,4 @@
-# Forbidden Island - Java Swing Implementation
+# Forbidden Island Game
 
 A graphical desktop application implementing the cooperative board game "Forbidden Island" using Java Swing. This project follows a classic Model-View-Controller (MVC) architecture to separate concerns.
 
@@ -58,7 +58,7 @@ This project provides a playable version of the Forbidden Island board game with
 
 ## Getting Started
 
-Requires Java 8 or higher.
+Requires Java 11 or higher.
 
 1.  **Clone the Repository:**
     ```bash
@@ -66,16 +66,7 @@ Requires Java 8 or higher.
     cd l-ile-interdite
     ```
 2.  **Resource Location:** Ensure the image resources (like those in `src/main/resources/roles_images`, `src/main/resources/island_card_images`, etc. if using a standard Maven/Gradle structure, or directly in the classpath root if not) are accessible. The `ResourceMapper` class relies on `getClass().getResource()` or `ClassLoader.getSystemResource()` to load these images from the classpath.
-3.  **Compile:** Compile all Java source files (`.java`) located in the `src` directory.
-    ```bash
-    javac src/*/*/*.java src/*/*/*/*.java src/*/*/*/*/*.java
-    ```
-    *(Note: This command might need adjustment depending on the exact depth of your package structure and if you are not using a build tool like Maven or Gradle.)*
-4.  **Run:** Execute the compiled `Main` class.
-    ```bash
-    java Main
-    ```
-    Most modern Java IDEs (like IntelliJ IDEA, Eclipse, VS Code with Java extensions) can handle steps 2-4 automatically if you open the project root directory.
+3.  **Build and run the project** using your IDE.
 
 ## How to Play
 
@@ -126,4 +117,4 @@ This combination of patterns helps ensure a structured, modular, and maintainabl
 
 ---
 
-*This project is a fan-made implementation of the Forbidden Island board game for educational and personal use. It is not affiliated with, endorsed, or sponsored by the game's original creators, Matt Leacock and Gamewright.*
+*This project is a university project of the Forbidden Island board game for educational use. It is not affiliated with, endorsed, or sponsored by the game's original creators, Matt Leacock and Gamewright.*
