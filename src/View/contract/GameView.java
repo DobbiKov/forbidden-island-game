@@ -78,4 +78,9 @@ public interface GameView {
      * @param controller The controller to initialize the view with
      */
     void initialize(GameController controller);
+
+    /**
+     * Called when the game is over so the UI can lock down.
+     */
+    void onGameOver();
 }

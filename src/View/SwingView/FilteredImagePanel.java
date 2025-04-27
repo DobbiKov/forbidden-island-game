@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
+import java.util.Objects;
 
 class FilteredImagePanel extends JPanel {
     private boolean showBlueFilter = false;
@@ -33,7 +34,7 @@ class FilteredImagePanel extends JPanel {
 
     public void setInaccessible() {
         this.isInaccessible = true;
-        this.setVisible(false);
+        //this.setVisible(false);
         repaint();
     }
     public boolean isInaccessible() {
@@ -66,7 +67,7 @@ class FilteredImagePanel extends JPanel {
                 overlayImage = ResourceMapper.getArtefactIcon(art, -1, -1).getImage();
             }else if(z.getZone_type() == ZoneType.Helicopter){
 
-                overlayImage = new ImageIcon("/artefacts_images/" + "helicopter_no_background" + ".png").getImage();
+                overlayImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/artefacts_images/helicopter_no_background.png"))).getImage();
             }
         }
         this.addMouseListener(new MouseAdapter() {

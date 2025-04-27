@@ -12,7 +12,8 @@ public class modelActionHandler {
            gameView.showErrorMess("Invalid action", "You have used all the cards!");
        }
        catch(GameOverException ex){
-           gameView.showErrorMess("Game Over", "You have lost the game!");
+           gameView.showErrorMess("Game Over", ex.getMessage());
+           gameView.onGameOver();
        }
        catch(GameWonException ex){
            gameView.showInfoMess("Congratulations!", "You have won the game!");

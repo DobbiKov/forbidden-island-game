@@ -217,7 +217,17 @@ public class GUI extends JFrame implements GameView {
 
     public GUI(){
         super("Forbidden Island");
+        //glass pane that will block input
+        JPanel blocker = new JPanel();
+        blocker.setOpaque(false);
+        blocker.addMouseListener(new MouseAdapter(){});
+        setGlassPane(blocker);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    @Override
+    public void onGameOver() {
+        getGlassPane().setVisible(true);
     }
 
     @Override
@@ -374,4 +384,5 @@ public class GUI extends JFrame implements GameView {
                 .getScaledInstance(w, h, Image.SCALE_SMOOTH);
         return new ImageIcon(img);
     }
+
 }
