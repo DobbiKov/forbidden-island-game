@@ -1,0 +1,76 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package MainApp {
+  class Main {
+    +main(args: String[])
+    -preloadImages()
+  }
+}
+
+package Controller {
+  class GameController {
+    +GameController(view: GameView)
+    +startGame()
+    +addPlayerToGame(name: String)
+    +endTurn()
+    +getPossibleActions(player: Player): List<PlayerAction>
+    +...
+  }
+  class modelActionHandler <<utility>> {
+    +handleModelAction(r: Runnable, view: GameView)
+  }
+}
+
+package View {
+  interface GameView <<interface>> {
+    +initialize(controller: GameController)
+    +updateZonePanels()
+    +updatePlayerPanels()
+    +updateCornerArtefacts()
+    +showError(title, msg)
+    +showInfo(title, msg)
+    +onGameOver()
+    +makePlayersChoosable(players, callback)
+    +makePlayersUnChoosable()
+    +addPlayerPanel(player)
+  }
+  class GUI {
+    +initialize(controller: GameController)
+    +startGameHandleView()
+    +updateZonePanels()
+    +updatePlayerPanels()
+    +updateCornerArtefacts()
+    +...
+  }
+}
+
+package Model {
+  class BoardGame {
+    +startGame()
+    +endTurn()
+    +addPlayer(name: String): Player
+    +getPossibleActions(player: Player): List<PlayerAction>
+    +takeArtefact()
+    +...
+  }
+}
+
+' Relationships
+Main --> GUI
+Main --> GameController
+
+GameController --> GameView
+GameController --> BoardGame
+
+modelActionHandler ..> BoardGame
+
+GUI ..|> GameView
+
+BoardGame *-- WaterMeter
+BoardGame *-- Zone
+BoardGame *-- Player
+BoardGame *-- Deck
+
+@enduml

@@ -1,0 +1,123 @@
+@startuml
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+package Model {
+  ''' Abstract deck of cards
+  '''
+  abstract class Deck<T> <<abstract>> {
+    - drawCards: List<T>
+    - discardCards: List<T>
+    + shuffle()
+    + draw(): T
+    + discard(card: T)
+  }
+
+  class TreasureDeck {
+    + addWaterRiseCards()
+  }
+
+  class FloodDeck {
+    + reshuffleDiscardIntoDraw()
+  }
+
+  class WaterMeter {
+    - level: int
+    + increaseLevel(): boolean
+    + getCurrentFloodRate(): int
+    + resetLevel()
+  }
+
+  class BoardGame {
+    - board: Zone[5×5]
+    - players: Player[1..4]
+    - waterMeter: WaterMeter
+    - treasureDeck: TreasureDeck
+    - floodDeck: FloodDeck
+    + startGame()
+    + endTurn()
+    + addPlayer(name: String): Player
+    + takeArtefact()
+    + getPossibleActions(player: Player): List<PlayerAction>
+    + getZones(): Zone[][]
+  }
+
+  class Player {
+    - id: int
+    - name: String
+    - hand: Hand
+    - role: PlayerRole
+    - actionsRemaining: int
+    + takeCard(card: Card)
+    + addArtefact(a: Artefact)
+    + move(to: Zone)
+  }
+
+  class Hand {
+    - cards: List<Card>
+    + add(c: Card)
+    + remove(c: Card)
+    + isOverflow(): boolean
+  }
+
+  class Card {
+    - type: CardType
+    + isTreasure(): boolean
+    + isAction(): boolean
+    + isWaterRise(): boolean
+  }
+
+  class Zone {
+    - state: ZoneState
+    - type: ZoneType
+    - playersOnZone: Set<Player>
+    + floodZone()
+    + shoreUp()
+    + isAccessible(): boolean
+  }
+
+  class ZoneFactory {
+    + createRandomZone(x:int, y:int): Zone
+    + createPlayerZone(x:int,y:int,card:ZoneCard): PlayerStartZone
+    + createArtefactZone(x:int,y:int,card:ZoneCard,a:Artefact): ArtefactZone
+  }
+
+  class PlayerFactory {
+    + createPlayer(name:String): Player
+    - getAvailibleRole(): PlayerRole
+  }
+
+  enum CardType
+  enum PlayerRole
+  enum ZoneCard
+  enum ZoneType
+  enum ZoneState
+  enum PlayerAction
+  enum Artefact
+}
+
+TreasureDeck --|> Deck
+FloodDeck     --|> Deck
+
+BoardGame "1" *-- "1" WaterMeter
+BoardGame "1" *-- "1" TreasureDeck
+BoardGame "1" *-- "1" FloodDeck
+BoardGame "1" o-- "1..4" Player
+BoardGame "1" o-- "24" Zone
+
+Player    "1" *-- "1" Hand
+Hand      "1" *-- "0..5" Card
+
+TreasureDeck "1" *-- "0..28" Card
+FloodDeck     "1" *-- "0..24" ZoneCard
+
+ZoneFactory     ..> Zone     : «creates»
+PlayerFactory   ..> Player   : «creates»
+
+Card       --> CardType
+Player     --> PlayerRole
+Zone       --> ZoneType
+Zone       --> ZoneState : «uses»
+BoardGame  --> PlayerAction
+BoardGame  --> Artefact
+@enduml
