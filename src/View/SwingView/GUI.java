@@ -363,7 +363,7 @@ public class GUI extends JFrame implements GameView {
 
         this.pack();
         this.setResizable(false);
-        this.setSize(1500, 1150);
+        this.setSize(1500, 1120);
 
 
         //player pane panels
@@ -407,8 +407,16 @@ public class GUI extends JFrame implements GameView {
 
 
         bottomCorners.add(botLeft);
-        bottomCorners.add(Box.createHorizontalGlue());
+
+        JComponent glue = (JComponent) Box.createHorizontalGlue();
+//        glue.setOpaque(false);
+//        glue.setBackground(new Color(0, 0, 0, 0));
+        bottomCorners.add(glue);
+
         bottomCorners.add(botRight);
+
+        bottomCorners.setOpaque(false);
+        bottomCorners.setBackground(new Color(0, 0, 0, 0));
 
         boardPanel.setBackground(backgroundColor);
 
@@ -424,8 +432,8 @@ public class GUI extends JFrame implements GameView {
         JPanel gameArea = new JPanel(new BorderLayout());
         gameArea.setBackground(backgroundColor);
         gameArea.add(topCorners, BorderLayout.NORTH);
-        gameArea.add(boardPanelWrapper,  BorderLayout.CENTER);
         gameArea.add(bottomCorners,  BorderLayout.SOUTH);
+        gameArea.add(boardPanelWrapper,  BorderLayout.CENTER);
 
         this.getContentPane().removeAll();
         this.getContentPane().setLayout(new BorderLayout());
