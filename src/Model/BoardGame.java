@@ -912,7 +912,7 @@ public class BoardGame {
         if(player_to_move == null){
             throw new InvalidStateOfTheGameException("The player to move is null!");
         }
-        return this.getAdjacentZones(player_to_move.getPlayer_zone(), true, Zone::isDry);
+        return this.getAdjacentZones(player_to_move.getPlayer_zone(), true, Zone::isAccessible);
     }
     /**
      * Gets the list of all flooded zones on the board. Used for the Sandbags card action.

@@ -280,7 +280,9 @@ public class GameController {
      * @param chosen_player The Player selected by the Navigator.
      */
     private void choosePlayerByNavigator(Player chosen_player) {
-        this.boardGame.choosePlayerByNavigator(chosen_player);
+        modelActionHandler.handleModelAction(() -> {
+            this.boardGame.choosePlayerByNavigator(chosen_player);
+        }, gameView);
         this.gameView.makePlayersUnChoosable();
         this.gameView.updateZonePanels();
         this.gameView.updatePlayerPanels();
