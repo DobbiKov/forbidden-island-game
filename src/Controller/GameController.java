@@ -255,6 +255,8 @@ public class GameController {
     public void flyPilotToTheZone(Zone zone){
         modelActionHandler.handleModelAction(() -> {
             this.boardGame.flyPilotToZone(zone);
+            gameView.updatePlayerPanels();
+            gameView.updateZonePanels();
         },gameView);
     }
 
