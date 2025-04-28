@@ -363,7 +363,7 @@ public class GUI extends JFrame implements GameView {
 
         this.pack();
         this.setResizable(false);
-        this.setSize(1480, 1080);
+        this.setSize(1500, 1150);
 
 
         //player pane panels
