@@ -861,9 +861,9 @@ public class BoardGame {
             return this.getZonesForDiver(player.getPlayer_zone());
         }
         if(player.getPlayer_role() == PlayerRole.Explorer){
-            return this.getAdjacentZones(player.getPlayer_zone(), true, Zone::isDry);
+            return this.getAdjacentZones(player.getPlayer_zone(), true, Zone::isAccessible);
         }
-        return this.getAdjacentZones(player.getPlayer_zone(), false, Zone::isDry);
+        return this.getAdjacentZones(player.getPlayer_zone(), false, Zone::isAccessible);
     }
 
     /**
